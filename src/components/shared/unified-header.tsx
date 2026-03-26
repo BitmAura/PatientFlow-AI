@@ -45,7 +45,7 @@ export function UnifiedHeader({
   
   const config = {
     logo: 'PatientFlow AI',
-    tagline: 'Appointment Management',
+    tagline: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
     primaryColor: 'green',
     ctaText: 'Start Free Trial',
     ctaHref: '/signup',
@@ -64,7 +64,7 @@ export function UnifiedHeader({
             <div className="relative w-14 h-14">
                <Image 
                  src="/logo.png" 
-                 alt="Aura Logo" 
+                 alt="PatientFlow AI Logo" 
                  fill
                  className="object-contain"
                  priority

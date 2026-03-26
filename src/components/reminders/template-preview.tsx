@@ -17,14 +17,14 @@ export function TemplatePreview({ template }: TemplatePreviewProps) {
     patient_name: 'John Doe',
     patient_first_name: 'John',
     doctor_name: 'Dr. Smith',
-    clinic_name: 'Aura Dental',
+    clinic_name: 'PatientFlow Dental',
     date: 'Oct 24, 2024',
     time: '10:00 AM',
     service: 'Root Canal',
     clinic_address: '123 Health St, NY',
     clinic_phone: '+1 555-0123',
     maps_link: 'maps.google.com/q=...',
-    booking_link: 'aura.me/book',
+    booking_link: 'app.patientflow.ai/book',
     deposit_amount: '$50.00',
     payment_link: 'stripe.com/pay/...'
   }
@@ -40,7 +40,7 @@ export function TemplatePreview({ template }: TemplatePreviewProps) {
     clinic_address: '456 Cyber Ave, LA',
     clinic_phone: '+1 555-9999',
     maps_link: 'maps.google.com/q=...',
-    booking_link: 'aura.me/book',
+    booking_link: 'app.patientflow.ai/book',
     deposit_amount: '$25.00',
     payment_link: 'stripe.com/pay/...'
   }

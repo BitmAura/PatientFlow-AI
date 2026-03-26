@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'PatientFlow AI - Appointment Management',
+    name: 'PatientFlow AI',
     short_name: 'PatientFlow AI',
-    description: 'Reduce patient no-shows with WhatsApp reminders',
+    description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
     start_url: '/dashboard',
     display: 'standalone',
     background_color: '#ffffff',

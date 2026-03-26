@@ -24,7 +24,7 @@ interface TestMessageDialogProps {
 
 export function TestMessageDialog({ open, onOpenChange, defaultPhone }: TestMessageDialogProps) {
   const [phone, setPhone] = React.useState(defaultPhone || '')
-  const [message, setMessage] = React.useState('Hello! This is a test message from Aura Recall.')
+  const [message, setMessage] = React.useState('Hello! This is a test message from PatientFlow AI.')
   const [status, setStatus] = React.useState<'idle' | 'success' | 'error'>('idle')
   
   const sendTest = useSendTestMessage()

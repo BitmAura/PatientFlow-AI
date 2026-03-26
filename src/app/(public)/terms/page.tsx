@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'Terms & Conditions',
-  description: 'Terms and conditions for Aura Recall.',
+  description: 'Terms and conditions for PatientFlow AI.',
 }
 
 export default function TermsPage() {
@@ -13,7 +13,7 @@ export default function TermsPage() {
 
       <div className="prose prose-sm mt-8 dark:prose-invert">
         <p>
-          By signing up and using Aura Recall (&quot;the Service&quot;), you agree to these terms.
+          By signing up and using PatientFlow AI (&quot;the Service&quot;), you agree to these terms.
           We provide appointment reminders and practice management tools. You are responsible for
           securing your account and complying with applicable data protection and healthcare
           regulations in your jurisdiction.

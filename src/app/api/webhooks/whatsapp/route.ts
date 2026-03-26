@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { processIncomingJourneyMessage } from '@/lib/whatsapp/patient-journey'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -111,6 +112,16 @@ export async function POST(request: Request) {
                       .eq('patient_id', patient.id)
                       .in('status', ['pending', 'overdue'])
                   }
+                  continue
+                }
+
+                if (message.type === 'text' && message.text?.body) {
+                  await processIncomingJourneyMessage(
+                    admin as any,
+                    connection.clinic_id,
+                    message.from,
+                    message.text.body
+                  )
                 }
               }
             }

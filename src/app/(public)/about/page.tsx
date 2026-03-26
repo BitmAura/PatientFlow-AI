@@ -19,11 +19,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Why Aura Recall was built */}
+      {/* Why PatientFlow AI was built */}
       <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white mb-12 text-center">Why we built Aura Recall</h2>
+            <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white mb-12 text-center">Why we built PatientFlow AI</h2>
             <div className="grid md:grid-cols-3 gap-10">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Silent Patient Loss</h3>
@@ -90,7 +90,7 @@ export default function AboutPage() {
       <section className="py-20 bg-zinc-900 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl font-semibold mb-12">Who is Aura for?</h2>
+            <h2 className="text-2xl font-semibold mb-12">Who is PatientFlow AI for?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="p-6 rounded-xl bg-zinc-800 border border-zinc-700">
                 <h3 className="text-lg font-medium mb-2">Clinics</h3>
@@ -115,7 +115,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-medium text-zinc-900 dark:text-white mb-8">Stop the silent loss.</h2>
           <Link href="/signup">
             <Button size="lg" className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-full px-8 h-12 text-base font-medium">
-              Get Started with Aura Recall
+              Get Started with PatientFlow AI
             </Button>
           </Link>
         </div>

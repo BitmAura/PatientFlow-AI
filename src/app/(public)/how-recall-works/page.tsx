@@ -9,7 +9,7 @@ export default function HowRecallWorksPage() {
       <section className="py-20 bg-zinc-50 dark:bg-zinc-900/30">
         <div className="container mx-auto px-4 text-center max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
-            How Aura Recall Works
+            How PatientFlow AI Works
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
             A simple, automated system to bring your patients back—without adding work for your staff.
@@ -24,7 +24,7 @@ export default function HowRecallWorksPage() {
             <Step 
               number="01"
               title="Identify missed patients and leads"
-              description="Aura quietly scans your records to find opportunities you might have missed. We look for patients overdue for check-ups and inquiries that haven't been fully followed up."
+              description="PatientFlow AI quietly scans your records to find opportunities you might have missed. We look for patients overdue for check-ups and inquiries that haven't been fully followed up."
               points={[
                 "Patients who didn’t return",
                 "Leads that were not followed up"
@@ -46,7 +46,7 @@ export default function HowRecallWorksPage() {
             <Step 
               number="03"
               title="Staff steps in only when needed"
-              description="Your team doesn&apos;t need to chase anyone. Aura Recall notifies your staff only when a patient replies or if a specific case needs personal attention."
+              description="Your team doesn&apos;t need to chase anyone. PatientFlow AI notifies your staff only when a patient replies or if a specific case needs personal attention."
               points={[
                 "Missed responses",
                 "High-risk cases"
@@ -89,7 +89,7 @@ export default function HowRecallWorksPage() {
                   {[
                     "Messages are sent from your clinic&apos;s own WhatsApp number",
                     "Your number is upgraded to the official Business platform",
-                    "All chats and replies appear directly inside Aura Recall",
+                    "All chats and replies appear directly inside PatientFlow AI",
                     "Quick setup via a one-time code or phone call",
                     "Your phone doesn&apos;t need to be online for messages to send"
                   ].map((point, i) => (

@@ -19,6 +19,79 @@ async function cancelRecall(recallId: string, reason: string, supabase: Supabase
     .eq('id', recallId)
 }
 
+async function seedInactivePatientRecalls(clinicId: string, supabase: SupabaseClient) {
+  const db = supabase as any
+  const now = Date.now()
+  const dayMs = 24 * 60 * 60 * 1000
+
+  const { data: patients } = await db
+    .from('patients')
+    .select('id, full_name, phone, whatsapp_opt_in, lifecycle_stage')
+    .eq('clinic_id', clinicId)
+    .eq('whatsapp_opt_in', true)
+
+  for (const patient of patients || []) {
+    if (!patient.phone || patient.lifecycle_stage === 'opted_out') continue
+
+    const { data: latestAppointment } = await db
+      .from('appointments')
+      .select('start_time, status')
+      .eq('clinic_id', clinicId)
+      .eq('patient_id', patient.id)
+      .eq('status', 'completed')
+      .order('start_time', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (!latestAppointment?.start_time) continue
+    const daysInactive = Math.floor((now - new Date(latestAppointment.start_time).getTime()) / dayMs)
+    const needs30 = daysInactive >= 30
+    const needs60 = daysInactive >= 60
+
+    if (!needs30) continue
+
+    const { data: existingRecalls } = await db
+      .from('patient_recalls')
+      .select('id, treatment_category')
+      .eq('clinic_id', clinicId)
+      .eq('patient_id', patient.id)
+      .in('treatment_category', ['inactive_30', 'inactive_60'])
+
+    const has30 = (existingRecalls || []).some((r: any) => r.treatment_category === 'inactive_30')
+    const has60 = (existingRecalls || []).some((r: any) => r.treatment_category === 'inactive_60')
+
+    if (needs30 && !has30) {
+      await db.from('patient_recalls').insert({
+        clinic_id: clinicId,
+        patient_id: patient.id,
+        treatment_category: 'inactive_30',
+        last_visit_date: latestAppointment.start_time,
+        recall_due_date: new Date().toISOString(),
+        status: 'overdue',
+        attempt_count: 0,
+        notes: 'Auto-created: patient inactive for 30 days',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+    }
+
+    if (needs60 && !has60) {
+      await db.from('patient_recalls').insert({
+        clinic_id: clinicId,
+        patient_id: patient.id,
+        treatment_category: 'inactive_60',
+        last_visit_date: latestAppointment.start_time,
+        recall_due_date: new Date().toISOString(),
+        status: 'overdue',
+        attempt_count: 0,
+        notes: 'Auto-created: patient inactive for 60 days',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+    }
+  }
+}
+
 async function safeSendRecall(recallId: string, clinicId: string, supabase: SupabaseClient) {
   const db = supabase as any
 
@@ -62,6 +135,7 @@ async function safeSendRecall(recallId: string, clinicId: string, supabase: Supa
 export async function processDailyRecalls(clinicId: string, supabase: SupabaseClient) {
   const db = supabase as any
   const MAX_BATCH_SIZE = 50
+  await seedInactivePatientRecalls(clinicId, supabase)
 
   const { data: recalls } = await db
     .from('patient_recalls')

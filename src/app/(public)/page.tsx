@@ -1,262 +1,323 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Clock, MessageSquare, Shield, Smartphone, Zap, UserPlus, CalendarX, Bell, Users, Lock, Activity, AlertCircle } from 'lucide-react'
+import {
+  ArrowRight,
+  CalendarCheck2,
+  CheckCircle2,
+  Clock3,
+  MessageCircleMore,
+  PhoneCall,
+  Sparkles,
+  WalletCards,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function LandingPage() {
+  const solutionPoints = [
+    'WhatsApp auto-replies for every inquiry',
+    'Instant appointment booking links',
+    'Multi-step follow-up automation',
+    'Recall campaigns for old patients',
+  ]
+
+  const pricingPlans = [
+    {
+      name: 'Starter',
+      price: '₹3,999',
+      subtitle: '/month',
+      description: 'For single-doctor clinics getting started with automation.',
+      features: [
+        'Up to 500 conversations/month',
+        'WhatsApp auto-replies',
+        'Booking links + reminders',
+        'Basic analytics dashboard',
+      ],
+      cta: 'Book Free Demo',
+      featured: false,
+    },
+    {
+      name: 'Growth',
+      price: '₹8,999',
+      subtitle: '/month',
+      description: 'For fast-growing clinics focused on predictable bookings.',
+      features: [
+        'Up to 2,000 conversations/month',
+        'Advanced follow-up sequences',
+        'Recall + no-show prevention flows',
+        'Conversion and staff performance tracking',
+      ],
+      cta: 'Book Free Demo',
+      featured: true,
+    },
+    {
+      name: 'Pro',
+      price: 'Custom',
+      subtitle: '',
+      description: 'For multi-doctor and multi-location clinic groups.',
+      features: [
+        'Unlimited conversations',
+        'Multi-branch automation',
+        'Priority onboarding and support',
+        'Custom integrations and reporting',
+      ],
+      cta: 'Book Free Demo',
+      featured: false,
+    },
+  ]
+
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-background pt-20 pb-32 overflow-hidden">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-800 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 mb-8">
-              <span className="flex h-2 w-2 rounded-full bg-blue-600 mr-2"></span>
-              Trusted by Clinics Across India
+    <div className="flex min-h-screen flex-col">
+      <section className="bg-gradient-to-b from-slate-50 to-white pt-16 pb-14 md:pt-24 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl text-center">
+            <div className="mb-6 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-800">
+              Built for dental, skin, and general clinics
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-8">
-              The Safe, Silent Way to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Bring Patients Back</span>
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
+              Turn Missed Inquiries into Booked Patients Automatically
             </h1>
-            <p className="text-xl text-zinc-600 dark:text-zinc-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-              PatientFlow AI automatically identifies patients who missed their follow-ups and sends gentle, trustworthy WhatsApp reminders—so your clinic never loses a patient again.
+            <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-relaxed text-slate-600 sm:text-lg">
+              PatientFlow AI uses WhatsApp automation to follow up, confirm, and convert patients without extra staff.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/signup">
-                <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/book-demo">
+                <Button size="lg" className="h-12 w-full px-7 text-base sm:w-auto">
+                  Book Free Demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="#pricing">
+                <Button variant="outline" size="lg" className="h-12 w-full px-7 text-base sm:w-auto">
+                  View Pricing
+                </Button>
+              </Link>
+            </div>
+            <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 text-left sm:grid-cols-3">
+              <StatChip label="Avg. response time" value="< 10 sec" />
+              <StatChip label="Demo-to-signup focus" value="ROI-first" />
+              <StatChip label="Works with staff" value="No extra hires" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Why Clinics Lose High-Intent Patients
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+              Most clinics are not short on inquiries. They are short on instant, consistent follow-up.
+            </p>
+          </div>
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ProblemCard icon={WalletCards} text="Clinics lose 30-50% patients due to no follow-up." />
+            <ProblemCard icon={Clock3} text="Front desk staff cannot respond instantly during busy hours." />
+            <ProblemCard icon={PhoneCall} text="Leads go cold when there is no structured nurturing." />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-14 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                The Conversion Engine for Clinic Inquiries
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+                PatientFlow AI runs a complete WhatsApp workflow from inquiry to confirmed appointment, with follow-ups and recalls built in.
+              </p>
+              <div className="mt-6 space-y-3">
+                {solutionPoints.map((point) => (
+                  <div key={point} className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
+                    <p className="text-sm font-medium text-slate-700 sm:text-base">{point}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-7">
+                <Link href="/book-demo">
+                  <Button className="h-11 px-6">
+                    Book Free Demo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-900">Visual Demo: WhatsApp Flow</h3>
+              <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed booking.</p>
+              <div className="mt-5 rounded-2xl bg-[#ece5dd] p-4">
+                <div className="rounded-xl bg-[#075e54] px-3 py-2 text-sm font-medium text-white">
+                  PatientFlow AI Assistant
+                </div>
+                <div className="mt-3 space-y-2 text-sm">
+                  <ChatBubble incoming text="Hi, do you have a skin consultation slot this week?" />
+                  <ChatBubble outgoing text="Yes, we have slots tomorrow at 11:30 AM and 4:00 PM. Reply 1 or 2 to confirm." />
+                  <ChatBubble incoming text="2" />
+                  <ChatBubble outgoing text="Great! You're booked for tomorrow at 4:00 PM. Sharing location and prep details now." />
+                  <ChatBubble outgoing text="Reminder set: We will ping you 24h and 2h before your appointment." />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-100 bg-emerald-50 p-6 text-center sm:p-10">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Proven Results for Clinics</h2>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <ResultCard value="Recover 20-40% lost patients" description="Re-engage inquiries and past patients automatically." />
+              <ResultCard value="Reduce no-shows by 50%" description="Increase attendance with smart reminder timing." />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="pricing" className="bg-slate-50 py-14 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Simple Pricing for Every Clinic Stage
+            </h2>
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">Choose Starter, Growth, or Pro based on inquiry volume and branches.</p>
+          </div>
+          <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-5 lg:grid-cols-3">
+            {pricingPlans.map((plan) => (
+              <PricingCard key={plan.name} {...plan} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-900 py-16 md:py-20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-slate-700 bg-slate-800 px-6 py-10 sm:px-10">
+            <div className="mx-auto mb-3 inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+              Performance Promise
+            </div>
+            <h2 className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Get Your First 10 Bookings Guaranteed
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
+              See exactly how PatientFlow AI fits your clinic process in a personalized demo.
+            </p>
+            <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/book-demo">
+                <Button size="lg" className="h-12 w-full bg-emerald-500 px-7 text-base text-white hover:bg-emerald-600 sm:w-auto">
+                  Book Free Demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/how-it-works">
-                <Button variant="outline" size="lg" className="h-14 px-8 text-lg rounded-full border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                  How it works
+                <Button size="lg" variant="outline" className="h-12 w-full border-slate-500 bg-transparent px-7 text-base text-white hover:bg-slate-700 sm:w-auto">
+                  See How It Works
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Abstract Background Elements */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
-      </section>
-
-      {/* Problem Section */}
-      <section className="py-24 bg-white dark:bg-zinc-900">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
-              The Silent Leak in Your Practice
-            </h2>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Every day, clinics lose valuable revenue to simple oversights. Patients forget their 6-month checkups. Leads inquire but never book. Appointments are missed. Your staff is too busy to call everyone. This silent leak costs clinics lakhs every year.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <ProblemCard 
-              icon={CalendarX}
-              title="Missed Follow-ups"
-              description="Patients who should have returned for routine care but simply forgot."
-            />
-            <ProblemCard 
-              icon={AlertCircle}
-              title="Appointment No-shows"
-              description="Confirmed slots that go empty because reminders weren't seen."
-            />
-            <ProblemCard 
-              icon={UserPlus}
-              title="Forgotten Leads"
-              description="New inquiries that slipped through the cracks before booking."
-            />
-            <ProblemCard 
-              icon={Users}
-              title="Lost Patients"
-              description="Loyal patients who drifted away to competitors due to lack of contact."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Solution Section */}
-      <section className="py-24 bg-zinc-50 dark:bg-black/50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-16">
-            <div className="flex-1">
-              <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-6">
-                PatientFlow AI Quietly Fixes This
-              </h2>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                We built a system that watches your schedule so you don&apos;t have to. PatientFlow AI works in the background to identify patients who are due for a visit.
-              </p>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed">
-                It sends them a polite, professional message on WhatsApp—the app they already use and trust. It feels like it came from your receptionist, but it happens automatically. If they book, great. If not, it gently nudges them again later.
-              </p>
-              <div className="flex items-center gap-4 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  <span>Outcomes focused</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  <span>Zero friction</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-800">
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
-                    <MessageSquare className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-zinc-900 dark:text-white">Smart Detection</h4>
-                    <p className="text-sm text-zinc-500 mt-1">Identifies a patient 6 months past their last cleaning.</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-                    <Smartphone className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-zinc-900 dark:text-white">Gentle Nudge</h4>
-                    <p className="text-sm text-zinc-500 mt-1">Sends a friendly WhatsApp: &quot;Hi Rahul, it&apos;s time for your checkup at City Dental.&quot;</p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
-                    <CalendarX className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-zinc-900 dark:text-white">Booking</h4>
-                    <p className="text-sm text-zinc-500 mt-1">Patient replies and books a slot. Revenue recovered.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What PatientFlow AI Does Section */}
-      <section id="features" className="py-24 bg-white dark:bg-zinc-900">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white mb-4">
-              Complete Patient Retention
-            </h2>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Four key ways we help your practice grow without adding work.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <FeatureCard 
-              icon={Clock}
-              title="Patient Recall"
-              description="Automatically identifies and invites old patients back for their routine check-ups and follow-ups."
-            />
-            <FeatureCard 
-              icon={UserPlus}
-              title="Lead Follow-ups"
-              description="Instantly engages new inquiries and leads so they don't drift away to your competitors."
-            />
-            <FeatureCard 
-              icon={Shield}
-              title="No-Show Reduction"
-              description="Sends timely, polite reminders to ensure confirmed patients show up for their appointments."
-            />
-            <FeatureCard 
-              icon={Bell}
-              title="Staff Escalation"
-              description="Smartly alerts your team only when a human touch is needed or automation fails."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section className="py-24 bg-zinc-50 dark:bg-black">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white mb-12">
-              Why Clinics Trust PatientFlow AI
-            </h2>
-            <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-              <div className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 mb-6">
-                  <Shield className="h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">No Spam</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  Strict anti-spam rules ensure your patients are never annoyed. We prioritize patient relationships over aggressive marketing.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6">
-                  <Zap className="h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">No Extra Staff Work</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  The system runs 100% in the background. Your reception staff doesn&apos;t need to learn a new tool or click extra buttons.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="mx-auto h-16 w-16 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-6">
-                  <Lock className="h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">Works Silently</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  You won&apos;t even notice it&apos;s there—until you see your appointment book filling up with returning patients.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-blue-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-            Stop Losing Revenue Today
-          </h2>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            It takes just 2 minutes to set up. No technical skills required.
-          </p>
-          <Link href="/signup">
-            <Button size="lg" className="h-16 px-10 text-xl rounded-full bg-white text-blue-600 hover:bg-zinc-100 border-0 shadow-xl">
-                  Get PatientFlow AI
-            </Button>
-          </Link>
-        </div>
       </section>
     </div>
   )
 }
 
-function ProblemCard({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
+function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-800/50 p-6 rounded-xl border border-zinc-100 dark:border-zinc-800">
-      <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 mb-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
+    </div>
+  )
+}
+
+function ProblemCard({ icon: Icon, text }: { icon: any; text: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
         <Icon className="h-5 w-5" />
       </div>
-      <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        {description}
-      </p>
+      <p className="text-sm font-medium leading-relaxed text-slate-700">{text}</p>
     </div>
   )
 }
 
-function FeatureCard({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
+function ChatBubble({ incoming, outgoing, text }: { incoming?: boolean; outgoing?: boolean; text: string }) {
+  const bubbleStyle = incoming
+    ? 'bg-white text-slate-800 self-start rounded-bl-sm'
+    : 'bg-[#dcf8c6] text-slate-800 self-end rounded-br-sm'
+
   return (
-    <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
-      <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6">
-        <Icon className="h-6 w-6" />
+    <div className={`max-w-[90%] rounded-xl px-3 py-2 shadow-sm ${bubbleStyle}`}>
+      <p className="leading-relaxed">{text}</p>
+      {(incoming || outgoing) && <span className="mt-1 block text-right text-[10px] text-slate-500">10:24</span>}
+    </div>
+  )
+}
+
+function ResultCard({ value, description }: { value: string; description: string }) {
+  return (
+    <div className="rounded-2xl border border-emerald-200 bg-white p-5 text-left shadow-sm">
+      <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+        <Sparkles className="h-4 w-4" />
       </div>
-      <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">{title}</h3>
-      <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        {description}
-      </p>
+      <h3 className="text-lg font-semibold text-slate-900">{value}</h3>
+      <p className="mt-1 text-sm text-slate-600">{description}</p>
+    </div>
+  )
+}
+
+function PricingCard({
+  name,
+  price,
+  subtitle,
+  description,
+  features,
+  cta,
+  featured,
+}: {
+  name: string
+  price: string
+  subtitle: string
+  description: string
+  features: string[]
+  cta: string
+  featured: boolean
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-6 shadow-sm ${
+        featured ? 'border-emerald-400 bg-white ring-2 ring-emerald-100' : 'border-slate-200 bg-white'
+      }`}
+    >
+      {featured && (
+        <div className="mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+          Most Popular
+        </div>
+      )}
+      <h3 className="text-xl font-semibold text-slate-900">{name}</h3>
+      <p className="mt-1 text-sm text-slate-600">{description}</p>
+      <div className="mt-5 flex items-end gap-1">
+        <span className="text-3xl font-bold tracking-tight text-slate-900">{price}</span>
+        {subtitle && <span className="pb-1 text-sm text-slate-500">{subtitle}</span>}
+      </div>
+      <ul className="mt-5 space-y-2">
+        {features.map((feature) => (
+          <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
+            <CalendarCheck2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <Link href="/book-demo" className="mt-6 block">
+        <Button className={`h-11 w-full ${featured ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}>
+          <MessageCircleMore className="mr-2 h-4 w-4" />
+          {cta}
+        </Button>
+      </Link>
     </div>
   )
 }

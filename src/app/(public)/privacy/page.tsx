@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy for Aura Recall.',
+  description: 'Privacy policy for PatientFlow AI.',
 }
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
       <div className="prose prose-sm mt-8 dark:prose-invert">
         <p>
-          Aura Recall (&quot;we&quot;) collects and processes data necessary to provide appointment
+          PatientFlow AI (&quot;we&quot;) collects and processes data necessary to provide appointment
           reminders, recall campaigns, and practice management. This includes clinic and staff
           account data, patient and lead contact information (e.g. name, phone, email), and
           appointment and message logs.

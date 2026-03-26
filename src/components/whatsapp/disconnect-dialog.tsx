@@ -43,7 +43,7 @@ export function DisconnectDialog({ open, onOpenChange }: DisconnectDialogProps) 
           </DialogTitle>
           <DialogDescription className="space-y-4 pt-4">
             <div className="space-y-2">
-              <p className="text-zinc-600">You are about to disconnect your number from Aura Recall. Here is what happens:</p>
+              <p className="text-zinc-600">You are about to disconnect your number from PatientFlow AI. Here is what happens:</p>
               <ul className="list-disc pl-5 space-y-1 text-zinc-600">
                 <li>All automated messages will stop immediately.</li>
                 <li>Your patient data remains safe and accessible.</li>

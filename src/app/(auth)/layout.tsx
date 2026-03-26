@@ -12,7 +12,7 @@ export default function AuthLayout({
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-[40%] lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <Link href="/" className="mb-8 block">
-            <h1 className="text-2xl font-bold text-primary">Aura</h1>
+            <h1 className="text-2xl font-bold text-primary">PatientFlow AI</h1>
           </Link>
           {children}
         </div>
@@ -23,7 +23,7 @@ export default function AuthLayout({
         <div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-900 opacity-90" />
         <div className="relative flex h-full flex-col justify-center px-12 text-white">
           <h2 className="mb-6 text-4xl font-bold leading-tight">
-            Reduce No-Shows by 70% with Automated WhatsApp Reminders
+            Increase Patient Bookings. Reduce No-Shows. Automatically.
           </h2>
           <p className="mb-8 text-lg text-blue-100">
             Join thousands of healthcare professionals who have streamlined their

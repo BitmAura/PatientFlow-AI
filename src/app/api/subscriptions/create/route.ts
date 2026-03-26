@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSubscription } from '@/lib/razorpay/subscriptions'
+import type { PricingPlanId } from '@/lib/billing/plans'
+
+const VALID_PLAN_IDS: PricingPlanId[] = ['starter', 'growth', 'pro']
 
 /**
  * POST /api/subscriptions/create
@@ -27,8 +30,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { planId, billingCycle = 'monthly' } = body
 
-    // Validate plan ID
-    if (!['clinic', 'hospital'].includes(planId)) {
+    // Validate plan ID (PatientFlow AI tiers)
+    if (!planId || !VALID_PLAN_IDS.includes(planId as PricingPlanId)) {
       return NextResponse.json(
         { error: 'Invalid plan ID' },
         { status: 400 }
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
     const razorpaySubscription = await createSubscription({
       userId: user.id,
       userEmail: user.email!,
-      planId: planId as 'clinic' | 'hospital',
+      planId: planId as PricingPlanId,
       billingCycle: billingCycle as 'monthly' | 'annual',
       customerId: existingSubscription.razorpay_customer_id || undefined,
     })

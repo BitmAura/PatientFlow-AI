@@ -4,13 +4,12 @@ import * as React from 'react'
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card' // Keep for internal padding if needed, or just use divs
 import { useStats } from '@/hooks/use-stats'
 import {
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  CreditCard,
+  Users,
+  CalendarCheck,
+  ShieldCheck,
+  IndianRupee,
   ArrowUp,
   ArrowDown,
-  TrendingUp,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -32,40 +31,48 @@ export function StatsCards() {
 
   if (!stats) return null
 
-  const items = [
+  const items: Array<{
+    title: string
+    value: number | string
+    description: string
+    icon: typeof Users
+    trend: number
+    inverseTrend?: boolean
+    color: string
+    sparkline: string
+  }> = [
     {
-      title: "Today's Appointments",
-      value: stats.today_appointments_count,
-      description: `${stats.today_confirmed_count} confirmed, ${stats.today_pending_count} pending`,
-      icon: Calendar,
+      title: 'Total Leads',
+      value: stats.total_leads_count,
+      description: `${stats.uncontacted_leads_count} waiting follow-up`,
+      icon: Users,
       trend: 0,
       color: 'text-blue-500',
       sparkline: 'M0 10 L 10 10 L 20 5 L 30 8 L 40 2 L 50 5',
     },
     {
-      title: 'Completed Week',
-      value: stats.week_completed_count,
-      description: `Out of ${stats.week_appointments_count} scheduled`,
-      icon: CheckCircle,
+      title: 'Booked Patients',
+      value: stats.booked_leads_count,
+      description: `From ${stats.total_leads_count} total leads`,
+      icon: CalendarCheck,
       trend: 12,
       color: 'text-green-500',
       sparkline: 'M0 10 L 10 8 L 20 6 L 30 4 L 40 5 L 50 1',
     },
     {
-      title: 'No-Show Rate',
-      value: `${stats.no_show_rate_current_month.toFixed(1)}%`,
-      description: 'Current month',
-      icon: AlertCircle,
-      trend: stats.no_show_rate_last_month - stats.no_show_rate_current_month,
-      inverseTrend: true,
+      title: 'No-Shows Prevented',
+      value: stats.no_shows_prevented_count,
+      description: `${stats.no_shows_this_week} no-shows this week`,
+      icon: ShieldCheck,
+      trend: stats.no_shows_prevented_count > 0 ? 8 : 0,
       color: 'text-red-500',
       sparkline: 'M0 5 L 10 5 L 20 5 L 30 8 L 40 10 L 50 10', // Flat/Bad
     },
     {
-      title: 'Revenue (Deposits)',
-      value: formatCurrency(stats.deposits_collected_this_month),
-      description: `${stats.deposits_count} payments`,
-      icon: CreditCard,
+      title: 'Revenue Recovered',
+      value: formatCurrency(stats.estimated_revenue_recovered),
+      description: `${stats.booked_leads_count} booked patient outcomes`,
+      icon: IndianRupee,
       trend: 8,
       color: 'text-purple-500',
       sparkline: 'M0 10 L 10 9 L 20 7 L 30 6 L 40 3 L 50 0',
@@ -138,7 +145,7 @@ export function StatsCards() {
                 <div
                   className={`mt-3 flex items-center text-xs font-medium ${
                     (item.trend > 0 && !item.inverseTrend) ||
-                    (item.trend < 0 && item.inverseTrend)
+                    (item.trend < 0 && Boolean(item.inverseTrend))
                       ? 'bg-green-50 text-green-600 dark:bg-green-900/20'
                       : 'bg-red-50 text-red-600 dark:bg-red-900/20'
                   } w-fit rounded-full px-2 py-0.5`}

@@ -5,6 +5,13 @@
 
 // @ts-ignore
 import Razorpay from 'razorpay'
+import {
+  FREE_TRIAL_DAYS,
+  getPlanPrice,
+  type BillingCycle,
+  type PricingPlanId,
+} from '@/lib/billing/plans'
+import { getDefaultTrialEndDate } from '@/lib/billing/subscription-guard'
 
 let _razorpay: InstanceType<typeof Razorpay> | null = null
 function getRazorpay() {
@@ -17,41 +24,10 @@ function getRazorpay() {
   return _razorpay!
 }
 
-// Plan details mapping
-export const PLAN_CONFIGS = {
-  clinic: {
-    monthly: {
-      price: 299900, // ₹2,999 in paise
-      period: 'monthly' as const,
-      interval: 1,
-    },
-    annual: {
-      price: 2879280, // ₹28,792.80 (20% discount) in paise
-      period: 'yearly' as const,
-      interval: 1,
-    },
-  },
-  hospital: {
-    monthly: {
-      price: 999900, // ₹9,999 in paise
-      period: 'monthly' as const,
-      interval: 1,
-    },
-    annual: {
-      price: 9599040, // ₹95,990.40 (20% discount) in paise
-      period: 'yearly' as const,
-      interval: 1,
-    },
-  },
-} as const
-
-type PlanId = keyof typeof PLAN_CONFIGS
-type BillingCycle = keyof typeof PLAN_CONFIGS[PlanId]
-
 interface CreateSubscriptionParams {
   userId: string
   userEmail: string
-  planId: PlanId
+  planId: PricingPlanId
   billingCycle: BillingCycle
   customerId?: string
 }
@@ -64,6 +40,20 @@ interface SubscriptionResponse {
   currentPeriodStart: number
   currentPeriodEnd: number
   shortUrl?: string
+}
+
+function getRazorpayPlanEnvId(planId: PricingPlanId, billingCycle: BillingCycle): string | undefined {
+  const cycleKey = billingCycle === 'monthly' ? 'MONTHLY' : 'ANNUAL'
+  const primaryKey = `RAZORPAY_PLAN_${planId.toUpperCase()}_${cycleKey}` as const
+
+  if (process.env[primaryKey]) {
+    return process.env[primaryKey]
+  }
+
+  // Backward compatibility with older tier names.
+  const legacyPlanId = planId === 'starter' ? 'CLINIC' : planId === 'growth' ? 'HOSPITAL' : 'PRO'
+  const legacyKey = `RAZORPAY_PLAN_${legacyPlanId}_${cycleKey}` as const
+  return process.env[legacyKey]
 }
 
 /**
@@ -83,7 +73,7 @@ export async function getOrCreateCustomer(userId: string, email: string, name?: 
     // Create new customer
     const customer = await getRazorpay().customers.create({
       email,
-      name: name || 'Aura User',
+      name: name || 'PatientFlow AI User',
       notes: {
         userId,
       },
@@ -101,18 +91,18 @@ export async function getOrCreateCustomer(userId: string, email: string, name?: 
  * This should be run once to create plans in Razorpay dashboard
  */
 export async function createRazorpayPlan(
-  planId: PlanId,
+  planId: PricingPlanId,
   billingCycle: BillingCycle
 ) {
-  const config = PLAN_CONFIGS[planId][billingCycle]
+  const price = getPlanPrice(planId, billingCycle)
 
   try {
     const plan = await getRazorpay().plans.create({
-      period: config.period,
-      interval: config.interval,
+      period: billingCycle === 'annual' ? 'yearly' : 'monthly',
+      interval: 1,
       item: {
-        name: `Aura Recall ${planId.charAt(0).toUpperCase() + planId.slice(1)} Plan - ${billingCycle}`,
-        amount: config.price,
+        name: `PatientFlow AI ${planId.charAt(0).toUpperCase() + planId.slice(1)} Plan - ${billingCycle}`,
+        amount: price,
         currency: 'INR',
         description: `${planId} plan billed ${billingCycle}`,
       },
@@ -142,14 +132,8 @@ export async function createSubscription(
     // Get or create customer
     const rzpCustomerId = customerId || (await getOrCreateCustomer(userId, userEmail))
 
-    // Get plan config
-    const planConfig = PLAN_CONFIGS[planId][billingCycle]
-
     // Get Razorpay plan ID from environment variables
-    const razorpayPlanId =
-      billingCycle === 'monthly'
-        ? process.env[`RAZORPAY_PLAN_${planId.toUpperCase()}_MONTHLY`]
-        : process.env[`RAZORPAY_PLAN_${planId.toUpperCase()}_ANNUAL`]
+    const razorpayPlanId = getRazorpayPlanEnvId(planId, billingCycle)
 
     if (!razorpayPlanId) {
       throw new Error(`Razorpay plan ID not configured for ${planId} ${billingCycle}`)
@@ -160,12 +144,14 @@ export async function createSubscription(
       plan_id: razorpayPlanId,
       customer_id: rzpCustomerId,
       quantity: 1,
-      total_count: billingCycle === 'annual' ? 1 : 12, // 1 year for annual, ongoing for monthly
+      total_count: billingCycle === 'annual' ? 1 : 12,
       customer_notify: 1, // Send email to customer
       notes: {
         userId,
         planId,
         billingCycle,
+        freeTrialDays: FREE_TRIAL_DAYS,
+        trialEndsAt: getDefaultTrialEndDate(),
       },
     } as any)
 

@@ -4,6 +4,7 @@ import { Database } from '@/types/database';
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message';
 import { RecallService } from './recall-service';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard';
 
 type DbLeadStatus = Database['public']['Enums']['lead_status'];
 
@@ -298,6 +299,11 @@ export class LeadService {
 
       // 5. Send Message (if applicable)
       if (messageToSend && lead.phone) {
+         const eligibility = await getClinicSubscriptionEligibility(clinicId);
+         if (!eligibility.canSendMessages) {
+           await this.logActivity(supabase, lead.id, 'followup_skipped', eligibility.message || 'Skipped follow-up: inactive subscription');
+           return;
+         }
          const result = await sendWhatsAppMessage(clinicId, lead.phone, messageToSend, {
              leadId: lead.id,
              type: 'auto_followup'
@@ -307,6 +313,10 @@ export class LeadService {
              await this.logActivity(supabase, lead.id, 'followup_failed', `Failed to send followup: ${result.error}`);
              return; // Don't increment count if failed
          }
+         await trackClinicUsage(clinicId, 'lead_messages', 1, {
+           leadId: lead.id,
+           flow: 'auto_followup',
+         });
       }
 
       // 6. Update Lead (Increment count, set next date)
@@ -393,6 +403,11 @@ export class LeadService {
    */
   private static async sendInstantResponse(supabase: SupabaseClient, clinicId: string, lead: Lead): Promise<void> {
     if (!lead.phone) return;
+    const eligibility = await getClinicSubscriptionEligibility(clinicId);
+    if (!eligibility.canSendMessages) {
+      await this.logActivity(supabase, lead.id, 'response_skipped', eligibility.message || 'Skipped instant response: inactive subscription');
+      return;
+    }
 
     // 1. Safeguard: Check Opt-Out Status in Patients table
     // (Assuming leads might be existing patients or we respect global phone blacklist)
@@ -454,7 +469,7 @@ export class LeadService {
 
     const firstName = lead.full_name.split(' ')[0];
     const bookingLink = clinic.slug 
-      ? `https://${process.env.NEXT_PUBLIC_APP_URL || 'aura.com'}/book/${clinic.slug}` // Adjust domain as needed
+      ? `https://${process.env.NEXT_PUBLIC_APP_URL || 'patientflow.ai'}/book/${clinic.slug}` // Adjust domain as needed
       : clinic.website || '#';
 
     // 4. Construct Message
@@ -473,6 +488,10 @@ export class LeadService {
       
       // 7. Log specific activity
       await this.logActivity(supabase, lead.id, 'instant_response_sent', `Sent WhatsApp to ${lead.phone}`, null, { messageId: result.messageId });
+      await trackClinicUsage(clinicId, 'lead_messages', 1, {
+        leadId: lead.id,
+        flow: 'instant_response',
+      });
     } else {
       await this.logActivity(supabase, lead.id, 'response_failed', `WhatsApp failed: ${result.error}`);
     }

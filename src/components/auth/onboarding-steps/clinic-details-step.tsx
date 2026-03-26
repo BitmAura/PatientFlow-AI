@@ -45,7 +45,7 @@ export function ClinicDetailsStep({ defaultValues, onNext }: ClinicDetailsStepPr
             <FormItem>
               <FormLabel>Clinic Name</FormLabel>
               <FormControl>
-                <Input placeholder="Aura Dental Care" {...field} />
+                <Input placeholder="PatientFlow Dental Care" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

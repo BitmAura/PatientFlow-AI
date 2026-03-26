@@ -2,14 +2,14 @@ export const TEMPLATE_VARIABLES = [
   { key: 'patient_name', description: 'Full name of the patient', example: 'John Doe' },
   { key: 'patient_first_name', description: 'First name of the patient', example: 'John' },
   { key: 'doctor_name', description: 'Name of the doctor', example: 'Dr. Smith' },
-  { key: 'clinic_name', description: 'Name of the clinic', example: 'Aura Dental' },
+  { key: 'clinic_name', description: 'Name of the clinic', example: 'PatientFlow Dental' },
   { key: 'date', description: 'Appointment date', example: 'Oct 24, 2024' },
   { key: 'time', description: 'Appointment time', example: '10:00 AM' },
   { key: 'service', description: 'Service booked', example: 'Root Canal' },
   { key: 'clinic_address', description: 'Full address of the clinic', example: '123 Health St, NY' },
   { key: 'clinic_phone', description: 'Clinic contact number', example: '+1 555-0123' },
   { key: 'maps_link', description: 'Google Maps link to clinic', example: 'https://maps.google.com/?q=...' },
-  { key: 'booking_link', description: 'Link to book new appointment', example: 'https://app.aura.me/book' },
+  { key: 'booking_link', description: 'Link to book new appointment', example: 'https://app.patientflow.ai/book' },
   { key: 'deposit_amount', description: 'Required deposit amount', example: '$50.00' },
   { key: 'payment_link', description: 'Link to pay deposit', example: 'https://stripe.com/...' },
 ]
@@ -26,7 +26,9 @@ Your appointment is confirmed:
 
 📍 {{clinic_address}}
 
-Reply C to confirm, R to reschedule, X to cancel.`,
+Reply C to confirm, R to reschedule, X to cancel.
+
+_Powered by PatientFlow AI_`,
 
   reminder_24h: `⏰ *Reminder: Appointment Tomorrow*
 
@@ -39,7 +41,9 @@ Your appointment is tomorrow:
 📍 {{clinic_address}}
 🗺️ {{maps_link}}
 
-Reply C to confirm attendance.`,
+Reply C to confirm attendance.
+
+_PatientFlow AI keeps your schedule running on time._`,
 
   reminder_2h: `🔔 *See You Soon!*
 
@@ -57,7 +61,9 @@ Your appointment was at {{time}} but we didn't see you.
 
 To reschedule: {{booking_link}}
 
-Or reply BOOK to schedule.`,
+Or reply BOOK to schedule.
+
+_PatientFlow AI helps you rebook faster and reduce missed visits._`,
 
   post_visit_message: `👋 *Thank You for Visiting*
 

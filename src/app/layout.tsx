@@ -24,26 +24,45 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'PatientFlow AI - Healthcare Appointment Management',
+    default: 'PatientFlow AI',
     template: '%s | PatientFlow AI',
   },
-  description:
-    'Automated WhatsApp reminders and appointment management for modern clinics. Reduce no-shows by 70%.',
+  description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
   keywords: [
-    'healthcare',
-    'appointment',
-    'reminder',
-    'whatsapp',
-    'clinic',
-    'no-show',
+    'PatientFlow AI',
+    'clinic automation',
+    'patient bookings',
+    'no-show reduction',
+    'whatsapp reminders',
+    'healthcare SaaS',
   ],
   authors: [
     {
       name: 'PatientFlow AI',
-      url: 'https://auradigitalservices.me',
+      url: 'https://patientflow.ai',
     },
   ],
   creator: 'PatientFlow AI',
+  metadataBase: new URL('https://patientflow.ai'),
+  openGraph: {
+    title: 'PatientFlow AI',
+    description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
+    url: 'https://patientflow.ai',
+    siteName: 'PatientFlow AI',
+    images: ['/logo.png'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PatientFlow AI',
+    description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
+    images: ['/logo.png'],
+  },
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
 }
 
 export default function RootLayout({

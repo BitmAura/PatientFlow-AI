@@ -86,7 +86,7 @@ export function ServicePopup({ isOpen = true, onClose, currentPage = 'neutral' }
             </div>
           </div>
 
-          {/* Aura marketing small block */}
+          {/* Marketing services small block */}
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-semibold text-gray-900 flex items-center gap-2">

@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 export function WhatsAppTestSender() {
   const { data, sendTestMessage } = useWhatsApp()
   const [phone, setPhone] = React.useState('')
-  const [message, setMessage] = React.useState('Hello from Aura Recall! This is a test message.')
+  const [message, setMessage] = React.useState('Hello from PatientFlow AI! This is a test message.')
   const [status, setStatus] = React.useState<'idle' | 'sending' | 'success' | 'error'>('idle')
 
   const isConnected = data?.status === 'connected'

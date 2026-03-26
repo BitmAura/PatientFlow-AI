@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { WhatsAppProviderFactory } from '@/lib/whatsapp/provider-factory';
 import { gupshupConfig } from '@/config/gupshup';
+import { processIncomingJourneyMessage } from '@/lib/whatsapp/patient-journey';
 
 /** Optional: verify webhook authenticity. Gupshup may send Authorization header or you can use a shared secret. */
 function verifyGupshupWebhook(request: Request): boolean {
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
         .contains('session_data', { phoneNumber: clinicNumber }) // Assuming we stored phone in session_data
         .single();
 
-      if (!connection || connection.status !== 'connected') {
+      if (!connection || !['connected', 'active'].includes(connection.status)) {
         console.warn(`Clinic not found or disconnected for number ${clinicNumber}`);
         continue;
       }
@@ -83,9 +84,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      // 6. Handle Free Text -> Staff Notification
-      // If it's not a clear keyword, we treat it as a manual reply needing attention
-      await notifyStaff(admin, clinicId, fromPhone, content);
+      await processIncomingJourneyMessage(admin as any, clinicId, fromPhone, content);
     }
 
     return NextResponse.json({ received: true });
@@ -160,12 +159,3 @@ async function pauseAutomation(admin: any, clinicId: string, phone: string) {
   }
 }
 
-async function notifyStaff(admin: any, clinicId: string, phone: string, content: string) {
-  // Create a notification or log a "Needs Attention" activity
-  // For now, we'll just log it to reminder_logs as 'received' which might show up in a chat view
-  console.log(`[Staff Alert] New message from ${phone}: "${content}"`);
-  
-  // Ideally, insert into a 'inbound_messages' table or create a notification
-  // Since we don't have an inbox table yet, we can use notifications
-  // Assuming we have a way to notify clinic users...
-}

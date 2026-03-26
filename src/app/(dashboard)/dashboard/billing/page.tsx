@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, CreditCard, Calendar, TrendingUp, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { PRICING_PLANS, formatPriceInrFromPaise, type BillingCycle, type PricingPlanId } from '@/lib/billing/plans'
 
 interface Subscription {
   id: string
   plan_id: string
   status: string
-  trial_end: string
-  current_period_end: string
-  billing_cycle: string
+  trial_end?: string | null
+  current_period_end?: string | null
+  billing_cycle?: string | null
   razorpay_subscription_id: string | null
 }
 
@@ -55,14 +55,14 @@ export default function BillingPage() {
     setLoading(false)
   }
 
-  async function handleUpgrade() {
+  async function handleUpgrade(planId: PricingPlanId, billingCycle: BillingCycle = 'monthly') {
     // Redirect to payment flow
     const response = await fetch('/api/subscriptions/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        planId: subscription?.plan_id,
-        billingCycle: subscription?.billing_cycle || 'monthly'
+        planId,
+        billingCycle,
       })
     })
 
@@ -82,20 +82,9 @@ export default function BillingPage() {
     )
   }
 
-  const planDetails = {
-    clinic: {
-      name: 'Clinic',
-      price: '₹2,999',
-      features: ['500 appointments/month', '3 doctors', 'WhatsApp + SMS reminders', 'Analytics dashboard']
-    },
-    hospital: {
-      name: 'Hospital',
-      price: '₹9,999',
-      features: ['Unlimited appointments', 'Unlimited doctors', 'Multi-location', 'Priority support']
-    }
-  }
-
-  const currentPlan = subscription ? planDetails[subscription.plan_id as keyof typeof planDetails] : null
+  const planKey = (subscription?.plan_id as PricingPlanId) || 'starter'
+  const currentPlan = PRICING_PLANS[planKey] || PRICING_PLANS.starter
+  const currentCycle = subscription?.billing_cycle === 'annual' ? 'annual' : 'monthly'
 
   return (
     <div className="space-y-6">
@@ -132,7 +121,7 @@ export default function BillingPage() {
             <div>
               <h3 className="text-2xl font-bold">{currentPlan?.name} Plan</h3>
               <p className="text-muted-foreground">
-                {currentPlan?.price}/month
+                {formatPriceInrFromPaise(currentCycle === 'annual' ? currentPlan.annualPricePaise : currentPlan.monthlyPricePaise)}/{currentCycle === 'annual' ? 'year' : 'month'}
               </p>
             </div>
             <div className="text-right">
@@ -142,7 +131,7 @@ export default function BillingPage() {
                   <p className="text-sm text-muted-foreground">days left in trial</p>
                 </>
               ) : (
-                <Button onClick={handleUpgrade} size="sm">
+                <Button onClick={() => handleUpgrade(planKey, currentCycle)} size="sm">
                   Manage Subscription
                 </Button>
               )}
@@ -166,10 +155,10 @@ export default function BillingPage() {
               <div className="flex-1">
                 <p className="font-medium text-amber-900">Trial ending soon</p>
                 <p className="text-sm text-amber-700 mt-1">
-                  Your trial ends in {daysLeft} days. Add payment details to continue using Aura Recall.
+                  Your 7-day free trial ends in {daysLeft} days. Add payment details to continue automation.
                 </p>
                 <Button 
-                  onClick={handleUpgrade}
+                  onClick={() => handleUpgrade(planKey, currentCycle)}
                   className="mt-3 bg-amber-600 hover:bg-amber-700"
                   size="sm"
                 >
@@ -229,7 +218,7 @@ export default function BillingPage() {
                   })}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  You&apos;ll be charged {currentPlan?.price} on this date
+                  You&apos;ll be charged {formatPriceInrFromPaise(currentCycle === 'annual' ? currentPlan.annualPricePaise : currentPlan.monthlyPricePaise)} on this date
                 </p>
               </div>
             </div>
@@ -237,41 +226,48 @@ export default function BillingPage() {
         </Card>
       )}
 
-      {/* Upgrade Options */}
-      {subscription?.plan_id === 'clinic' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Upgrade to Hospital Plan
-            </CardTitle>
-            <CardDescription>
-              Unlock unlimited appointments and multi-location support
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Current</p>
-                  <p className="text-2xl font-bold">₹2,999</p>
-                  <p className="text-xs text-muted-foreground">per month</p>
+      {/* Plans */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Upgrade Your Plan
+          </CardTitle>
+          <CardDescription>Choose Starter, Growth, or Pro based on your clinic needs</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            {(Object.values(PRICING_PLANS)).map((plan) => {
+              const isCurrent = plan.id === planKey
+              return (
+                <div key={plan.id} className={`rounded-lg border p-4 ${isCurrent ? 'border-green-600 bg-green-50/40' : ''}`}>
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{plan.name}</h3>
+                    {isCurrent ? <Badge className="bg-green-600">Current</Badge> : null}
+                  </div>
+                  <p className="text-2xl font-bold">{formatPriceInrFromPaise(plan.monthlyPricePaise)}</p>
+                  <p className="mb-3 text-xs text-muted-foreground">per month</p>
+                  <div className="mb-4 space-y-2">
+                    {plan.features.map((feature) => (
+                      <div key={feature} className="flex items-start gap-2">
+                        <Check className="mt-0.5 h-4 w-4 text-green-600" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    className="w-full"
+                    variant={isCurrent ? 'outline' : 'default'}
+                    onClick={() => handleUpgrade(plan.id, 'monthly')}
+                  >
+                    {isCurrent ? 'Manage Plan' : `Upgrade to ${plan.name}`}
+                  </Button>
                 </div>
-                <div className="p-4 bg-green-50 border-2 border-green-600 rounded-lg">
-                  <p className="text-sm text-green-700">Hospital Plan</p>
-                  <p className="text-2xl font-bold text-green-600">₹9,999</p>
-                  <p className="text-xs text-muted-foreground">per month</p>
-                </div>
-              </div>
-              <Link href="/pricing">
-                <Button className="w-full" variant="outline">
-                  Compare Plans
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

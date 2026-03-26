@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createCampaignRecipients } from '@/lib/services/campaign-recipients'
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message' // Assuming this exists from previous step
 import { buildMessage } from '@/lib/whatsapp/templates'
+import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard'
 
 export async function startCampaignSend(campaignId: string): Promise<{
   success: boolean
@@ -59,6 +60,11 @@ export async function processCampaignBatch(campaignId: string): Promise<{
     
   if (!campaign) throw new Error('Campaign not found')
 
+  const eligibility = await getClinicSubscriptionEligibility(campaign.clinic_id)
+  if (!eligibility.canSendMessages) {
+    throw new Error(eligibility.message || 'Messaging is disabled for this clinic')
+  }
+
   // 2. Get pending recipients
   const { data: recipients } = await supabase
     .from('campaign_recipients')
@@ -99,7 +105,7 @@ export async function processCampaignBatch(campaignId: string): Promise<{
         patient_name: recipient.patient.full_name,
         patient_first_name: recipient.patient.first_name || recipient.patient.full_name.split(' ')[0],
         clinic_name: campaign.clinic?.name || 'Clinic',
-        booking_link: `https://app.aura.me/book/${campaign.clinic_id}` // Mock link
+        booking_link: `https://app.patientflow.ai/book/${campaign.clinic_id}` // Mock link
       })
 
       // Send
@@ -126,6 +132,12 @@ export async function processCampaignBatch(campaignId: string): Promise<{
 
       if (result.success) sent++
       else failed++
+      if (result.success) {
+        await trackClinicUsage(campaign.clinic_id, 'campaign_messages', 1, {
+          campaignId: campaign.id,
+          recipientId: recipient.id,
+        })
+      }
 
     } catch (error) {
       console.error('Error sending to recipient:', recipient.id, error)

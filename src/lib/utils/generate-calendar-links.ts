@@ -8,9 +8,9 @@ export function generateIcsContent(event: any): string {
 
   return `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Aura Recall//Appointment Scheduler//EN
+PRODID:-//PatientFlow AI//Appointment Scheduler//EN
 BEGIN:VEVENT
-UID:${event.id}@auradigital.health
+UID:${event.id}@patientflow.ai
 DTSTART:${formatDate(startDate)}
 DTEND:${formatDate(endDate)}
 SUMMARY:${event.title}

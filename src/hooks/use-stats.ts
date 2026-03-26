@@ -15,6 +15,13 @@ export interface DashboardStats {
   pending_confirmations_count: number
   followups_due_count: number
   waiting_list_count: number
+  total_leads_count: number
+  booked_leads_count: number
+  no_shows_this_week: number
+  no_shows_prevented_count: number
+  estimated_revenue_recovered: number
+  uncontacted_leads_count: number
+  weekly_bookings: Array<{ day: string; booked: number; conversionRate: number }>
 }
 
 export function useStats() {

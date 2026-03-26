@@ -22,7 +22,7 @@ export default function IntegrationsPage() {
       icon: Calendar,
       name: "Google Calendar",
       category: "Scheduling",
-      description: "Two-way sync with Google Calendar. Appointments booked in Aura appear in Google, and vice versa.",
+      description: "Two-way sync with Google Calendar. Appointments booked in PatientFlow AI appear in Google Calendar, and vice versa.",
       popular: true
     },
     {
@@ -54,7 +54,7 @@ export default function IntegrationsPage() {
             Seamless Integrations
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Connect Aura with the tools you already use to run your clinic.
+            Connect PatientFlow AI with the tools you already use to run your clinic.
           </p>
         </div>
       </section>

@@ -37,7 +37,11 @@ export async function GET() {
     deposits,
     pendingConfirmations,
     followups,
-    waitingList
+    waitingList,
+    totalLeads,
+    bookedLeads,
+    uncontactedLeads,
+    noShowsThisWeek
   ] = await Promise.all([
     // Today's Appointments
     supabase.from('appointments')
@@ -92,7 +96,28 @@ export async function GET() {
     supabase.from('waiting_list')
       .select('id', { count: 'exact', head: true })
       .eq('clinic_id', clinicId)
-      .eq('status', 'active')
+      .eq('status', 'active'),
+
+    supabase.from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId),
+
+    supabase.from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .eq('status', 'booked'),
+
+    supabase.from('leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .eq('status', 'new'),
+
+    supabase.from('appointments')
+      .select('id', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .eq('status', 'no_show')
+      .gte('start_time', weekStart)
+      .lte('start_time', weekEnd)
   ])
 
   // Process Stats
@@ -116,6 +141,31 @@ export async function GET() {
 
   // Deposits
   const totalDeposits = deposits.data?.reduce((sum: any, p: any) => sum + (p.amount || 0), 0) || 0
+  const totalLeadsCount = totalLeads.count || 0
+  const bookedLeadsCount = bookedLeads.count || 0
+  const noShowsThisWeekCount = noShowsThisWeek.count || 0
+  const noShowsPreventedCount = Math.max(weekTotal - noShowsThisWeekCount - (weekAppointments.data?.filter((a: any) => a.status === 'pending').length || 0), 0)
+  const estimatedRevenueRecovered = bookedLeadsCount * 1500
+  const weekRows = weekAppointments.data || []
+  const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const weeklyMap = new Map<number, { booked: number; total: number }>()
+  for (const row of weekRows) {
+    const day = new Date(row.start_time).getDay()
+    const bucket = weeklyMap.get(day) || { booked: 0, total: 0 }
+    bucket.total += 1
+    if (row.status === 'booked' || row.status === 'confirmed' || row.status === 'completed') {
+      bucket.booked += 1
+    }
+    weeklyMap.set(day, bucket)
+  }
+  const weeklyBookings = labels.map((day, index) => {
+    const bucket = weeklyMap.get(index) || { booked: 0, total: 0 }
+    return {
+      day,
+      booked: bucket.booked,
+      conversionRate: bucket.total ? Number(((bucket.booked / bucket.total) * 100).toFixed(1)) : 0,
+    }
+  })
 
   return NextResponse.json({
     today_appointments_count: todayTotal,
@@ -129,6 +179,13 @@ export async function GET() {
     deposits_count: deposits.count || 0,
     pending_confirmations_count: pendingConfirmations.count || 0,
     followups_due_count: followups.count || 0,
-    waiting_list_count: waitingList.count || 0
+    waiting_list_count: waitingList.count || 0,
+    total_leads_count: totalLeadsCount,
+    booked_leads_count: bookedLeadsCount,
+    no_shows_this_week: noShowsThisWeekCount,
+    no_shows_prevented_count: noShowsPreventedCount,
+    estimated_revenue_recovered: estimatedRevenueRecovered,
+    uncontacted_leads_count: uncontactedLeads.count || 0,
+    weekly_bookings: weeklyBookings
   })
 }

@@ -15,7 +15,7 @@ export function Footer() {
               <div className="relative h-10 w-10">
                  <Image 
                    src="/logo.png" 
-                   alt="Aura" 
+                   alt="PatientFlow AI" 
                    fill
                    className="object-contain"
                  />
@@ -72,7 +72,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
                 <Mail className="h-5 w-5 shrink-0 text-green-600" />
-                <span>hello@aura.health</span>
+                <span>hello@patientflow.ai</span>
               </li>
             </ul>
           </div>

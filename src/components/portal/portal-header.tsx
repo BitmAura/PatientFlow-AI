@@ -16,9 +16,9 @@ export function PortalHeader() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/portal" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-            A
+            PF
           </div>
-          <span className="font-semibold text-lg hidden sm:inline-block">Aura Clinic</span>
+          <span className="font-semibold text-lg hidden sm:inline-block">PatientFlow AI Portal</span>
         </Link>
         
         <Button 

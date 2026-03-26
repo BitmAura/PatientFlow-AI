@@ -35,7 +35,7 @@ export function UpdatePrompt() {
           <div className="flex-1">
             <h4 className="text-sm font-semibold mb-1">Update Available</h4>
             <p className="text-xs text-muted-foreground mb-3">
-              A new version of Aura is available. Update now to get the latest features.
+              A new version of PatientFlow AI is available. Update now to get the latest features.
             </p>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleUpdate}>Update Now</Button>

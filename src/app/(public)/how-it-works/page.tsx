@@ -11,7 +11,7 @@ export default function HowItWorksPage() {
             Three Steps to <span className="text-green-600">Zero No-Shows</span>
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400">
-            Getting started with Aura Recall is effortless. We integrate directly with your existing workflow.
+            Getting started with PatientFlow AI is effortless. We integrate directly with your existing workflow.
           </p>
         </div>
       </section>
@@ -37,7 +37,7 @@ export default function HowItWorksPage() {
             <Step 
               number="03"
               title="Watch Revenue Grow"
-              description="Sit back as Aura handles the communication. Patients confirm instantly, and cancelled slots are automatically offered to your waiting list."
+              description="Sit back as PatientFlow AI handles the communication. Patients confirm instantly, and cancelled slots are automatically offered to your waiting list."
               icon={TrendingUp}
               align="left"
             />
@@ -65,7 +65,7 @@ export default function HowItWorksPage() {
           <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-12 text-center">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <FAQItem 
-              question="Is Aura Recall HIPAA compliant?" 
+              question="Is PatientFlow AI HIPAA compliant?" 
               answer="Yes, we take data security seriously. All patient data is encrypted in transit and at rest, and we sign BAAs with covered entities."
             />
             <FAQItem 
@@ -74,7 +74,7 @@ export default function HowItWorksPage() {
             />
             <FAQItem 
               question="What happens if a patient replies?" 
-              answer="Replies appear directly in your Aura dashboard. You can also configure them to forward to your email or personal phone."
+              answer="Replies appear directly in your PatientFlow AI dashboard. You can also configure them to forward to your email or personal phone."
             />
             <FAQItem 
               question="Is there a setup fee?" 
@@ -88,7 +88,7 @@ export default function HowItWorksPage() {
       <section className="py-20 text-center">
          <div className="container mx-auto px-4">
           <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-10 h-14 text-lg shadow-lg shadow-green-600/20">
-            Get Started with Aura Recall
+            Get Started with PatientFlow AI
           </Button>
         </div>
       </section>

@@ -348,7 +348,7 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
             <HelpCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>Need help?</strong> Our support team can set this up for you in 5 minutes. 
-              <Button variant="link" className="p-0 h-auto" onClick={() => window.open('mailto:support@noshowkiller.com', '_blank')}>
+              <Button variant="link" className="p-0 h-auto" onClick={() => window.open('mailto:support@patientflow.ai', '_blank')}>
                 Contact Support
               </Button>
             </AlertDescription>
@@ -360,7 +360,7 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
             <div className="space-y-2">
               <FAQItem 
                 question="Can I keep using my WhatsApp app on this number?" 
-                answer="No. Once connected to Aura Recall, this number will work exclusively through our dashboard. The standard WhatsApp app on your phone will stop working for this number. We strongly recommend using a dedicated secondary number for this system."
+                answer="No. Once connected to PatientFlow AI, this number will work exclusively through our dashboard. The standard WhatsApp app on your phone will stop working for this number. We strongly recommend using a dedicated secondary number for this system."
               />
               <FAQItem 
                 question="Will patients know this is automated?" 
@@ -368,11 +368,11 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
               />
               <FAQItem 
                 question="Can patients reply normally?" 
-                answer="Yes! When patients reply, their messages appear instantly in your Aura dashboard. Your staff can reply back manually from their computer or mobile, just like a regular chat."
+                answer="Yes! When patients reply, their messages appear instantly in your PatientFlow AI dashboard. Your staff can reply back manually from their computer or mobile, just like a regular chat."
               />
               <FAQItem 
                 question="What if my phone is switched off?" 
-                answer="It keeps working. Since Aura Recall uses the Cloud API, it runs 24/7 on our secure servers. Your phone can be off, broken, or without internet—reminders will still go out on time."
+                answer="It keeps working. Since PatientFlow AI uses the Cloud API, it runs 24/7 on our secure servers. Your phone can be off, broken, or without internet—reminders will still go out on time."
               />
               <FAQItem 
                 question="Can I stop or change the number later?" 

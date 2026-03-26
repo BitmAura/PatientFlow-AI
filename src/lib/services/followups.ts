@@ -4,6 +4,7 @@ import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
 import { buildMessage } from '@/lib/whatsapp/templates'
 import { FOLLOWUP_TYPES } from '@/constants/followup-types'
 import { addDays } from 'date-fns'
+import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard'
 
 export async function createFollowup(data: CreateFollowupInput & { clinic_id: string, created_by: string }) {
   const supabase = createClient() as any
@@ -34,6 +35,11 @@ export async function sendFollowup(followupId: string) {
 
   if (!followup) throw new Error('Followup not found')
 
+  const eligibility = await getClinicSubscriptionEligibility(followup.clinic_id)
+  if (!eligibility.canSendMessages) {
+    throw new Error(eligibility.message || 'Messaging is disabled for this clinic')
+  }
+
   // 2. Build message
   // Assuming message in DB is the template or final message
   // If template, we parse. For simplicity, let's assume it's pre-filled but might need variable replacement
@@ -42,7 +48,7 @@ export async function sendFollowup(followupId: string) {
     patient_first_name: followup.patient.first_name || followup.patient.full_name.split(' ')[0],
     clinic_name: followup.clinic?.name || 'Clinic',
     service: 'Appointment', // Placeholder if not linked
-    booking_link: `https://app.aura.me/book/${followup.clinic_id}`
+    booking_link: `https://app.patientflow.ai/book/${followup.clinic_id}`
   })
 
   // 3. Send
@@ -65,6 +71,10 @@ export async function sendFollowup(followupId: string) {
         sent_at: new Date().toISOString()
       })
       .eq('id', followupId)
+    await trackClinicUsage(followup.clinic_id, 'followup_messages', 1, {
+      followupId: followup.id,
+      patientId: followup.patient_id,
+    })
   }
 
   return result

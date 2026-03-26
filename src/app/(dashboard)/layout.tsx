@@ -32,7 +32,7 @@ export default function DashboardLayout({
       {/* Unified Header - Shows service toggle */}
       <UnifiedHeader 
         currentService="noshow" 
-        logoText="Aura Recall"
+        logoText="PatientFlow AI"
       />
       
       <div className="hidden lg:block">

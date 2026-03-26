@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 const steps = [
   {
     id: 1,
-    title: "Welcome to Aura",
+    title: "Welcome to PatientFlow AI",
     description: "Let's get your clinic set up in just 2 minutes",
     icon: <Hospital className="w-8 h-8 text-blue-600" />,
     component: "WelcomeStep"
@@ -61,7 +61,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       </div>
       
       <div>
-        <h3 className="text-xl font-semibold mb-2">Welcome to Aura Recall!</h3>
+        <h3 className="text-xl font-semibold mb-2">Welcome to PatientFlow AI!</h3>
         <p className="text-gray-600 mb-6">
           We&apos;re excited to help you reduce no-shows and grow your practice. 
           This quick setup will take just 2 minutes.
@@ -414,7 +414,7 @@ function CompleteStep({ onFinish }: { onFinish: () => void }) {
       </Button>
 
       <p className="text-xs text-gray-500">
-        Need help? Our support team is available 24/7 at support@aura.health
+        Need help? Our support team is available 24/7 at support@patientflow.ai
       </p>
     </div>
   )

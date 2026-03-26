@@ -3,11 +3,14 @@
 import { useAuth } from '@/hooks/use-auth'
 import { PageContainer } from '@/components/layout/page-container'
 import { StatsCards } from '@/components/dashboard/stats-cards'
+import { RevenueImpactPanel } from '@/components/dashboard/revenue-impact-panel'
 import { TodayAppointments } from '@/components/dashboard/today-appointments'
 import { WhatsappStatusCard } from '@/components/dashboard/whatsapp-status-card'
 import { UpcomingAppointments } from '@/components/dashboard/upcoming-appointments'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { PlanUpgradePrompt } from '@/components/dashboard/plan-upgrade-prompt'
+import { ConversionFunnel } from '@/components/dashboard/conversion-funnel'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
@@ -56,7 +59,7 @@ export default function DashboardPage() {
               {getGreeting(userName)}
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Here&apos;s what&apos;s happening at your clinic today.
+              Here&apos;s your real-time patient flow, booking performance, and no-show risk for today.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -76,7 +79,20 @@ export default function DashboardPage() {
 
         {/* Alerts */}
         <motion.div variants={item}>
+          <PlanUpgradePrompt />
+        </motion.div>
+
+        <motion.div variants={item}>
           <WhatsappStatusCard />
+        </motion.div>
+
+        {/* Revenue Impact */}
+        <motion.div variants={item}>
+          <RevenueImpactPanel />
+        </motion.div>
+
+        <motion.div variants={item}>
+          <ConversionFunnel />
         </motion.div>
 
         {/* Stats Row */}

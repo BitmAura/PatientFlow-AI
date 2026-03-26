@@ -20,7 +20,7 @@ export default function LoginPage() {
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            New to Aura Recall?{' '}
+            New to PatientFlow AI for clinics?{' '}
             <Link
               href="/signup"
               className="font-medium text-primary transition-colors hover:text-primary/90 dark:text-blue-400 dark:hover:text-blue-300"
@@ -31,6 +31,13 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-6">
+          <Link
+            href="/demo"
+            className="block rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+          >
+            Continue as Guest (Live Demo)
+          </Link>
+
           <LoginForm />
 
           <div className="relative">
