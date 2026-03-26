@@ -1,0 +1,39 @@
+{
+  "Common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back"
+  },
+  "Auth": {
+    "loginTitle": "Patient Portal",
+    "loginDescription": "Enter your phone number to access your appointments.",
+    "phoneLabel": "Phone Number",
+    "getOtp": "Get OTP",
+    "otpSent": "OTP Sent",
+    "otpSentDesc": "Check your WhatsApp for the code.",
+    "enterOtp": "Enter OTP",
+    "enterOtpDesc": "Enter the code sent to +91 {phone}",
+    "verifyLogin": "Verify & Login",
+    "resendOtp": "Resend OTP",
+    "changeNumber": "Change Number"
+  },
+  "Dashboard": {
+    "appointments": "Appointments",
+    "patients": "Patients",
+    "reminders": "Reminders",
+    "settings": "Settings"
+  },
+  "PatientPortal": {
+    "welcome": "Welcome back",
+    "yourAppointments": "Your Appointments",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noAppointments": "No upcoming appointments.",
+    "reschedule": "Reschedule",
+    "cancel": "Cancel",
+    "rescheduleRequest": "Request Reschedule",
+    "cancelRequest": "Request Cancellation"
+  }
+}

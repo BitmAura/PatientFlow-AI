@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './no-show-killer/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: ./no-show-killer
+        run: npm ci
+
+      - name: Lint
+        working-directory: ./no-show-killer
+        run: npm run lint
+
+      - name: Type Check
+        working-directory: ./no-show-killer
+        run: npx tsc --noEmit
+
+      - name: Run Unit Tests
+        working-directory: ./no-show-killer
+        run: npm test
+
+      - name: Build Check
+        working-directory: ./no-show-killer
+        run: npm run build

@@ -1,0 +1,35 @@
+import { createClient } from '@/lib/supabase/client'
+import { useQuery } from '@tanstack/react-query'
+import { useClinicStore } from '@/stores/clinic-store'
+
+export interface DashboardStats {
+  today_appointments_count: number
+  today_confirmed_count: number
+  today_pending_count: number
+  week_appointments_count: number
+  week_completed_count: number
+  no_show_rate_current_month: number
+  no_show_rate_last_month: number
+  deposits_collected_this_month: number
+  deposits_count: number
+  pending_confirmations_count: number
+  followups_due_count: number
+  waiting_list_count: number
+}
+
+export function useStats() {
+  const { clinic } = useClinicStore()
+
+  return useQuery({
+    queryKey: ['dashboard-stats', clinic?.id],
+    queryFn: async () => {
+      if (!clinic?.id) return null
+      
+      const response = await fetch('/api/stats/dashboard')
+      if (!response.ok) throw new Error('Failed to fetch stats')
+      
+      return response.json() as Promise<DashboardStats>
+    },
+    enabled: !!clinic?.id,
+  })
+}
