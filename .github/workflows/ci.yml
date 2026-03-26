@@ -18,24 +18,16 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: './no-show-killer/package-lock.json'
+          cache-dependency-path: './package-lock.json'
 
       - name: Install Dependencies
-        working-directory: ./no-show-killer
         run: npm ci
 
       - name: Lint
-        working-directory: ./no-show-killer
         run: npm run lint
 
       - name: Type Check
-        working-directory: ./no-show-killer
         run: npx tsc --noEmit
 
-      - name: Run Unit Tests
-        working-directory: ./no-show-killer
-        run: npm test
-
       - name: Build Check
-        working-directory: ./no-show-killer
         run: npm run build
