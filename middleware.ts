@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
   // 1. Rate Limiting Headers (Basic)
@@ -8,7 +7,11 @@ export async function middleware(request: NextRequest) {
   headers.set('x-ratelimit-remaining', '99')
 
   // 2. Security Headers
-  const response = await updateSession(request)
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
