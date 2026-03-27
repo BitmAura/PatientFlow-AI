@@ -1,7 +1,6 @@
 import { 
   Calendar, 
   MessageCircle, 
-  CreditCard, 
   Database,
   Clock3,
   ArrowRight
@@ -24,12 +23,6 @@ export default function IntegrationsPage() {
       category: "Scheduling",
       description: "Generate calendar actions for confirmed appointments (Google/Outlook links and .ics download) from booking flows.",
       popular: true
-    },
-    {
-      icon: CreditCard,
-      name: "Razorpay Billing",
-      category: "Payments",
-      description: "Manage subscription lifecycle, plan upgrades, and payment webhooks using Razorpay."
     },
     {
       icon: Database,

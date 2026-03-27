@@ -81,10 +81,10 @@ export default function SignupPage({
               </p>
             </div>
             <Link
-              href="/pricing"
+              href="/login?next=/dashboard/billing"
               className="whitespace-nowrap text-sm font-medium text-primary transition-colors hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300"
             >
-              Change plan
+              Change after login
             </Link>
           </div>
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-green-100/50 p-2 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">

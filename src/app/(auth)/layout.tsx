@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
 export default function AuthLayout({
@@ -38,13 +37,17 @@ export default function AuthLayout({
                 { name: 'Dr. Patel', color: 'F59E0B' },
                 { name: 'Dr. Lee', color: 'EF4444' }
               ].map((doctor, i) => (
-                <div key={i} className="relative h-10 w-10 rounded-full border-2 border-primary bg-gray-200 overflow-hidden">
-                  <Image
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.name)}&background=${doctor.color}&color=fff&size=128`}
-                    alt={doctor.name}
-                    fill
-                    className="object-cover"
-                  />
+                <div
+                  key={i}
+                  className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-primary text-xs font-semibold text-white"
+                  style={{ backgroundColor: `#${doctor.color}` }}
+                >
+                  {doctor.name
+                    .split(' ')
+                    .map((part) => part[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </div>
               ))}
             </div>

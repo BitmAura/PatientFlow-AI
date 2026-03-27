@@ -49,8 +49,16 @@ export function useAuth() {
       })
       if (error) throw error
       toast.success('Signed in successfully')
-      // Full-page redirect so session cookie is sent and middleware sees the user
-      window.location.href = '/dashboard'
+      // Preserve explicit post-login target when present (e.g. billing flow),
+      // otherwise default to dashboard. Full-page redirect ensures session cookie
+      // is available to middleware/server checks.
+      const params = new URLSearchParams(window.location.search)
+      const nextPath = params.get('next')
+      const target =
+        nextPath && nextPath.startsWith('/') && !nextPath.startsWith('//')
+          ? nextPath
+          : '/dashboard'
+      window.location.href = target
       return
     } catch (error: any) {
       console.error('Sign in error:', error)
