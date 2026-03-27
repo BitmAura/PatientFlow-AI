@@ -1,65 +1,34 @@
+import { PRICING_PLANS } from '@/lib/billing/plans'
+
 export const SUBSCRIPTION_PLANS = [
   {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    interval: 'month',
-    appointments_limit: 30,
-    features: [
-      'Up to 30 appointments/month',
-      'Basic appointment management',
-      'Patient records',
-      'Manual reminders'
-    ],
-    cta: 'Current Plan'
-  },
-  {
     id: 'starter',
-    name: 'Starter',
-    price: 1999,
+    name: PRICING_PLANS.starter.name,
+    price: PRICING_PLANS.starter.monthlyPricePaise / 100,
     interval: 'month',
-    appointments_limit: 200,
-    features: [
-      'Up to 200 appointments/month',
-      'Automated WhatsApp reminders',
-      'Basic campaigns',
-      'Deposit collection',
-      'Email support'
-    ],
+    appointments_limit: PRICING_PLANS.starter.monthlyAppointmentLimit,
+    features: PRICING_PLANS.starter.features,
     cta: 'Upgrade',
-    popular: false
+    popular: false,
   },
   {
-    id: 'professional',
-    name: 'Professional',
-    price: 4999,
+    id: 'growth',
+    name: PRICING_PLANS.growth.name,
+    price: PRICING_PLANS.growth.monthlyPricePaise / 100,
     interval: 'month',
-    appointments_limit: -1, // unlimited
-    features: [
-      'Unlimited appointments',
-      'All reminder types',
-      'Advanced campaigns',
-      'Full analytics',
-      'Team members (up to 5)',
-      'Priority support'
-    ],
+    appointments_limit: PRICING_PLANS.growth.monthlyAppointmentLimit,
+    features: PRICING_PLANS.growth.features,
     cta: 'Upgrade',
-    popular: true
+    popular: true,
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 14999,
+    id: 'pro',
+    name: PRICING_PLANS.pro.name,
+    price: PRICING_PLANS.pro.monthlyPricePaise / 100,
     interval: 'month',
-    appointments_limit: -1,
-    features: [
-      'Everything in Professional',
-      'Multiple locations',
-      'API access',
-      'Custom integrations',
-      'Dedicated support',
-      'SLA guarantee'
-    ],
-    cta: 'Contact Sales'
-  }
+    appointments_limit: PRICING_PLANS.pro.monthlyAppointmentLimit,
+    features: PRICING_PLANS.pro.features,
+    cta: 'Contact Sales',
+    popular: false,
+  },
 ]

@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { plan_id, payment_method_id } = await request.json()
+  const { plan_id } = await request.json()
+  const normalizedPlanId = normalizePlanId(plan_id)
 
   // 1. Get clinic
   const { data: clinic } = await supabase
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
   const { error } = await supabase
     .from('clinics')
     .update({
-      subscription_plan_id: plan_id,
+      subscription_plan_id: normalizedPlanId,
       subscription_id: newSubId,
       subscription_status: 'active'
     })
@@ -38,9 +40,9 @@ export async function POST(request: Request) {
     .from('invoices')
     .insert({
       clinic_id: clinic.id,
-      amount: plan_id === 'starter' ? 1999 : plan_id === 'professional' ? 4999 : 14999,
+      amount: PRICING_PLANS[normalizedPlanId].monthlyPricePaise / 100,
       status: 'paid',
-      description: `Upgrade to ${plan_id} plan`
+      description: `Upgrade to ${normalizedPlanId} plan`
     })
 
   return NextResponse.json({ success: true, subscription_id: newSubId })

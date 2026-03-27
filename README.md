@@ -210,6 +210,7 @@ Recommended: Vercel
 5. Set Supabase auth URLs and webhook callback URLs to production domain
 
 Detailed guide: `docs/SETUP.md`.
+Deployment guardrails: `docs/DEPLOYMENT_CHECKLIST.md`.
 
 ## Documentation Index
 
@@ -218,6 +219,8 @@ Detailed guide: `docs/SETUP.md`.
 - API: `docs/API.md`
 - WhatsApp quick setup: `docs/WHATSAPP-SIMPLE-SETUP.md`
 - WhatsApp troubleshooting: `docs/WHATSAPP-TROUBLESHOOTING.md`
+- Deployment checklist: `docs/DEPLOYMENT_CHECKLIST.md`
+- Schema drift notes: `docs/SCHEMA_DRIFT_NOTES.md`
 - Co-founder checklist: `docs/COFOUNDER-CHECKLIST.md`
 
 ## Ownership

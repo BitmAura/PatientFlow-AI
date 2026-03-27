@@ -8,6 +8,7 @@ import { SUBSCRIPTION_PLANS } from '@/constants/plans'
 import { UpgradeDialog } from './upgrade-dialog'
 import { useUpgradePlan } from '@/hooks/use-subscription'
 import { useToast } from '@/hooks/use-toast'
+import { normalizePlanId } from '@/lib/billing/plans'
 
 interface PlanComparisonProps {
   currentPlanId: string
@@ -17,6 +18,7 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
   const [selectedPlan, setSelectedPlan] = React.useState<any>(null)
   const upgradePlan = useUpgradePlan()
   const { toast } = useToast()
+  const normalizedCurrentPlanId = normalizePlanId(currentPlanId)
 
   const handleUpgradeClick = (plan: any) => {
     setSelectedPlan(plan)
@@ -38,7 +40,7 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {SUBSCRIPTION_PLANS.map((plan) => {
-          const isCurrent = plan.id === currentPlanId
+          const isCurrent = plan.id === normalizedCurrentPlanId
           const isPopular = plan.popular
           
           return (

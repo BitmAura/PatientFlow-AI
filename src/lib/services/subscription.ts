@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { SUBSCRIPTION_PLANS } from '@/constants/plans'
 import { startOfMonth, endOfMonth } from 'date-fns'
+import { normalizePlanId } from '@/lib/billing/plans'
 
 // Define types locally if needed or import from types/database
 type RazorpayEvent = any 
@@ -19,7 +20,7 @@ export async function getCurrentUsage(clinicId: string) {
     .eq('id', clinicId)
     .single()
 
-  const planId = clinic?.subscription_plan_id || 'free'
+  const planId = normalizePlanId(clinic?.subscription_plan_id)
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId) || SUBSCRIPTION_PLANS[0]
 
   // Count appointments in current period

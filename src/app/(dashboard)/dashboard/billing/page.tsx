@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, CreditCard, Calendar, TrendingUp, AlertCircle } from 'lucide-react'
-import { PRICING_PLANS, formatPriceInrFromPaise, type BillingCycle, type PricingPlanId } from '@/lib/billing/plans'
+import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise, normalizePlanId, type BillingCycle, type PricingPlanId } from '@/lib/billing/plans'
 
 interface Subscription {
   id: string
@@ -82,7 +82,7 @@ export default function BillingPage() {
     )
   }
 
-  const planKey = (subscription?.plan_id as PricingPlanId) || 'starter'
+  const planKey = normalizePlanId(subscription?.plan_id) as PricingPlanId
   const currentPlan = PRICING_PLANS[planKey] || PRICING_PLANS.starter
   const currentCycle = subscription?.billing_cycle === 'annual' ? 'annual' : 'monthly'
 
@@ -155,7 +155,7 @@ export default function BillingPage() {
               <div className="flex-1">
                 <p className="font-medium text-amber-900">Trial ending soon</p>
                 <p className="text-sm text-amber-700 mt-1">
-                  Your 7-day free trial ends in {daysLeft} days. Add payment details to continue automation.
+                  Your {FREE_TRIAL_DAYS}-day free trial ends in {daysLeft} days. Add payment details to continue automation.
                 </p>
                 <Button 
                   onClick={() => handleUpgrade(planKey, currentCycle)}

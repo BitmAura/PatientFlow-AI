@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { normalizePlanId } from '@/lib/billing/plans'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
@@ -7,6 +8,7 @@ export async function POST(request: Request) {
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
   const { plan_id } = await request.json()
+  const normalizedPlanId = normalizePlanId(plan_id)
 
   const { data: clinic } = await supabase
     .from('clinics')
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
   const { error } = await supabase
     .from('clinics')
     .update({
-      subscription_plan_id: plan_id
+      subscription_plan_id: normalizedPlanId
     })
     .eq('id', clinic.id)
 

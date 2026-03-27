@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, parseWebhookEvent } from '@/lib/razorpay/subscriptions'
 
 /**
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     console.log(`Received Razorpay webhook: ${event}`)
 
     // Initialize Supabase admin client
-    const supabase = createClient()
+    const supabase = createAdminClient()
 
     // Handle different webhook events
     switch (event) {

@@ -1,15 +1,16 @@
 import Link from 'next/link'
 import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
 export default function PricingPage() {
   const plans = [
     {
-      name: 'Clinic',
-      price: '₹2,999',
+      name: PRICING_PLANS.starter.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise),
       period: '/month',
       description: 'For doctors and small clinics',
-      planId: 'clinic',
+      planId: 'starter',
       features: [
         'Up to 500 appointments/month',
         'Up to 3 doctors',
@@ -24,16 +25,16 @@ export default function PricingPage() {
       popular: true
     },
     {
-      name: 'Hospital',
-      price: '₹9,999',
+      name: PRICING_PLANS.growth.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.growth.monthlyPricePaise),
       period: '/month',
-      description: 'For hospitals and multi-location practices',
-      planId: 'hospital',
+      description: 'For scaling clinics and multi-doctor practices',
+      planId: 'growth',
       features: [
-        'Unlimited appointments',
-        'Unlimited doctors & staff',
-        'Multi-location support',
-        'Full WhatsApp Business API',
+        'Up to 2,000 appointments/month',
+        'Up to 10 doctors & staff',
+        'Campaign automation workflows',
+        'Advanced recall system',
         'Advanced automation workflows',
         'Custom integrations (EMR, billing)',
         'Priority feature requests',
@@ -41,6 +42,22 @@ export default function PricingPage() {
         '24/7 phone & WhatsApp support',
         'DISHA compliance tools',
         'Custom reports & analytics'
+      ],
+      popular: false
+    },
+    {
+      name: PRICING_PLANS.pro.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.pro.monthlyPricePaise),
+      period: '/month',
+      description: 'For multi-location clinics and hospital groups',
+      planId: 'pro',
+      features: [
+        'Unlimited appointments',
+        'Unlimited doctors and staff',
+        'Multi-location management',
+        'Advanced automation and API access',
+        'Custom integrations and reporting',
+        'Priority support and SLA options'
       ],
       popular: false
     }
@@ -60,7 +77,7 @@ export default function PricingPage() {
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-600" />
-              <span>14-day free trial</span>
+              <span>{FREE_TRIAL_DAYS}-day free trial</span>
             </div>
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-600" />
@@ -77,7 +94,7 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => (
               <div key={plan.name} className={`relative rounded-2xl border ${plan.popular ? 'border-green-600 bg-green-50/50 dark:bg-green-950/20 shadow-xl' : 'border-zinc-200 dark:border-zinc-800'} p-8 transition-all hover:shadow-lg`}>
                 {plan.popular && (
@@ -95,7 +112,7 @@ export default function PricingPage() {
                     <span className="text-4xl font-bold text-zinc-900 dark:text-white">{plan.price}</span>
                     <span className="text-zinc-600 dark:text-zinc-400">{plan.period}</span>
                   </div>
-                  <p className="text-sm text-green-600 font-medium mt-2">First 14 days free</p>
+                  <p className="text-sm text-green-600 font-medium mt-2">First {FREE_TRIAL_DAYS} days free</p>
                 </div>
 
                 <ul className="space-y-3 mb-8">
@@ -221,7 +238,7 @@ export default function PricingPage() {
           <div className="space-y-6">
             <FAQItem 
               question="Is the trial really free?"
-              answer="Yes! No credit card required. Get full access to all features for 14 days."
+              answer={`Yes! No credit card required. Get full access to all features for ${FREE_TRIAL_DAYS} days.`}
             />
             <FAQItem 
               question="What happens after the trial?"
@@ -250,15 +267,15 @@ export default function PricingPage() {
             Ready to Eliminate No-Shows?
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8">
-            Start your free 14-day trial today. No credit card required.
+            Start your free {FREE_TRIAL_DAYS}-day trial today. No credit card required.
           </p>
-          <Link href="/signup?plan=clinic">
+          <Link href="/signup?plan=starter">
             <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 h-12 text-lg shadow-lg shadow-green-600/20">
               Start Your Free Trial
             </Button>
           </Link>
           <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-            No credit card required • 14-day free trial • Cancel anytime
+            No credit card required • {FREE_TRIAL_DAYS}-day free trial • Cancel anytime
           </p>
         </div>
       </section>

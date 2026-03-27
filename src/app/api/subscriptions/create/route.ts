@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSubscription } from '@/lib/razorpay/subscriptions'
-import type { PricingPlanId } from '@/lib/billing/plans'
+import { normalizePlanId, type PricingPlanId } from '@/lib/billing/plans'
 
 const VALID_PLAN_IDS: PricingPlanId[] = ['starter', 'growth', 'pro']
 
@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
     // Get request body
     const body = await request.json()
     const { planId, billingCycle = 'monthly' } = body
+    const normalizedPlanId = normalizePlanId(planId)
 
     // Validate plan ID (PatientFlow AI tiers)
-    if (!planId || !VALID_PLAN_IDS.includes(planId as PricingPlanId)) {
+    if (!planId || !VALID_PLAN_IDS.includes(normalizedPlanId)) {
       return NextResponse.json(
         { error: 'Invalid plan ID' },
         { status: 400 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     const razorpaySubscription = await createSubscription({
       userId: user.id,
       userEmail: user.email!,
-      planId: planId as PricingPlanId,
+      planId: normalizedPlanId as PricingPlanId,
       billingCycle: billingCycle as 'monthly' | 'annual',
       customerId: existingSubscription.razorpay_customer_id || undefined,
     })
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
         razorpay_subscription_id: razorpaySubscription.subscriptionId,
         razorpay_customer_id: razorpaySubscription.customerId,
         razorpay_plan_id: razorpaySubscription.planId,
+        plan_id: normalizedPlanId,
         status: 'active',
         current_period_start: new Date(razorpaySubscription.currentPeriodStart * 1000).toISOString(),
         current_period_end: new Date(razorpaySubscription.currentPeriodEnd * 1000).toISOString(),

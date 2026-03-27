@@ -10,6 +10,7 @@ import {
   WalletCards,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
 export default function LandingPage() {
   const solutionPoints = [
@@ -21,8 +22,8 @@ export default function LandingPage() {
 
   const pricingPlans = [
     {
-      name: 'Starter',
-      price: '₹3,999',
+      name: PRICING_PLANS.starter.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise),
       subtitle: '/month',
       description: 'For single-doctor clinics getting started with automation.',
       features: [
@@ -35,8 +36,8 @@ export default function LandingPage() {
       featured: false,
     },
     {
-      name: 'Growth',
-      price: '₹8,999',
+      name: PRICING_PLANS.growth.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.growth.monthlyPricePaise),
       subtitle: '/month',
       description: 'For fast-growing clinics focused on predictable bookings.',
       features: [
@@ -49,9 +50,9 @@ export default function LandingPage() {
       featured: true,
     },
     {
-      name: 'Pro',
-      price: 'Custom',
-      subtitle: '',
+      name: PRICING_PLANS.pro.name,
+      price: formatPriceInrFromPaise(PRICING_PLANS.pro.monthlyPricePaise),
+      subtitle: '/month',
       description: 'For multi-doctor and multi-location clinic groups.',
       features: [
         'Unlimited conversations',
@@ -65,11 +66,12 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <section className="bg-gradient-to-b from-slate-50 to-white pt-16 pb-14 md:pt-24 md:pb-20">
+    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] pt-16 pb-14 md:pt-24 md:pb-20">
+        <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-5xl text-center">
-            <div className="mb-6 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-800">
+          <div className="relative mx-auto max-w-5xl text-center">
+            <div className="mb-6 inline-flex items-center rounded-full border border-emerald-300 bg-white/80 px-4 py-1.5 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur">
               Built for dental, skin, and general clinics
             </div>
             <h1 className="text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
@@ -80,13 +82,20 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/book-demo">
-                <Button size="lg" className="h-12 w-full px-7 text-base sm:w-auto">
+                <Button
+                  size="lg"
+                  className="h-12 w-full bg-emerald-600 px-7 text-base text-white shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500 sm:w-auto"
+                >
                   Book Free Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="#pricing">
-                <Button variant="outline" size="lg" className="h-12 w-full px-7 text-base sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-12 w-full border-slate-300 bg-white/90 px-7 text-base shadow-sm backdrop-blur transition hover:bg-white sm:w-auto"
+                >
                   View Pricing
                 </Button>
               </Link>
@@ -145,7 +154,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/70">
               <h3 className="text-lg font-semibold text-slate-900">Visual Demo: WhatsApp Flow</h3>
               <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed booking.</p>
               <div className="mt-5 rounded-2xl bg-[#ece5dd] p-4">
@@ -207,7 +216,10 @@ export default function LandingPage() {
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/book-demo">
-                <Button size="lg" className="h-12 w-full bg-emerald-500 px-7 text-base text-white hover:bg-emerald-600 sm:w-auto">
+                <Button
+                  size="lg"
+                  className="h-12 w-full bg-emerald-500 px-7 text-base text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400 sm:w-auto"
+                >
                   Book Free Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -227,7 +239,7 @@ export default function LandingPage() {
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white/95 p-4 text-center shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md">
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
     </div>
@@ -236,7 +248,7 @@ function StatChip({ label, value }: { label: string; value: string }) {
 
 function ProblemCard({ icon: Icon, text }: { icon: any; text: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
       <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
         <Icon className="h-5 w-5" />
       </div>
@@ -289,8 +301,10 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-6 shadow-sm ${
-        featured ? 'border-emerald-400 bg-white ring-2 ring-emerald-100' : 'border-slate-200 bg-white'
+      className={`rounded-2xl border p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl ${
+        featured
+          ? 'border-emerald-400 bg-gradient-to-b from-white to-emerald-50/40 ring-2 ring-emerald-100'
+          : 'border-slate-200 bg-white'
       }`}
     >
       {featured && (
@@ -313,7 +327,13 @@ function PricingCard({
         ))}
       </ul>
       <Link href="/book-demo" className="mt-6 block">
-        <Button className={`h-11 w-full ${featured ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}>
+        <Button
+          className={`h-11 w-full transition ${
+            featured
+              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 hover:bg-emerald-500'
+              : 'bg-white hover:bg-slate-100'
+          }`}
+        >
           <MessageCircleMore className="mr-2 h-4 w-4" />
           {cta}
         </Button>

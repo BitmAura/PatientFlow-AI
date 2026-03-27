@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { FREE_TRIAL_DAYS, type PricingPlanId } from '@/lib/billing/plans'
+import { FREE_TRIAL_DAYS, normalizePlanId, type PricingPlanId } from '@/lib/billing/plans'
 
 type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired' | 'inactive'
 
@@ -26,13 +26,6 @@ function isFutureDate(value?: string | null): boolean {
   if (!value) return false
   const parsed = new Date(value)
   return !Number.isNaN(parsed.getTime()) && parsed.getTime() > Date.now()
-}
-
-function normalizePlanId(planId: string | undefined): PricingPlanId {
-  if (planId === 'starter' || planId === 'growth' || planId === 'pro') return planId
-  if (planId === 'clinic') return 'starter'
-  if (planId === 'hospital') return 'growth'
-  return 'starter'
 }
 
 export function deriveSubscriptionStatus(subscription: SubscriptionRecord | null): SubscriptionStatus {

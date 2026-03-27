@@ -21,6 +21,7 @@ import { Loader2 } from 'lucide-react'
 import * as z from 'zod'
 import { PasswordStrength } from './password-strength'
 import Link from 'next/link'
+import { FREE_TRIAL_DAYS, normalizePlanId } from '@/lib/billing/plans'
 
 type SignupFormValues = z.infer<typeof signupSchema>
 
@@ -28,8 +29,9 @@ interface SignupFormProps {
   selectedPlan?: string
 }
 
-export function SignupForm({ selectedPlan = 'clinic' }: SignupFormProps) {
+export function SignupForm({ selectedPlan = 'starter' }: SignupFormProps) {
   const { signUp, loading } = useAuth()
+  const normalizedPlan = normalizePlanId(selectedPlan)
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -50,7 +52,7 @@ export function SignupForm({ selectedPlan = 'clinic' }: SignupFormProps) {
     await signUp(data.email, data.password, data.fullName, {
       phone: data.phone,
       clinicName: data.clinicName,
-      selectedPlan: selectedPlan,
+      selectedPlan: normalizedPlan,
     })
   }
 
@@ -157,12 +159,12 @@ export function SignupForm({ selectedPlan = 'clinic' }: SignupFormProps) {
 
         <GlowButton type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Start 14-Day Free Trial
+          Start {FREE_TRIAL_DAYS}-Day Free Trial
         </GlowButton>
 
         <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-          By creating an account, you agree to start your {selectedPlan} plan
-          trial. You will not be charged until after your 14-day trial period
+          By creating an account, you agree to start your {normalizedPlan} plan
+          trial. You will not be charged until after your {FREE_TRIAL_DAYS}-day trial period
           ends.
         </p>
       </form>

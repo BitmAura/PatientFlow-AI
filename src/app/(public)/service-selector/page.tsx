@@ -1,8 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, CheckCircle2, Stethoscope, Briefcase } from "lucide-react"
+import { ArrowRight, CheckCircle2, Stethoscope } from "lucide-react"
 import Link from 'next/link'
+import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise } from "@/lib/billing/plans"
 
 export default function ServiceSelectorPage() {
   return (
@@ -68,35 +69,13 @@ export default function ServiceSelectorPage() {
               </ul>
               <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
                 <span className="text-sm text-gray-600">Pricing</span>
-                <span className="font-semibold text-gray-900">Free trial, then ₹999/month</span>
+                <span className="font-semibold text-gray-900">
+                  Free {FREE_TRIAL_DAYS}-day trial, then {formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise)}/month
+                </span>
               </div>
-              <Link href="/signup">
+              <Link href="/signup?plan=starter">
                 <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
-                  Start Free 14-Day Trial
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section className="py-12 px-4">
-        <div className="container mx-auto max-w-3xl">
-          <Card className="border-blue-200 bg-blue-50/40">
-            <CardHeader>
-              <div className="flex items-center gap-2 text-blue-700">
-                <Briefcase className="w-4 h-4" />
-                <span className="text-sm font-medium">Digital Marketing Services (Optional)</span>
-              </div>
-              <CardDescription className="text-gray-700">
-                Need patient acquisition too? Our marketing team can support SEO, ads, and local visibility.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link href="https://wa.me/919148868413?text=Hi%2C%20I%20need%20digital%20marketing%20support%20for%20my%20clinic.">
-                <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-100">
-                  Explore Marketing Services
+                  Start Free {FREE_TRIAL_DAYS}-Day Trial
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
