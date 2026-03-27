@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createLeadSchema } from '@/lib/validations/lead'
+import { triggerAutomation } from '@/services/automation/engine'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -52,4 +53,77 @@ export async function GET(request: Request) {
       pages: Math.ceil((count || 0) / limit)
     }
   })
+}
+
+export async function POST(request: Request) {
+  const supabase = createClient() as any
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return new NextResponse('Unauthorized', { status: 401 })
+
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!staff?.clinic_id) return new NextResponse('No clinic found', { status: 404 })
+
+  try {
+    const body = await request.json()
+    const parsed = createLeadSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid lead payload', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const payload = {
+      ...parsed.data,
+      clinic_id: staff.clinic_id,
+      status: parsed.data.status || 'new',
+      source: parsed.data.source || 'manual',
+    }
+
+    if (payload.phone) {
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('clinic_id', staff.clinic_id)
+        .eq('phone', payload.phone)
+        .limit(1)
+        .maybeSingle()
+
+      if (existingLead?.id) {
+        return NextResponse.json({ error: 'Lead with this phone already exists' }, { status: 409 })
+      }
+    }
+
+    const { data: created, error } = await supabase
+      .from('leads')
+      .insert(payload)
+      .select('*')
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to create lead', details: error.message }, { status: 500 })
+    }
+
+    if (created?.phone && created?.status === 'new') {
+      await triggerAutomation({
+        type: 'lead.created',
+        clinicId: staff.clinic_id,
+        phone: created.phone,
+        payload: { leadId: created.id, source: created.source || 'manual' },
+      })
+    }
+
+    return NextResponse.json({ lead: created }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unexpected error while creating lead' },
+      { status: 500 }
+    )
+  }
 }

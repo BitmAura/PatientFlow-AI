@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
+import { sendMessage } from '@/services/messaging'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
@@ -20,7 +20,12 @@ export async function POST(request: Request) {
     const { phone, message } = await request.json()
     if (!phone || !message) return new NextResponse('Missing phone or message', { status: 400 })
 
-    const result = await sendWhatsAppMessage(staff.clinic_id, phone, message, { type: 'manual_test' })
+    const result = await sendMessage({
+      clinicId: staff.clinic_id,
+      to: phone,
+      content: message,
+      metadata: { type: 'manual_test' },
+    })
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Failed to send' }, { status: 500 })

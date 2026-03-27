@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { WhatsAppProviderFactory } from '@/lib/whatsapp/provider-factory';
+import { verifyNumber } from '@/services/messaging';
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient() as any;
     const body = await req.json();
-    const { phone_number, clinic_id, clinic_name, logo_url } = body;
+    const { phone_number } = body;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { data: staff } = await supabase
+      .from('staff')
+      .select('clinic_id')
+      .eq('user_id', user.id)
+      .single();
+
+    const clinicId = staff?.clinic_id;
 
     // 1. Validate Input
-    if (!phone_number || !clinic_id) {
+    if (!phone_number || !clinicId) {
       return NextResponse.json(
-        { error: 'Missing required fields: phone_number, clinic_id' },
+        { error: 'Missing required fields: phone_number and authenticated clinic scope' },
         { status: 400 }
       );
     }
@@ -25,58 +38,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Fetch Gupshup Config (from Env or Settings)
-    // For now, using Env vars as default partner config
-    const config = {
-      apiKey: process.env.GUPSHUP_API_KEY || 'mock_key',
-      appId: process.env.GUPSHUP_APP_ID || 'mock_app_id',
-      appName: clinic_name || 'AuraRecall'
-    };
-
-    // 3. Initiate Registration (Call Gupshup API)
-    const provider = WhatsAppProviderFactory.getProvider('gupshup');
-    const result = await provider.registerNumber(phone_number, config);
+    // 2. Initiate verification using provider-agnostic messaging service
+    const result = await verifyNumber({
+      clinicId,
+      phoneNumber: phone_number,
+    });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: 'Failed to initiate registration with Gupshup', details: result.providerData },
-        { status: 502 }
-      );
-    }
-
-    // 4. Store in Database
-    // Map 'pending_verification' to 'connecting' as per DB Enum
-    const dbStatus = result.status === 'pending_verification' ? 'connecting' : 'disconnected';
-
-    // Upsert connection
-    const { error: dbError } = await supabase
-      .from('whatsapp_connections')
-      .upsert({
-        clinic_id,
-        status: dbStatus,
-        session_data: {
-          phone_number,
-          clinic_name,
-          logo_url,
-          provider_status: result.status, // 'pending_verification'
-          ...result.providerData
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'clinic_id' });
-
-    if (dbError) {
-      console.error('Database Error:', dbError);
-      return NextResponse.json(
-        { error: 'Failed to save connection status' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error || 'Failed to initiate verification' }, { status: 502 });
     }
 
     return NextResponse.json({
       success: true,
       message: 'Registration initiated. OTP sent to phone number.',
       status: result.status,
-      data: result.providerData
+      provider: result.provider
     });
 
   } catch (error: any) {
