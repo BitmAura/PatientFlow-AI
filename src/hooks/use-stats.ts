@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/client'
 import { useQuery } from '@tanstack/react-query'
 import { useClinicStore } from '@/stores/clinic-store'
 
