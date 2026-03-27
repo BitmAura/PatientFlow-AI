@@ -64,17 +64,18 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="bg-white dark:bg-black min-h-screen">
+    <div className="min-h-screen bg-white text-slate-900">
       {/* Hero Section */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
+        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4 text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-6xl">
             Simple, Transparent <span className="text-green-600">Pricing</span>
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 mb-8">
+          <p className="mb-8 text-xl text-slate-600">
             Choose the perfect plan for your practice. Reduce no-shows by 70% and recover lost revenue.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-600" />
               <span>{FREE_TRIAL_DAYS}-day free trial</span>
@@ -88,6 +89,11 @@ export default function PricingPage() {
               <span>Cancel anytime</span>
             </div>
           </div>
+          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <PricingSignal value="70%" label="No-show reduction target" />
+            <PricingSignal value="< 10s" label="Lead response benchmark" />
+            <PricingSignal value="14 days" label="Risk-free evaluation" />
+          </div>
         </div>
       </section>
 
@@ -96,7 +102,14 @@ export default function PricingPage() {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => (
-              <div key={plan.name} className={`relative rounded-2xl border ${plan.popular ? 'border-green-600 bg-green-50/50 dark:bg-green-950/20 shadow-xl' : 'border-zinc-200 dark:border-zinc-800'} p-8 transition-all hover:shadow-lg`}>
+              <div
+                key={plan.name}
+                className={`relative rounded-2xl border p-8 transition-all hover:-translate-y-1 hover:shadow-xl ${
+                  plan.popular
+                    ? 'border-green-500 bg-gradient-to-b from-white to-green-50/50 shadow-xl shadow-green-500/10 ring-2 ring-green-100'
+                    : 'border-slate-200 bg-white shadow-sm'
+                }`}
+              >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
@@ -106,11 +119,11 @@ export default function PricingPage() {
                 )}
                 
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">{plan.name}</h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 mb-4">{plan.description}</p>
+                  <h3 className="mb-2 text-2xl font-bold text-slate-900">{plan.name}</h3>
+                  <p className="mb-4 text-slate-600">{plan.description}</p>
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-zinc-900 dark:text-white">{plan.price}</span>
-                    <span className="text-zinc-600 dark:text-zinc-400">{plan.period}</span>
+                    <span className="text-4xl font-bold text-slate-900">{plan.price}</span>
+                    <span className="text-slate-600">{plan.period}</span>
                   </div>
                   <p className="text-sm text-green-600 font-medium mt-2">First {FREE_TRIAL_DAYS} days free</p>
                 </div>
@@ -119,14 +132,18 @@ export default function PricingPage() {
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                      <span className="text-sm text-zinc-700 dark:text-zinc-300">{feature}</span>
+                      <span className="text-sm text-slate-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Link href={`/signup?plan=${plan.planId}`}>
                   <Button 
-                    className={`w-full ${plan.popular ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900'}`}
+                    className={`w-full ${
+                      plan.popular
+                        ? 'bg-green-600 text-white shadow-md shadow-green-600/20 hover:bg-green-500'
+                        : 'bg-slate-900 text-white hover:bg-slate-800'
+                    }`}
                     size="lg"
                   >
                     Start Free Trial
@@ -138,8 +155,8 @@ export default function PricingPage() {
 
           {/* Annual Discount Banner */}
           <div className="mt-12 text-center">
-            <div className="inline-block bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-full px-6 py-3">
-              <p className="text-green-800 dark:text-green-400 font-medium">
+            <div className="inline-block rounded-full border border-green-200 bg-green-100 px-6 py-3">
+              <p className="font-medium text-green-800">
                 💰 Save 20% with annual billing • Contact us for volume discounts
               </p>
             </div>
@@ -148,9 +165,9 @@ export default function PricingPage() {
       </section>
 
       {/* Features Comparison */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
+      <section className="bg-slate-50 py-20">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl font-bold text-center text-zinc-900 dark:text-white mb-12">
+          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
             Everything You Need to Reduce No-Shows
           </h2>
           
@@ -203,10 +220,10 @@ export default function PricingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">
+            <h2 className="mb-4 text-3xl font-bold text-slate-900">
               Trusted by Healthcare Providers Across India
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-slate-600">
               Join hundreds of doctors and clinics saving thousands each month
             </p>
           </div>
@@ -214,24 +231,24 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="p-6">
               <div className="text-4xl font-bold text-green-600 mb-2">70%</div>
-              <p className="text-zinc-600 dark:text-zinc-400">Average reduction in no-shows</p>
+              <p className="text-slate-600">Average reduction in no-shows</p>
             </div>
             <div className="p-6">
               <div className="text-4xl font-bold text-green-600 mb-2">₹2.5L+</div>
-              <p className="text-zinc-600 dark:text-zinc-400">Average monthly revenue recovered</p>
+              <p className="text-slate-600">Average monthly revenue recovered</p>
             </div>
             <div className="p-6">
               <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
-              <p className="text-zinc-600 dark:text-zinc-400">Active clinics using PatientFlow AI</p>
+              <p className="text-slate-600">Active clinics using PatientFlow AI</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
+      <section className="bg-slate-50 py-20">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-center text-zinc-900 dark:text-white mb-12">
+          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
             Frequently Asked Questions
           </h2>
           
@@ -263,10 +280,10 @@ export default function PricingPage() {
       {/* CTA */}
       <section className="py-20 text-center">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-6">
+          <h2 className="mb-6 text-3xl font-bold text-slate-900">
             Ready to Eliminate No-Shows?
           </h2>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400 mb-8">
+          <p className="mb-8 text-lg text-slate-600">
             Start your free {FREE_TRIAL_DAYS}-day trial today. No credit card required.
           </p>
           <Link href="/signup?plan=starter">
@@ -274,16 +291,16 @@ export default function PricingPage() {
               Start Your Free Trial
             </Button>
           </Link>
-          <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-4 text-sm text-slate-500">
             No credit card required • {FREE_TRIAL_DAYS}-day free trial • Cancel anytime
           </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-zinc-50 dark:bg-zinc-900/50">
+      <footer className="bg-slate-50 py-12">
         <div className="container mx-auto px-4">
-          <div className="border-t border-zinc-200 dark:border-zinc-800 pt-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-500">
             <p>&copy; 2024 PatientFlow AI. All rights reserved.</p>
           </div>
         </div>
@@ -294,13 +311,13 @@ export default function PricingPage() {
 
 function FeatureCard({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 shrink-0">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
         <Icon className="h-6 w-6" />
       </div>
       <div>
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">{title}</h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+        <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
+        <p className="text-sm text-slate-600">{description}</p>
       </div>
     </div>
   )
@@ -308,9 +325,18 @@ function FeatureCard({ icon: Icon, title, description }: { icon: any; title: str
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <div className="border-b border-zinc-200 dark:border-zinc-800 pb-6">
-      <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-3">{question}</h3>
-      <p className="text-zinc-600 dark:text-zinc-400">{answer}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 className="mb-3 text-lg font-semibold text-slate-900">{question}</h3>
+      <p className="text-slate-600">{answer}</p>
+    </div>
+  )
+}
+
+function PricingSignal({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
+      <p className="text-lg font-semibold text-slate-900">{value}</p>
+      <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{label}</p>
     </div>
   )
 }

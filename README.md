@@ -222,6 +222,7 @@ Deployment guardrails: `docs/DEPLOYMENT_CHECKLIST.md`.
 - Deployment checklist: `docs/DEPLOYMENT_CHECKLIST.md`
 - Schema drift notes: `docs/SCHEMA_DRIFT_NOTES.md`
 - Co-founder checklist: `docs/COFOUNDER-CHECKLIST.md`
+- Product brief: `docs/PRODUCT_BRIEF.md`
 
 ## Ownership
 

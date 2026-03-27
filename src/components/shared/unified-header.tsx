@@ -51,11 +51,11 @@ export function UnifiedHeader({
   }
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/95 backdrop-blur-sm shadow-md' 
-        : 'bg-white border-b border-gray-100'
-    }`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white/90 shadow-md backdrop-blur-md' : 'border-b border-emerald-100 bg-white/80 backdrop-blur-md'
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -70,12 +70,10 @@ export function UnifiedHeader({
                />
             </div>
             <div>
-              <h1 className={`font-bold text-2xl ${
-                'text-green-900'
-              }`}>
+              <h1 className="text-2xl font-bold text-emerald-900">
                 {logoText || config.logo}
               </h1>
-              <p className="text-sm text-gray-600 font-medium">{config.tagline}</p>
+              <p className="text-sm font-medium text-slate-600">{config.tagline}</p>
             </div>
           </Link>
 
@@ -85,7 +83,7 @@ export function UnifiedHeader({
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-base font-bold text-zinc-900 transition-colors hover:text-${config.primaryColor}-600 ${
+                className={`text-base font-bold text-zinc-900 transition-colors hover:text-emerald-600 ${
                   item.external ? 'flex items-center gap-1' : ''
                 }`}
                 {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
@@ -97,7 +95,7 @@ export function UnifiedHeader({
             
             <Link href={config.ctaHref}>
               <Button 
-                className={`bg-${config.primaryColor}-600 hover:bg-${config.primaryColor}-700`}
+                className="bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-500"
                 size="sm"
               >
                 <Phone className="w-4 h-4 mr-2" />
@@ -121,13 +119,13 @@ export function UnifiedHeader({
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="border-t border-emerald-100 py-4 md:hidden">
             <nav className="flex flex-col gap-3">
               {navItems.map((item: any) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`flex items-center justify-between py-2 px-3 rounded-lg text-zinc-700 hover:bg-${config.primaryColor}-50 transition-colors`}
+                  className="flex items-center justify-between rounded-lg px-3 py-2 text-zinc-700 transition-colors hover:bg-emerald-50"
                   {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
                 >
                   <span className="font-medium">{item.label}</span>
@@ -137,7 +135,7 @@ export function UnifiedHeader({
               
               <Link href={config.ctaHref} className="w-full">
                 <Button 
-                  className={`w-full bg-${config.primaryColor}-600 hover:bg-${config.primaryColor}-700 mt-2`}
+                  className="mt-2 w-full bg-emerald-600 text-white hover:bg-emerald-500"
                   size="sm"
                 >
                   <Phone className="w-4 h-4 mr-2" />

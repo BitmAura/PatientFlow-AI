@@ -6,7 +6,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
+    <footer className="border-t border-emerald-100 bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand Column */}
@@ -20,11 +20,11 @@ export function Footer() {
                    className="object-contain"
                  />
               </div>
-              <span className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              <span className="text-2xl font-bold tracking-tight text-zinc-900">
                 PatientFlow AI
               </span>
             </Link>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-xs">
+            <p className="max-w-xs text-sm text-zinc-600">
               Automated appointment management and WhatsApp reminders for modern healthcare practices.
             </p>
             <div className="flex space-x-4">
@@ -37,7 +37,7 @@ export function Footer() {
 
           {/* Product Column */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">Product</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">Product</h3>
             <ul className="mt-4 space-y-3">
               <FooterLink href="/how-it-works">How it Works</FooterLink>
               <FooterLink href="/how-recall-works">Recall System</FooterLink>
@@ -49,7 +49,7 @@ export function Footer() {
 
           {/* Company Column */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">Company</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">Company</h3>
             <ul className="mt-4 space-y-3">
               <FooterLink href="/about">About Us</FooterLink>
               <FooterLink href="/careers">Careers</FooterLink>
@@ -60,17 +60,17 @@ export function Footer() {
 
           {/* Contact Column */}
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white uppercase tracking-wider">Contact</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">Contact</h3>
             <ul className="mt-4 space-y-3">
-              <li className="flex items-start gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+              <li className="flex items-start gap-3 text-sm text-zinc-600">
                 <MapPin className="h-5 w-5 shrink-0 text-green-600" />
                 <span>123 Healthcare Ave,<br />Medical District, NY 10001</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+              <li className="flex items-center gap-3 text-sm text-zinc-600">
                 <Phone className="h-5 w-5 shrink-0 text-green-600" />
                 <span>+1 (555) 123-4567</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+              <li className="flex items-center gap-3 text-sm text-zinc-600">
                 <Mail className="h-5 w-5 shrink-0 text-green-600" />
                 <span>hello@patientflow.ai</span>
               </li>
@@ -78,11 +78,11 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="mt-12 border-t border-zinc-200 dark:border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 md:flex-row">
+          <p className="text-sm text-zinc-500">
             &copy; {currentYear} PatientFlow AI. All rights reserved.
           </p>
-          <div className="flex space-x-6 text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="flex space-x-6 text-sm text-zinc-500">
             <Link href="/privacy" className="hover:text-green-600 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-green-600 transition-colors">Terms of Service</Link>
           </div>
@@ -96,7 +96,7 @@ function SocialLink({ href, icon: Icon }: { href: string; icon: any }) {
   return (
     <Link 
       href={href} 
-      className="text-zinc-400 hover:text-green-600 transition-colors"
+      className="text-zinc-400 transition-colors hover:text-green-600"
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -110,7 +110,7 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     <li>
       <Link 
         href={href} 
-        className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-green-600 dark:hover:text-green-500 transition-colors"
+        className="text-sm text-zinc-600 transition-colors hover:text-green-600"
       >
         {children}
       </Link>

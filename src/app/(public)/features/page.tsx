@@ -62,14 +62,15 @@ export default function FeaturesPage() {
   ]
 
   return (
-    <div className="bg-white dark:bg-zinc-950">
+    <div className="bg-white">
       {/* Hero */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
+        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-6">
+          <h1 className="mb-6 text-4xl font-bold text-zinc-900 md:text-5xl">
             Powerful Features for Modern Clinics
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-xl text-zinc-600">
             Everything you need to streamline operations, reduce no-shows, and grow your healthcare practice.
           </p>
         </div>
@@ -80,12 +81,12 @@ export default function FeaturesPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900">
-                <div className="h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 mb-6">
+              <div key={index} className="rounded-2xl border border-zinc-200 bg-white p-8 transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
                   <feature.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">{feature.title}</h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <h3 className="mb-3 text-xl font-bold text-zinc-900">{feature.title}</h3>
+                <p className="leading-relaxed text-zinc-600">
                   {feature.description}
                 </p>
               </div>
