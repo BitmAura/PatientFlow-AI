@@ -1,39 +1,29 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
 /**
- * Keep middleware minimal for Vercel Edge — avoid forwarding `request.headers` into
- * `NextResponse.next({ request: ... })` (known to cause MIDDLEWARE_INVOCATION_FAILED on some deployments).
- * Cron / webhook auth stays in API route handlers.
+ * Only run on /portal/* so the Edge runtime never touches "/" or other pages.
+ * Global MIDDLEWARE_INVOCATION_FAILED on Vercel often came from matcher/bundle issues affecting all routes.
  */
 export function middleware(request: NextRequest) {
-  try {
-    if (
-      request.nextUrl.pathname.startsWith('/portal') &&
-      !request.nextUrl.pathname.startsWith('/portal/login')
-    ) {
-      const portalSession = request.cookies.get('portal_session')
-      if (!portalSession) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/portal/login'
-        url.search = ''
-        return NextResponse.redirect(url)
-      }
-    }
+  const { pathname } = request.nextUrl
 
-    const response = NextResponse.next()
-    response.headers.set('X-Frame-Options', 'DENY')
-    response.headers.set('X-Content-Type-Options', 'nosniff')
-    response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-    return response
-  } catch (error) {
-    console.error('[middleware]', error)
+  if (pathname.startsWith('/portal/login')) {
     return NextResponse.next()
   }
+
+  if (pathname.startsWith('/portal')) {
+    const portalSession = request.cookies.get('portal_session')
+    if (!portalSession) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/portal/login'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|icon.png|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/portal', '/portal/:path*'],
 }
