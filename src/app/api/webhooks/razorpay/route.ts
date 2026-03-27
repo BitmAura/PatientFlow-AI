@@ -1,33 +1,217 @@
+/**
+ * POST /api/webhooks/razorpay
+ * Razorpay webhook handler for payment events
+ * 
+ * Events handled:
+ * - payment.authorized: Payment is authorized (may need capture)
+ * - payment.failed: Payment failed
+ * - payment.captured: Payment captured successfully
+ * - subscription events: For recurring subscriptions
+ */
+
 import { NextResponse } from 'next/server'
-import { handleSubscriptionWebhook } from '@/lib/services/subscription'
 import crypto from 'crypto'
+import { createClient } from '@/lib/supabase/server'
+
+// Types for Razorpay webhook payload
+interface RazorpayPaymentEntity {
+  id: string
+  entity: string
+  amount: number
+  currency: string
+  status: 'authorized' | 'failed' | 'captured'
+  method: string
+  description?: string
+  order_id?: string
+  notes?: Record<string, string>
+  error_code?: string
+  error_description?: string
+}
+
+interface RazorpayWebhookPayload {
+  event: string
+  created_at: number
+  payload?: {
+    payment?: {
+      entity: RazorpayPaymentEntity
+    }
+    subscription?: {
+      entity: Record<string, unknown>
+    }
+  }
+}
+
+/**
+ * Verify Razorpay webhook signature
+ */
+function verifyWebhookSignature(body: string, signature: string): boolean {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET
+  if (!secret) {
+    console.error('[Razorpay Webhook] RAZORPAY_WEBHOOK_SECRET not configured')
+    return false
+  }
+
+  const expectedSignature = crypto.createHmac('sha256', secret).update(body).digest('hex')
+
+  const isValid = expectedSignature === signature
+
+  if (!isValid) {
+    console.warn('[Razorpay Webhook] Signature mismatch', {
+      provided: signature,
+      expected: expectedSignature,
+    })
+  }
+
+  return isValid
+}
+
+/**
+ * Handle payment.authorized event
+ */
+async function handlePaymentAuthorized(payment: RazorpayPaymentEntity) {
+  console.log('[Razorpay Webhook] Payment authorized:', payment.id)
+  // Most payment methods are automatically captured, so this is usually a no-op
+  // For manual capture methods, you might want to auto-capture here
+}
+
+/**
+ * Handle payment.captured event
+ */
+async function handlePaymentCaptured(payment: RazorpayPaymentEntity) {
+  try {
+    console.log('[Razorpay Webhook] Payment captured:', payment.id, 'Amount:', payment.amount)
+
+    // If payment has appointment notes, we could update appointment status
+    // This is optional since the confirm endpoint already checks payment status
+    if (payment.notes?.clinic_id && payment.order_id) {
+      const supabase = createClient()
+
+      // Find appointment with matching deposit_payment_id
+      const { data: appointment, error: fetchError } = await supabase
+        .from('appointments')
+        .select('id, deposit_status')
+        .eq('clinic_id', payment.notes.clinic_id as string)
+        .eq('deposit_payment_id', payment.id)
+        .single()
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('[Razorpay Webhook] Error fetching appointment:', fetchError)
+        return
+      }
+
+      if (appointment && (appointment as any).deposit_status !== 'paid') {
+        // Update appointment to mark deposit as paid
+        await (supabase as any)
+          .from('appointments')
+          .update({ deposit_status: 'paid' })
+          .eq('id', (appointment as any).id)
+
+        console.log('[Razorpay Webhook] Updated appointment deposit status:', (appointment as any).id)
+      }
+    }
+  } catch (error) {
+    console.error('[Razorpay Webhook] Error handling payment.captured:', error)
+    // Don't throw - webhook handler should be resilient
+  }
+}
+
+/**
+ * Handle payment.failed event
+ */
+async function handlePaymentFailed(payment: RazorpayPaymentEntity) {
+  console.warn('[Razorpay Webhook] Payment failed:', payment.id, {
+    error_code: payment.error_code,
+    error_description: payment.error_description,
+  })
+
+  // Optionally send notification to customer or update logs
+  // For now, just log it - the appointment won't be confirmed until payment succeeds
+}
+
+/**
+ * Handle subscription events (for recurring subscriptions)
+ */
+async function handleSubscriptionEvent(event: string, payload: Record<string, unknown>) {
+  console.log('[Razorpay Webhook] Subscription event:', event)
+  // Handle subscription.activated, subscription.charged, etc.
+  // This is for clinic subscription management, not booking deposits
+}
 
 export async function POST(request: Request) {
-  const body = await request.text() // Read as text for signature verification
-  const signature = request.headers.get('x-razorpay-signature')
+  try {
+    // Read body as text for signature verification
+    const body = await request.text()
+    const signature = request.headers.get('x-razorpay-signature')
 
-  if (!signature) {
-    return new NextResponse('Missing signature', { status: 400 })
+    if (!signature) {
+      console.warn('[Razorpay Webhook] Missing signature header')
+      return NextResponse.json(
+        { error: 'Missing signature' },
+        { status: 400 }
+      )
+    }
+
+    // Verify signature
+    if (!verifyWebhookSignature(body, signature)) {
+      console.error('[Razorpay Webhook] Invalid signature')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+
+    // Parse payload
+    const payload: RazorpayWebhookPayload = JSON.parse(body)
+
+    console.log('[Razorpay Webhook] Received event:', payload.event)
+
+    // Route to appropriate handler
+    switch (payload.event) {
+      case 'payment.authorized':
+        if (payload.payload?.payment?.entity) {
+          await handlePaymentAuthorized(payload.payload.payment.entity)
+        }
+        break
+
+      case 'payment.captured':
+        if (payload.payload?.payment?.entity) {
+          await handlePaymentCaptured(payload.payload.payment.entity)
+        }
+        break
+
+      case 'payment.failed':
+        if (payload.payload?.payment?.entity) {
+          await handlePaymentFailed(payload.payload.payment.entity)
+        }
+        break
+
+      case 'subscription.activated':
+      case 'subscription.charged':
+      case 'subscription.completed':
+      case 'subscription.halted':
+      case 'subscription.resumed':
+      case 'subscription.pending':
+      case 'subscription.cancelled':
+        if (payload.payload?.subscription?.entity) {
+          await handleSubscriptionEvent(payload.event, payload.payload.subscription.entity as Record<string, unknown>)
+        }
+        break
+
+      default:
+        console.log('[Razorpay Webhook] Unhandled event:', payload.event)
+    }
+
+    // Always return 200 to Razorpay (webhook is idempotent)
+    return NextResponse.json(
+      { received: true },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error('[Razorpay Webhook] Error processing webhook:', error)
+    // Return 200 anyway to prevent Razorpay retries for processing errors
+    return NextResponse.json(
+      { received: true, error: 'Processing error' },
+      { status: 200 }
+    )
   }
-
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET
-  if (!webhookSecret) {
-    console.error('RAZORPAY_WEBHOOK_SECRET is not set')
-    return new NextResponse('Server configuration error', { status: 500 })
-  }
-
-  // Verify signature
-  const expectedSignature = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(body)
-    .digest('hex')
-
-  if (signature !== expectedSignature) {
-    return new NextResponse('Invalid signature', { status: 400 })
-  }
-
-  const event = JSON.parse(body)
-  await handleSubscriptionWebhook(event)
-
-  return NextResponse.json({ received: true })
 }

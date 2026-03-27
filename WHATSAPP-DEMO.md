@@ -1,91 +1,229 @@
-# 🚀 WhatsApp Automation Demo
+Refactor the application architecture for a SaaS product called "PatientFlow AI".
 
-## What We've Built
+Goal:
+Make the system multi-tenant, scalable, and independent of WhatsApp providers.
 
-### 1. **Simple Setup Process**
-✅ **Quick Setup (Recommended)**: Users just enter their phone number and click "Enable WhatsApp Reminders"
-✅ **Advanced Setup**: For users with existing WhatsApp Business API credentials
-✅ **Step-by-step wizard**: Guides users through the entire process
+Requirements:
 
-### 2. **User-Friendly Interface**
-✅ **Clean design**: Modern, professional interface
-✅ **Visual feedback**: Progress indicators and success messages
-✅ **Help tooltips**: Contextual help for each field
-✅ **Copy-to-clipboard**: Easy credential copying
+1. Multi-Clinic Architecture:
+- Each clinic has isolated data (leads, patients, appointments)
+- Use clinic_id for scoping across all tables
 
-### 3. **Comprehensive Documentation**
-✅ **Simple setup guide**: 2-minute setup for non-technical users
-✅ **Troubleshooting guide**: Common issues and solutions
-✅ **API key management**: Secure credential handling
+2. Messaging Abstraction Layer:
+- Create a unified messaging service
+- Support providers: Gupshup (primary), Meta Cloud API (fallback)
 
-## How It Works
+3. Structure:
+- /services/messaging/
+    - sendMessage()
+    - receiveWebhook()
+    - verifyNumber()
+- /services/clinic/
+- /services/leads/
+- /services/appointments/
 
-### For Non-Technical Users:
-1. **Enter phone number**: Just type your clinic's WhatsApp number
-2. **Click "Enable WhatsApp Reminders"**: System automatically creates WhatsApp Business account
-3. **Done!**: Start sending automated appointment reminders
+4. Provider Logic:
+- If clinic.provider = "gupshup" → use Gupshup API
+- Else → fallback to Meta API
 
-### For Technical Users:
-1. **Choose "Advanced Setup"**: Use existing Meta Developer account
-2. **Enter API credentials**: Phone Number ID, Access Token, Webhook Secret
-3. **Configure webhook**: Optional advanced settings
-4. **Test connection**: Built-in validation
+5. Ensure:
+- Loose coupling (easy provider switch)
+- Clean service-based architecture
 
-## Key Features
+Tech:
+- TypeScript
+- Next.js backend routes
 
-### 🎯 **Automatic Appointment Reminders**
-- 24-hour advance notifications
-- Booking confirmations
-- Follow-up messages
-- No-show prevention
+Implement WhatsApp integration module for PatientFlow AI.
 
-### 📱 **WhatsApp Integration**
-- Works with any smartphone
-- No app installation required
-- Messages appear in your chat history
-- Patients can reply directly to you
+Requirements:
 
-### 🔒 **Security & Compliance**
-- 100% HIPAA compliant
-- End-to-end encryption
-- No data sharing with third parties
-- Secure credential storage
+1. Gupshup Integration:
+- Send message API
+- Receive webhook handler
+- OTP verification flow
+- Store app_id, api_key per clinic
 
-### 📊 **Analytics & Monitoring**
-- Message delivery tracking
-- Response rate monitoring
-- Connection health status
-- Usage statistics
+2. Meta Cloud API (fallback):
+- Send message API
+- Webhook support
 
-## Benefits for Clinics
+3. Database:
+Each clinic must store:
+- phone_number
+- provider (gupshup/meta)
+- credentials (securely)
 
-### 📈 **Reduce No-Shows by 75%**
-Gentle reminders significantly reduce missed appointments
+4. Webhook Flow:
+- Receive incoming message
+- Identify clinic via phone number
+- Route to internal message handler
 
-### ⏰ **Save 2 Hours Daily**
-Automated messaging eliminates manual phone calls
+5. Error Handling:
+- Retry failed messages
+- Log all message activity
 
-### 💰 **Increase Revenue**
-More confirmed appointments = more revenue
+6. Logging:
+- Save all messages in message_logs table
 
-### 😊 **Improve Patient Experience**
-Patients appreciate convenient WhatsApp reminders
+Goal:
+Reliable messaging layer independent of business logic.
 
-## Getting Started
+Build automation engine for PatientFlow AI.
 
-1. **Navigate to Settings > WhatsApp** in your dashboard
-2. **Choose your setup method** (Quick or Advanced)
-3. **Follow the wizard** step-by-step
-4. **Start sending reminders** automatically
+Goal:
+Automate patient communication lifecycle.
 
-## Support
+Flows:
 
-Need help? We've got you covered:
-- 📧 Email: support@noshowkiller.com
-- 💬 Live chat in dashboard
-- 📞 Phone: 1-800-NO-SHOWS
-- 📚 Comprehensive documentation
+1. New Lead:
+- Trigger: new lead created
+- Action: send instant WhatsApp reply
 
----
+2. Booking Flow:
+- Capture patient info
+- Suggest appointment slots
+- Confirm booking
 
-**Ready to reduce no-shows and save time? Start your WhatsApp automation journey today!** 🚀
+3. Reminder Engine:
+- 24 hours before appointment
+- 3 hours before appointment
+
+4. No-show Recovery:
+- If status = no-show → send reschedule message
+
+5. Recall Engine:
+- Identify inactive patients (30/60 days)
+- Send reactivation messages
+
+6. Follow-up:
+- After appointment → feedback + review request
+
+Structure:
+- /services/automation/
+- Event-driven triggers
+
+Ensure:
+- Configurable per clinic
+- Logs for each automation action
+
+Build onboarding wizard for PatientFlow AI.
+
+Steps:
+
+1. Clinic Details:
+- Name
+- Doctor name
+- Services
+- Working hours
+
+2. WhatsApp Setup:
+- Enter phone number
+- OTP verification via Gupshup
+
+3. Template Setup:
+- Welcome message
+- Reminder message
+- No-show message
+- Recall message
+
+4. Test System:
+- Send test message
+
+5. Go Live:
+- Mark clinic as active
+
+UI:
+- Step-by-step wizard
+- Progress indicator
+
+Goal:
+Non-technical users can complete setup easily.
+
+Enhance dashboard for PatientFlow AI to show business impact.
+
+Add:
+
+1. Metrics:
+- Total Leads
+- Booked Appointments
+- No-Shows
+- Recovered Patients
+- Revenue Generated (calculated)
+
+2. Funnel:
+- Leads → Booked → Completed
+
+3. Alerts:
+- Unfollowed leads
+- Missed appointments
+
+4. Graphs:
+- Weekly trends
+- Conversion rates
+
+Goal:
+Make clinic owner clearly see ROI.
+
+Build central message handler system.
+
+Flow:
+
+1. Receive webhook from provider
+2. Identify clinic using phone_number
+3. Identify user (existing patient or new lead)
+4. Route message:
+
+- New → create lead
+- Booking → schedule appointment
+- Existing → continue conversation
+
+5. Trigger automation engine
+
+Structure:
+- /services/messages/handler.ts
+
+Ensure:
+- Scalable
+- Stateless where possible
+- Clean separation of concerns
+
+Design scalable database schema for PatientFlow AI.
+
+Tables:
+
+1. clinics
+2. staff
+3. leads
+4. patients
+5. appointments
+6. message_logs
+7. automation_logs
+8. whatsapp_configs
+
+Requirements:
+- All tables must include clinic_id
+- Apply RLS for multi-tenancy
+- Ensure performance for large data
+
+Goal:
+Support 100+ clinics without issues. (note already we have sql schema check and create new schemas)
+
+Implement secure multi-tenant system.
+
+Requirements:
+
+1. Row Level Security:
+- Clinics can only access their data
+
+2. Staff Access:
+- Role-based permissions
+
+3. API Protection:
+- Validate clinic_id on all requests
+
+4. Webhooks:
+- Verify provider signatures
+
+Goal:
+Prevent data leakage across clinics.
