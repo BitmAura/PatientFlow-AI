@@ -2,8 +2,8 @@ import {
   Calendar, 
   MessageCircle, 
   CreditCard, 
-  Mail, 
   Database,
+  Clock3,
   ArrowRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -13,35 +13,35 @@ export default function IntegrationsPage() {
   const integrations = [
     {
       icon: MessageCircle,
-      name: "WhatsApp Business API",
+      name: "WhatsApp Providers (Gupshup + Meta)",
       category: "Communication",
-      description: "Connect your official WhatsApp Business number to send automated reminders and chat with patients.",
+      description: "Connect your clinic number and run outbound reminders plus inbound reply handling through supported WhatsApp providers.",
       popular: true
     },
     {
       icon: Calendar,
-      name: "Google Calendar",
+      name: "Calendar Actions",
       category: "Scheduling",
-      description: "Two-way sync with Google Calendar. Appointments booked in PatientFlow AI appear in Google Calendar, and vice versa.",
+      description: "Generate calendar actions for confirmed appointments (Google/Outlook links and .ics download) from booking flows.",
       popular: true
     },
     {
       icon: CreditCard,
-      name: "Stripe / Razorpay",
+      name: "Razorpay Billing",
       category: "Payments",
-      description: "Accept secure online payments for deposits or full consultations directly through your booking page."
+      description: "Manage subscription lifecycle, plan upgrades, and payment webhooks using Razorpay."
     },
     {
       icon: Database,
-      name: "Electronic Health Records (EHR)",
+      name: "Supabase (Auth + Postgres + RLS)",
       category: "Data",
-      description: "Sync patient data with popular EHR systems (Coming Soon). Import/Export patient lists easily."
+      description: "Clinic data, tenant isolation, and authenticated application APIs are powered through Supabase."
     },
     {
-      icon: Mail,
-      name: "Email Services",
-      category: "Communication",
-      description: "Send professional HTML email confirmations and marketing campaigns to your patient list."
+      icon: Clock3,
+      name: "Vercel Cron Automation",
+      category: "Automation",
+      description: "Scheduled jobs execute reminder, recall, and lead follow-up processing with secure cron secret protection."
     }
   ]
 

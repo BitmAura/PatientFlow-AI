@@ -25,7 +25,7 @@ export default function HowRecallWorksPage() {
             <Step 
               number="01"
               title="Identify missed patients and leads"
-              description="PatientFlow AI quietly scans your records to find opportunities you might have missed. We look for patients overdue for check-ups and inquiries that haven't been fully followed up."
+              description="Scheduled clinic workflows evaluate appointments and patient activity windows to surface recall and follow-up opportunities."
               points={[
                 "Patients who didn’t return",
                 "Leads that were not followed up"
@@ -36,7 +36,7 @@ export default function HowRecallWorksPage() {
             <Step 
               number="02"
               title="Automatic WhatsApp follow-ups"
-              description="We send friendly, personalized messages to these patients. It looks and feels exactly like a message from your front desk, maintaining your clinic&apos;s professional image."
+              description="Configured reminder and recovery messages are sent through your connected WhatsApp provider with template-controlled content."
               points={[
                 "Gentle, professional reminders",
                 "No spam"
@@ -46,11 +46,11 @@ export default function HowRecallWorksPage() {
             />
             <Step 
               number="03"
-              title="Staff steps in only when needed"
-              description="Your team doesn&apos;t need to chase anyone. PatientFlow AI notifies your staff only when a patient replies or if a specific case needs personal attention."
+              title="Staff handles responses and conversions"
+              description="Inbound replies are captured, and teams can act through dashboard workflows to continue conversations, notify waitlist patients, and convert follow-ups."
               points={[
-                "Missed responses",
-                "High-risk cases"
+                "Inbound message handling",
+                "Waitlist notify/convert actions"
               ]}
               icon={Users}
               align="left"
@@ -89,8 +89,8 @@ export default function HowRecallWorksPage() {
                 <ul className="space-y-4">
                   {[
                     "Messages are sent from your clinic&apos;s own WhatsApp number",
-                    "Your number is upgraded to the official Business platform",
-                    "All chats and replies appear directly inside PatientFlow AI",
+                    "Provider-based verification and webhook handling are configured centrally",
+                    "Inbound and outbound message logs are captured for operational visibility",
                     "Quick setup via a one-time code or phone call",
                     "Your phone doesn&apos;t need to be online for messages to send"
                   ].map((point, i) => (

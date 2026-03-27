@@ -22,7 +22,7 @@ export default function FeaturesPage() {
     {
       icon: Clock,
       title: "Smart Scheduling",
-      description: "Intelligent booking system that fills gaps in your calendar and optimizes your daily schedule. Syncs with Google Calendar."
+      description: "Clinic booking flows with doctor/service availability and slot selection to reduce manual coordination."
     },
     {
       icon: Shield,
@@ -32,7 +32,7 @@ export default function FeaturesPage() {
     {
       icon: Zap,
       title: "Instant Recovery",
-      description: "Automatically rebook cancelled slots by notifying waitlisted patients instantly. Never let a slot go to waste."
+      description: "Staff-assisted waitlist recovery tools to notify matched patients and convert open slots into confirmed appointments."
     },
     {
       icon: Smartphone,
@@ -42,7 +42,7 @@ export default function FeaturesPage() {
     {
       icon: CheckCircle2,
       title: "Review Booster",
-      description: "Automatically request reviews from satisfied patients to boost your online reputation and Google Maps ranking."
+      description: "Post-visit follow-up messages can request feedback and reviews with clinic-controlled templates."
     },
     {
       icon: Calendar,
