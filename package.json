@@ -8,9 +8,6 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "db:migrate": "supabase db push",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > lib/supabase/types.ts"
@@ -93,18 +90,10 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
-    "@types/supertest": "^7.2.0",
-    "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "supertest": "^7.2.2",
-    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^5.3.3"
   }
 }
