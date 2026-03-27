@@ -24,32 +24,32 @@ export default function HowItWorksPage() {
           <div className="space-y-24">
             <Step 
               number="01"
-              title="Connect Your Calendar"
-              description="Link your existing practice management software or Google Calendar. We sync appointments in real-time so you never have to enter data twice."
+              title="Connect Your Clinic WhatsApp Setup"
+              description="Set up your clinic WhatsApp configuration and reminder preferences in a guided flow so automation can start without changing your front-desk process."
               icon={Calendar}
               align="left"
               points={[
-                'No duplicate data entry for staff',
-                'Real-time availability sync',
-                'Fewer scheduling conflicts',
+                'Works with your clinic number setup',
+                'Reminder toggles and template control',
+                'Fast onboarding for staff teams',
               ]}
             />
             <Step 
               number="02"
-              title="Customize Your Reminders"
-              description="Set up your WhatsApp message templates. Choose when to send reminders (e.g., 24 hours before), what to say, and add quick-action buttons for confirming or rescheduling."
+              title="Automate Reminder and Recovery Flows"
+              description="PatientFlow AI runs scheduled WhatsApp communication across the appointment lifecycle: pre-visit reminders, no-show recovery, and post-visit follow-ups."
               icon={MessageCircle}
               align="right"
               points={[
                 'Personalized reminders in clinic tone',
-                'One-tap confirm or reschedule',
-                'Automated no-show prevention cadence',
+                '24h and near-time reminder cadence',
+                'Automated no-show prevention and recovery',
               ]}
             />
             <Step 
               number="03"
-              title="Watch Revenue Grow"
-              description="Sit back as PatientFlow AI handles the communication. Patients confirm instantly, and cancelled slots are automatically offered to your waiting list."
+              title="Track Outcomes and Close the Loop"
+              description="Your team monitors replies and outcomes in the dashboard, then uses waitlist and follow-up tools to recover missed opportunities and improve monthly conversion."
               icon={TrendingUp}
               align="left"
               points={[
@@ -62,12 +62,21 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* Integration List */}
+      {/* Operations Stack */}
       <section className="border-y border-zinc-100 bg-zinc-50 py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-12 text-3xl font-bold text-zinc-900">Works with your favorite tools</h2>
+          <h2 className="mb-12 text-3xl font-bold text-zinc-900">Built Around Real Clinic Workflows</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto opacity-70">
-            {['Google Calendar', 'Outlook', 'Cliniko', 'Jane App', 'Mindbody', 'Practice Better', 'SimplePractice', 'DrChrono'].map((tool) => (
+            {[
+              'WhatsApp Messaging',
+              'Reminder Settings',
+              'No-Show Recovery',
+              'Waitlist Management',
+              'Booking Pages',
+              'Patient Follow-ups',
+              'Impact Dashboard',
+              'Clinic Team Access',
+            ].map((tool) => (
               <div key={tool} className="flex items-center justify-center rounded-xl bg-white p-6 font-semibold text-zinc-700 shadow-sm">
                 {tool}
               </div>
@@ -91,7 +100,7 @@ export default function HowItWorksPage() {
             />
             <FAQItem 
               question="What happens if a patient replies?" 
-              answer="Replies appear directly in your PatientFlow AI dashboard. You can also configure them to forward to your email or personal phone."
+              answer="Replies are captured in PatientFlow AI and can trigger your follow-up workflows. Your staff can continue handling responses from the dashboard process."
             />
             <FAQItem 
               question="Is there a setup fee?" 
