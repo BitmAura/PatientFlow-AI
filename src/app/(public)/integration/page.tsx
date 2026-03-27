@@ -46,14 +46,15 @@ export default function IntegrationsPage() {
   ]
 
   return (
-    <div className="bg-white dark:bg-zinc-950">
+    <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/50">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
+        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-6">
+          <h1 className="mb-6 text-4xl font-bold text-zinc-900 md:text-5xl">
             Seamless Integrations
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-xl text-zinc-600">
             Connect PatientFlow AI with the tools you already use to run your clinic.
           </p>
         </div>
@@ -64,24 +65,27 @@ export default function IntegrationsPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {integrations.map((item, index) => (
-              <div key={index} className="flex flex-col p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:shadow-lg transition-shadow bg-white dark:bg-zinc-900 relative overflow-hidden">
+              <div
+                key={index}
+                className="relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+              >
                 {item.popular && (
                   <div className="absolute top-4 right-4 px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wide">
                     Popular
                   </div>
                 )}
-                <div className="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 mb-6">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                   <item.icon className="h-6 w-6" />
                 </div>
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white">{item.name}</h3>
+                  <h3 className="text-xl font-bold text-zinc-900">{item.name}</h3>
                   <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{item.category}</span>
                 </div>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6 flex-1">
+                <p className="mb-6 flex-1 leading-relaxed text-zinc-600">
                   {item.description}
                 </p>
                 <Button variant="outline" className="w-full justify-between group" asChild>
-                  <Link href="/signup">
+                  <Link href="/book-demo">
                     Connect
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
@@ -93,16 +97,16 @@ export default function IntegrationsPage() {
       </section>
       
       {/* CTA */}
-      <section className="py-24 bg-zinc-900 text-white">
+      <section className="bg-zinc-900 py-24 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">
             Don&apos;t see your favorite tool?
           </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto mb-10">
+          <p className="mx-auto mb-10 max-w-2xl text-zinc-400">
             We are constantly adding new integrations. Contact our support team to request a specific integration for your clinic.
           </p>
-          <Button size="lg" variant="secondary" className="h-14 px-8" asChild>
-            <Link href="/contact">Request Integration</Link>
+          <Button size="lg" variant="secondary" className="h-14 rounded-full px-8" asChild>
+            <Link href="/book-demo">Request Integration</Link>
           </Button>
         </div>
       </section>

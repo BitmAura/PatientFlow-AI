@@ -4,14 +4,15 @@ import Link from 'next/link'
 
 export default function HowRecallWorksPage() {
   return (
-    <div className="bg-white dark:bg-black min-h-screen">
+    <div className="min-h-screen bg-white text-zinc-900">
       {/* Hero */}
-      <section className="py-20 bg-zinc-50 dark:bg-zinc-900/30">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
+        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4 text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight text-zinc-900 md:text-6xl">
             How PatientFlow AI Works
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-xl text-zinc-600">
             A simple, automated system to bring your patients back—without adding work for your staff.
           </p>
         </div>
@@ -71,18 +72,18 @@ export default function HowRecallWorksPage() {
       </section>
 
       {/* WhatsApp Setup */}
-      <section className="py-20 border-t border-zinc-100 dark:border-zinc-800">
+      <section className="border-t border-zinc-100 py-20">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">
+            <h2 className="mb-4 text-3xl font-bold text-zinc-900">
               Simple, Secure WhatsApp Connection
             </h2>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            <p className="text-lg text-zinc-600">
               We connect your clinic&apos;s existing number to the official WhatsApp Business platform.
             </p>
           </div>
 
-          <div className="bg-green-50/50 dark:bg-green-900/10 rounded-3xl p-8 md:p-12 border border-green-100 dark:border-green-900/20">
+          <div className="rounded-3xl border border-green-100 bg-green-50/60 p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <ul className="space-y-4">
@@ -93,9 +94,9 @@ export default function HowRecallWorksPage() {
                     "Quick setup via a one-time code or phone call",
                     "Your phone doesn&apos;t need to be online for messages to send"
                   ].map((point, i) => (
-                    <li key={i} className="flex items-start gap-3 text-zinc-700 dark:text-zinc-300">
-                      <div className="mt-1 flex-shrink-0 w-5 h-5 rounded-full bg-green-200 dark:bg-green-800 flex items-center justify-center">
-                        <Check className="h-3 w-3 text-green-700 dark:text-green-300" />
+                    <li key={i} className="flex items-start gap-3 text-zinc-700">
+                      <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-200">
+                        <Check className="h-3 w-3 text-green-700" />
                       </div>
                       <span>{point}</span>
                     </li>
@@ -104,12 +105,12 @@ export default function HowRecallWorksPage() {
               </div>
               
               <div className="space-y-6">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm border border-green-100 dark:border-green-900/20">
-                  <h3 className="font-semibold text-zinc-900 dark:text-white mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
+                  <h3 className="mb-3 flex items-center gap-2 font-semibold text-zinc-900">
+                    <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                     Peace of Mind Guarantee
                   </h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm">
+                  <p className="text-sm leading-relaxed text-zinc-600">
                     We know your phone number is the lifeline of your practice. By upgrading it to this professional platform, you gain stability and multiple-staff access without relying on a physical phone battery or internet connection. Your number remains yours, and you can disconnect at any time.
                   </p>
                 </div>
@@ -122,7 +123,7 @@ export default function HowRecallWorksPage() {
       {/* FAQ */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-12 text-center">Frequently Asked Questions</h2>
+          <h2 className="mb-12 text-center text-3xl font-bold text-zinc-900">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <FAQItem 
               question="Can I cancel anytime?" 
@@ -149,9 +150,9 @@ export default function HowRecallWorksPage() {
       </section>
       
       {/* CTA */}
-      <section className="py-20 text-center bg-zinc-50 dark:bg-zinc-900/30">
+      <section className="bg-zinc-50 py-20 text-center">
          <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-8">
+          <h2 className="mb-8 text-3xl font-bold text-zinc-900">
             Ready to recover lost revenue?
           </h2>
           <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-10 h-14 text-lg shadow-lg shadow-green-600/20">
@@ -169,13 +170,13 @@ function Step({ number, title, description, points, icon: Icon, align }: { numbe
   return (
     <div className={`flex flex-col md:flex-row items-center gap-12 ${align === 'right' ? 'md:flex-row-reverse' : ''}`}>
       <div className="flex-1 space-y-6">
-        <div className="text-6xl font-black text-zinc-100 dark:text-zinc-800">{number}</div>
-        <h3 className="text-3xl font-bold text-zinc-900 dark:text-white">{title}</h3>
-        <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">{description}</p>
+        <div className="text-6xl font-black text-zinc-100">{number}</div>
+        <h3 className="text-3xl font-bold text-zinc-900">{title}</h3>
+        <p className="text-lg leading-relaxed text-zinc-600">{description}</p>
         <ul className="space-y-3">
           {points.map((point, i) => (
-            <li key={i} className="flex items-center gap-3 text-zinc-700 dark:text-zinc-300 font-medium">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <li key={i} className="flex items-center gap-3 font-medium text-zinc-700">
+              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                 <Check className="h-4 w-4 text-green-600" />
               </div>
               <span>{point}</span>
@@ -184,7 +185,7 @@ function Step({ number, title, description, points, icon: Icon, align }: { numbe
         </ul>
       </div>
       <div className="flex-1">
-        <div className="aspect-video rounded-2xl bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 flex items-center justify-center border border-zinc-100 dark:border-zinc-800 shadow-xl">
+        <div className="flex aspect-video items-center justify-center rounded-2xl border border-zinc-100 bg-gradient-to-br from-green-50 to-blue-50 shadow-xl">
           <Icon className="h-24 w-24 text-green-600 opacity-80" />
         </div>
       </div>
@@ -194,9 +195,9 @@ function Step({ number, title, description, points, icon: Icon, align }: { numbe
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 hover:border-green-200 dark:hover:border-green-900 transition-colors">
-      <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">{question}</h3>
-      <p className="text-zinc-600 dark:text-zinc-400">{answer}</p>
+    <div className="rounded-xl border border-zinc-200 bg-white p-6 transition-colors hover:border-green-200">
+      <h3 className="mb-2 text-lg font-semibold text-zinc-900">{question}</h3>
+      <p className="text-zinc-600">{answer}</p>
     </div>
   )
 }

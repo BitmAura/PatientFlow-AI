@@ -92,7 +92,7 @@ export default function PricingPage() {
           <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
             <PricingSignal value="70%" label="No-show reduction target" />
             <PricingSignal value="< 10s" label="Lead response benchmark" />
-            <PricingSignal value="14 days" label="Risk-free evaluation" />
+            <PricingSignal value={`${FREE_TRIAL_DAYS} days`} label="Risk-free evaluation" />
           </div>
         </div>
       </section>
@@ -297,14 +297,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-500">
-            <p>&copy; 2024 PatientFlow AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

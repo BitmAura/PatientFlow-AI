@@ -28,6 +28,11 @@ export default function HowItWorksPage() {
               description="Link your existing practice management software or Google Calendar. We sync appointments in real-time so you never have to enter data twice."
               icon={Calendar}
               align="left"
+              points={[
+                'No duplicate data entry for staff',
+                'Real-time availability sync',
+                'Fewer scheduling conflicts',
+              ]}
             />
             <Step 
               number="02"
@@ -35,6 +40,11 @@ export default function HowItWorksPage() {
               description="Set up your WhatsApp message templates. Choose when to send reminders (e.g., 24 hours before), what to say, and add quick-action buttons for confirming or rescheduling."
               icon={MessageCircle}
               align="right"
+              points={[
+                'Personalized reminders in clinic tone',
+                'One-tap confirm or reschedule',
+                'Automated no-show prevention cadence',
+              ]}
             />
             <Step 
               number="03"
@@ -42,6 +52,11 @@ export default function HowItWorksPage() {
               description="Sit back as PatientFlow AI handles the communication. Patients confirm instantly, and cancelled slots are automatically offered to your waiting list."
               icon={TrendingUp}
               align="left"
+              points={[
+                'Higher show-up rates',
+                'Better slot utilization',
+                'Visible monthly revenue recovery',
+              ]}
             />
           </div>
         </div>
@@ -67,8 +82,8 @@ export default function HowItWorksPage() {
           <h2 className="mb-12 text-center text-3xl font-bold text-zinc-900">Frequently Asked Questions</h2>
           <div className="space-y-6">
             <FAQItem 
-              question="Is PatientFlow AI HIPAA compliant?" 
-              answer="Yes, we take data security seriously. All patient data is encrypted in transit and at rest, and we sign BAAs with covered entities."
+              question="Is PatientFlow AI secure for clinic data?" 
+              answer="Yes. We use encryption in transit and at rest, role-based access controls, and tenant-isolated data policies. Workflows are designed to support Indian healthcare data handling expectations, including DISHA-aligned practices."
             />
             <FAQItem 
               question="Can I use my own WhatsApp number?" 
@@ -100,7 +115,21 @@ export default function HowItWorksPage() {
   )
 }
 
-function Step({ number, title, description, icon: Icon, align }: { number: string; title: string; description: string; icon: any; align: 'left' | 'right' }) {
+function Step({
+  number,
+  title,
+  description,
+  icon: Icon,
+  align,
+  points,
+}: {
+  number: string
+  title: string
+  description: string
+  icon: any
+  align: 'left' | 'right'
+  points: string[]
+}) {
   return (
     <div className={`flex flex-col md:flex-row items-center gap-12 ${align === 'right' ? 'md:flex-row-reverse' : ''}`}>
       <div className="flex-1 space-y-6">
@@ -108,10 +137,10 @@ function Step({ number, title, description, icon: Icon, align }: { number: strin
         <h3 className="text-3xl font-bold text-zinc-900">{title}</h3>
         <p className="text-lg leading-relaxed text-zinc-600">{description}</p>
         <ul className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <li key={i} className="flex items-center gap-3 text-zinc-600">
+          {points.map((point) => (
+            <li key={point} className="flex items-center gap-3 text-zinc-600">
               <Check className="h-5 w-5 text-green-600" />
-              <span>Key benefit point {i}</span>
+              <span>{point}</span>
             </li>
           ))}
         </ul>
