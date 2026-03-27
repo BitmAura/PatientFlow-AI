@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, Phone, ChevronRight, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ServiceToggle } from './service-toggle'
 
 interface UnifiedHeaderProps {
   currentService?: 'noshow'
@@ -108,9 +107,7 @@ export function UnifiedHeader({
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2">
-            <ServiceToggle currentService={currentService} />
-            
+          <div className="flex items-center">
             <Button
               variant="ghost"
               size="sm"

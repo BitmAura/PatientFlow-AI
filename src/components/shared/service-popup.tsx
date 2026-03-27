@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, ArrowRight, Stethoscope, Briefcase } from 'lucide-react'
+import { X, ArrowRight, Stethoscope } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -54,7 +54,7 @@ export function ServicePopup({ isOpen = true, onClose, currentPage = 'neutral' }
             PatientFlow AI
           </CardTitle>
           <CardDescription className="text-base">
-            No-show reduction and recall automation for modern clinics
+            AI automation for modern clinics
           </CardDescription>
         </CardHeader>
 
@@ -84,28 +84,6 @@ export function ServicePopup({ isOpen = true, onClose, currentPage = 'neutral' }
               
               <ArrowRight className="w-5 h-5 text-green-600 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
-
-          {/* Marketing services small block */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-blue-700" />
-                Digital Marketing Services (Optional)
-              </h4>
-            </div>
-            <p className="text-sm text-gray-600 mb-3">
-              Need patient acquisition support too? Explore SEO, ads, and local marketing services.
-            </p>
-            <a
-              href="https://wa.me/919148868413?text=Hi%2C%20I%20need%20digital%20marketing%20support%20for%20my%20clinic."
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                Explore Marketing Services
-              </Button>
-            </a>
           </div>
 
           {/* Don't show again */}
