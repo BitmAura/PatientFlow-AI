@@ -3,11 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import { processCampaignBatch } from '@/lib/campaigns/send-campaign'
 
 export async function POST(request: Request) {
+  // Validate Vercel Cron Secret - REQUIRED, always enforce
   const authHeader = request.headers.get('authorization')
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  const cronSecret = process.env.CRON_SECRET
+  
+  if (!cronSecret) {
+    console.error('CRON_SECRET not configured')
+    return new NextResponse('Service misconfigured', { status: 500 })
+  }
+  
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 

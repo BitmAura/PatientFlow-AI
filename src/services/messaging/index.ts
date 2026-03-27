@@ -293,13 +293,39 @@ export function verifyWebhookSignature(params: {
   provider: MessagingProviderType
   request: Request
   expectedSecret?: string
+  body?: string
 }): boolean {
   if (params.provider === 'meta') {
-    return true
+    // Validate Meta X-Hub-Signature
+    const signature = params.request.headers.get('x-hub-signature-256')
+    const appSecret = process.env.META_WEBHOOK_SECRET
+    
+    if (!signature || !appSecret || !params.body) {
+      console.error('Meta webhook: missing signature, secret, or body')
+      return false
+    }
+    
+    try {
+      const crypto = require('crypto')
+      const hash = crypto
+        .createHmac('sha256', appSecret)
+        .update(params.body)
+        .digest('hex')
+      const expectedSignature = `sha256=${hash}`
+      return signature === expectedSignature
+    } catch (error) {
+      console.error('Meta webhook verification failed:', error)
+      return false
+    }
   }
 
+  // Gupshup validation
   const secret = params.expectedSecret || process.env.GUPSHUP_WEBHOOK_SECRET
-  if (!secret) return true
+  if (!secret) {
+    console.error('Gupshup webhook: no secret configured')
+    return false
+  }
+  
   const authHeader = params.request.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7) === secret
   const token = params.request.headers.get('x-gupshup-token') || params.request.headers.get('x-app-token')
