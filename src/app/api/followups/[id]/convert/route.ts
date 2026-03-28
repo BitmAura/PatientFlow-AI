@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { convertToAppointment } from '@/lib/services/followups'
 import { convertFollowupSchema } from '@/lib/validations/followup'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(
   request: Request,
@@ -28,6 +29,20 @@ export async function POST(
       created_by: user.id
     }
     const appointment = await convertToAppointment(params.id, appointmentData)
+
+    await writeAuditLog({
+      clinicId: (staff as any).clinic_id,
+      userId: user.id,
+      action: 'update',
+      entityType: 'followup_conversion',
+      entityId: params.id,
+      newValues: {
+        appointment_id: appointment.id,
+        start_time: appointment.start_time,
+      },
+      request,
+    })
+
     return NextResponse.json(appointment)
   } catch (error) {
     return new NextResponse('Failed to convert followup', { status: 500 })

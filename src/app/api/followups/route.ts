@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createFollowupSchema } from '@/lib/validations/followup'
 import { createFollowup } from '@/lib/services/followups'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -84,6 +85,21 @@ export async function POST(request: Request) {
       clinic_id: staff.clinic_id,
       created_by: user.id
     })
+
+    await writeAuditLog({
+      clinicId: staff.clinic_id,
+      userId: user.id,
+      action: 'create',
+      entityType: 'followup',
+      entityId: followup.id,
+      newValues: {
+        type: followup.type,
+        status: followup.status,
+        patient_id: followup.patient_id,
+      },
+      request,
+    })
+
     return NextResponse.json(followup)
   } catch (error) {
     return new NextResponse('Failed to create followup', { status: 500 })
