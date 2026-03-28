@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createPatientSchema, patientFiltersSchema } from '@/lib/validations/patient'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -94,6 +95,19 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return new NextResponse(error.message, { status: 500 })
+
+  await writeAuditLog({
+    clinicId: staff.clinic_id,
+    userId: user.id,
+    action: 'create',
+    entityType: 'patient',
+    entityId: data.id,
+    newValues: {
+      source: data.source || null,
+      requires_deposit: data.requires_deposit || false,
+    },
+    request,
+  })
 
   return NextResponse.json(data)
 }

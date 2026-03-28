@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createLeadSchema } from '@/lib/validations/lead'
 import { triggerAutomation } from '@/services/automation/engine'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -118,6 +119,19 @@ export async function POST(request: Request) {
         payload: { leadId: created.id, source: created.source || 'manual' },
       })
     }
+
+    await writeAuditLog({
+      clinicId: staff.clinic_id,
+      userId: user.id,
+      action: 'create',
+      entityType: 'lead',
+      entityId: created.id,
+      newValues: {
+        status: created.status,
+        source: created.source,
+      },
+      request,
+    })
 
     return NextResponse.json({ lead: created }, { status: 201 })
   } catch (error) {

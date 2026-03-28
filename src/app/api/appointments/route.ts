@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createAppointmentSchema, appointmentFiltersSchema } from '@/lib/validations/appointment'
 import { addMinutes, parse } from 'date-fns'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -94,6 +95,21 @@ export async function POST(request: Request) {
   if (error) {
     return new NextResponse('Failed to create appointment', { status: 500 })
   }
+
+  await writeAuditLog({
+    clinicId: (staff as any).clinic_id,
+    userId: user.id,
+    action: 'create',
+    entityType: 'appointment',
+    entityId: data.id,
+    newValues: {
+      patient_id: data.patient_id,
+      doctor_id: data.doctor_id,
+      service_id: data.service_id,
+      status: data.status,
+    },
+    request,
+  })
 
   return NextResponse.json(data, { status: 201 })
 }

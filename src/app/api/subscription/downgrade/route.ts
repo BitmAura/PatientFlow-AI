@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { normalizePlanId } from '@/lib/billing/plans'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
@@ -28,6 +29,18 @@ export async function POST(request: Request) {
     .eq('id', clinic.id)
 
   if (error) return new NextResponse(error.message, { status: 500 })
+
+  await writeAuditLog({
+    clinicId: clinic.id,
+    userId: user.id,
+    action: 'update',
+    entityType: 'subscription_plan',
+    newValues: {
+      plan_id: normalizedPlanId,
+      mode: 'downgrade',
+    },
+    request,
+  })
 
   return NextResponse.json({ success: true })
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceSchema } from '@/lib/validations/service'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(request: Request) {
   const supabase = createClient() as any
@@ -65,6 +66,20 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return new NextResponse(error.message, { status: 500 })
+
+  await writeAuditLog({
+    clinicId: clinic.id,
+    userId: user.id,
+    action: 'create',
+    entityType: 'service',
+    entityId: service.id,
+    newValues: {
+      name: service.name,
+      price: service.price,
+      duration: service.duration,
+    },
+    request,
+  })
 
   return NextResponse.json(service)
 }
