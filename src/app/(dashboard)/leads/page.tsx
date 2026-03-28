@@ -1,6 +1,9 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader, PageCard } from '@/components/dashboard/PageStructure'
 
 export const metadata = {
   title: 'Leads | PatientFlow AI',
@@ -123,83 +126,82 @@ export default async function LeadsPage() {
   ]
 
   return (
-    <div className="space-y-6 p-4 pt-6 md:p-8">
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Sales CRM</h2>
-          <p className="text-sm text-muted-foreground">
-            Track leads, capture notes, and schedule follow-ups to close deals faster.
-          </p>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Sales CRM"
+        description="Track leads, capture notes, and schedule follow-ups to close deals faster."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border bg-white p-4">
+        <PageCard variant="default" padding>
           <p className="text-xs uppercase text-muted-foreground">New</p>
           <p className="text-2xl font-semibold">{pipelineCount.new}</p>
-        </div>
-        <div className="rounded-lg border bg-white p-4">
+        </PageCard>
+        <PageCard variant="default" padding>
           <p className="text-xs uppercase text-muted-foreground">Contacted</p>
           <p className="text-2xl font-semibold">{pipelineCount.contacted}</p>
-        </div>
-        <div className="rounded-lg border bg-white p-4">
+        </PageCard>
+        <PageCard variant="default" padding>
           <p className="text-xs uppercase text-muted-foreground">Demo</p>
           <p className="text-2xl font-semibold">{pipelineCount.demo}</p>
-        </div>
-        <div className="rounded-lg border bg-white p-4">
+        </PageCard>
+        <PageCard variant="default" padding>
           <p className="text-xs uppercase text-muted-foreground">Closed</p>
           <p className="text-2xl font-semibold">{pipelineCount.closed}</p>
-        </div>
+        </PageCard>
       </div>
 
-      <form action={createLead} className="rounded-lg border bg-white p-4">
-        <h3 className="mb-4 text-lg font-semibold">Add Lead</h3>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
-          <input
-            required
-            name="leadName"
-            placeholder="Lead name"
-            className="rounded-md border px-3 py-2 text-sm"
+      <PageCard variant="default" padding>
+        <form action={createLead}>
+          <h3 className="mb-4 text-lg font-semibold">Add Lead</h3>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
+            <input
+              required
+              name="leadName"
+              placeholder="Lead name"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            />
+            <select name="source" required className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              <option value="">Select source</option>
+              {sourceOptions.map((source) => (
+                <option key={source} value={source}>
+                  {source}
+                </option>
+              ))}
+            </select>
+            <select name="status" defaultValue="new" className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <input
+              name="followupAt"
+              type="datetime-local"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            />
+            <button
+              type="submit"
+              className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+            >
+              Add lead
+            </button>
+          </div>
+          <textarea
+            name="notes"
+            placeholder="Notes (context, objections, next step)"
+            className="mt-3 min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
-          <select name="source" required className="rounded-md border px-3 py-2 text-sm">
-            <option value="">Select source</option>
-            {sourceOptions.map((source) => (
-              <option key={source} value={source}>
-                {source}
-              </option>
-            ))}
-          </select>
-          <select name="status" defaultValue="new" className="rounded-md border px-3 py-2 text-sm">
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <input
-            name="followupAt"
-            type="datetime-local"
-            className="rounded-md border px-3 py-2 text-sm"
-          />
-          <button
-            type="submit"
-            className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white"
-          >
-            Add lead
-          </button>
-        </div>
-        <textarea
-          name="notes"
-          placeholder="Notes (context, objections, next step)"
-          className="mt-3 min-h-24 w-full rounded-md border px-3 py-2 text-sm"
-        />
-      </form>
+        </form>
+      </PageCard>
 
-      <div className="rounded-lg border bg-white">
-        <div className="border-b px-4 py-3">
+      <PageCard variant="default" padding={false} className="overflow-hidden">
+        <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
           <h3 className="text-lg font-semibold">Leads Pipeline</h3>
         </div>
-        <div className="divide-y">
+        <div className="divide-y divide-slate-200 dark:divide-slate-800">
           {(leads || []).length === 0 && (
             <p className="p-4 text-sm text-muted-foreground">No leads yet. Add your first lead above.</p>
           )}
@@ -218,7 +220,7 @@ export default async function LeadsPage() {
                   <select
                     name="status"
                     defaultValue={lead.status}
-                    className="rounded-md border px-3 py-2 text-sm"
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                   >
                     {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -234,11 +236,11 @@ export default async function LeadsPage() {
                         ? new Date(lead.next_followup_at).toISOString().slice(0, 16)
                         : ''
                     }
-                    className="rounded-md border px-3 py-2 text-sm"
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                   />
                   <button
                     type="submit"
-                    className="rounded-md border bg-gray-50 px-3 py-2 text-sm font-medium"
+                    className="rounded-md border border-slate-300 bg-gray-50 px-3 py-2 text-sm font-medium dark:border-slate-700 dark:bg-slate-800"
                   >
                     Save
                   </button>
@@ -248,12 +250,12 @@ export default async function LeadsPage() {
                 name="notes"
                 defaultValue={lead.notes || ''}
                 placeholder="Add notes"
-                className="min-h-20 w-full rounded-md border px-3 py-2 text-sm"
+                className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
               />
             </form>
           ))}
         </div>
-      </div>
-    </div>
+      </PageCard>
+    </PageContainer>
   )
 }

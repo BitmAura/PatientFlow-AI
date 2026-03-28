@@ -8,10 +8,11 @@ import { DepositsChart } from '@/components/reports/deposits-chart'
 import { MetricCard } from '@/components/reports/metric-card'
 import { ExportReportButton } from '@/components/reports/export-report-button'
 import { useRevenueReport } from '@/hooks/use-reports'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, DollarSign, RefreshCw, AlertCircle } from 'lucide-react'
+import { DollarSign, RefreshCw, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import Link from 'next/link'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function RevenueReportPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -22,23 +23,18 @@ export default function RevenueReportPage() {
   const { data, isLoading } = useRevenueReport(date)
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link href="/reports">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h2 className="text-3xl font-bold tracking-tight">Revenue & Deposits</h2>
-      </div>
-
-      <div className="flex items-center justify-between space-y-2">
-        <p className="text-muted-foreground">Track financial performance from deposits.</p>
-        <div className="flex items-center space-x-2">
-          <DateRangeSelector date={date} setDate={setDate} />
-          <ExportReportButton reportType="Revenue" data={data} dateRange={date as any} />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Revenue & Deposits"
+        description="Track financial performance from deposits."
+        actions={
+          <div className="flex items-center space-x-2">
+            <DateRangeSelector date={date} setDate={setDate} />
+            <ExportReportButton reportType="Revenue" data={data} dateRange={date as any} />
+          </div>
+        }
+      />
 
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -70,6 +66,6 @@ export default function RevenueReportPage() {
         
         <DepositsChart data={data?.daily_deposits} isLoading={isLoading} />
       </div>
-    </div>
+    </PageContainer>
   )
 }

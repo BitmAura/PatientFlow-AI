@@ -10,6 +10,7 @@ import { FollowupTable } from '@/components/followups/followup-table'
 import { ScheduleFollowupDialog } from '@/components/followups/schedule-followup-dialog'
 import { useFollowups, useFollowupStats } from '@/hooks/use-followups'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageHeader, PageCard } from '@/components/dashboard/PageStructure'
 
 export default function FollowupsPage() {
   const [activeTab, setActiveTab] = React.useState('due_today')
@@ -36,20 +37,17 @@ export default function FollowupsPage() {
 
   return (
     <PageContainer>
-      <Breadcrumbs />
-      
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Follow-ups</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage post-appointment checkups and reminders.
-          </p>
-        </div>
-        <Button onClick={() => setIsScheduleOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Schedule Follow-up
-        </Button>
-      </div>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Follow-ups"
+        description="Manage post-appointment checkups and reminders."
+        actions={
+          <Button onClick={() => setIsScheduleOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Schedule Follow-up
+          </Button>
+        }
+      />
 
       <FollowupStatsCards stats={stats} />
 
@@ -64,12 +62,12 @@ export default function FollowupsPage() {
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4">
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <PageCard variant="default" padding>
             <FollowupTable 
               data={followups?.data || []} 
               isLoading={isLoading} 
             />
-          </div>
+          </PageCard>
         </TabsContent>
       </Tabs>
 

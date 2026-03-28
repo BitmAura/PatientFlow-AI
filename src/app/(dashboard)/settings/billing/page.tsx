@@ -8,6 +8,9 @@ import { useSubscription, useBillingHistory } from '@/hooks/use-subscription'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function BillingPage() {
   const { data: subscription, isLoading: subLoading } = useSubscription()
@@ -18,13 +21,12 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Billing & Subscription</h2>
-        <p className="text-muted-foreground">
-          Manage your plan, payment methods, and invoices.
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Billing & Subscription"
+        description="Manage your plan, payment methods, and invoices."
+      />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="md:col-span-1">
@@ -79,6 +81,6 @@ export default function BillingPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   )
 }

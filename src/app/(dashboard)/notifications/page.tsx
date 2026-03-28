@@ -2,28 +2,22 @@
 
 import * as React from 'react'
 import { NotificationList } from '@/components/notifications/notification-list'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader, PageCard } from '@/components/dashboard/PageStructure'
 
 export default function NotificationsPage() {
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>
-          <p className="text-muted-foreground">Stay updated on appointments and clinic activity.</p>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Notifications"
+        description="Stay updated on appointments and clinic activity."
+      />
 
-      <div className="max-w-3xl">
+      <PageCard variant="minimal" className="max-w-3xl border-0 p-0 shadow-none">
         <NotificationList />
-      </div>
-    </div>
+      </PageCard>
+    </PageContainer>
   )
 }

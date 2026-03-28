@@ -10,9 +10,9 @@ import { NoShowByServiceChart } from '@/components/reports/no-show-by-service-ch
 import { TopNoShowPatients } from '@/components/reports/top-noshow-patients'
 import { ExportReportButton } from '@/components/reports/export-report-button'
 import { useNoShowReport } from '@/hooks/use-reports'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function NoShowsReportPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -23,23 +23,18 @@ export default function NoShowsReportPage() {
   const { data, isLoading } = useNoShowReport(date)
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link href="/reports">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h2 className="text-3xl font-bold tracking-tight">No-Show Analysis</h2>
-      </div>
-      
-      <div className="flex items-center justify-between space-y-2">
-        <p className="text-muted-foreground">Detailed breakdown of missed appointments.</p>
-        <div className="flex items-center space-x-2">
-          <DateRangeSelector date={date} setDate={setDate} />
-          <ExportReportButton reportType="No-Shows" data={data} dateRange={date as any} />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="No-Show Analysis"
+        description="Detailed breakdown of missed appointments."
+        actions={
+          <div className="flex items-center space-x-2">
+            <DateRangeSelector date={date} setDate={setDate} />
+            <ExportReportButton reportType="No-Shows" data={data} dateRange={date as any} />
+          </div>
+        }
+      />
 
       <div className="space-y-4">
         <NoShowRateChart data={data?.rate_over_time} isLoading={isLoading} />
@@ -51,6 +46,6 @@ export default function NoShowsReportPage() {
 
         <TopNoShowPatients data={data?.top_patients} isLoading={isLoading} />
       </div>
-    </div>
+    </PageContainer>
   )
 }

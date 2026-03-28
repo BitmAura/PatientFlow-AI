@@ -6,8 +6,10 @@ import { DoctorCard } from "@/components/doctors/doctor-card"
 import { DoctorFormDialog } from "@/components/doctors/doctor-form-dialog"
 import { DoctorAvailability } from "@/components/doctors/doctor-availability"
 import { Button } from "@/components/ui/button"
-import { Plus, Loader2 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Plus } from "lucide-react"
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader, EmptyState, SkeletonLoader, PageCard } from '@/components/dashboard/PageStructure'
 
 export default function DoctorsPage() {
   const { data: doctors, isLoading } = useDoctors()
@@ -30,42 +32,37 @@ export default function DoctorsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-            <h2 className="text-3xl font-bold tracking-tight">Doctors</h2>
-            <p className="text-muted-foreground">
-                Manage your clinic&apos;s doctors and their availability.
-            </p>
-        </div>
-        <div className="flex items-center space-x-2">
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Doctors"
+        description="Manage your clinic's doctors and their availability."
+        actions={
           <Button onClick={() => setIsAddOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Add Doctor
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-[200px] w-full" />)}
-        </div>
+        <SkeletonLoader variant="card" rows={3} />
+      ) : (doctors?.length ?? 0) === 0 ? (
+        <EmptyState
+          title="No doctors added yet"
+          description="Start by adding your first doctor profile and schedule."
+          action={<Button onClick={() => setIsAddOpen(true)}>Add your first doctor</Button>}
+        />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {doctors?.length === 0 && (
-                <div className="col-span-full text-center py-12 border-2 border-dashed rounded-lg">
-                    <h3 className="text-lg font-medium text-muted-foreground">No doctors added yet</h3>
-                    <Button variant="link" onClick={() => setIsAddOpen(true)}>Add your first doctor</Button>
-                </div>
-            )}
-            {doctors?.map((doctor: any) => (
-                <DoctorCard 
-                    key={doctor.id} 
-                    doctor={doctor} 
-                    onEdit={handleEdit}
-                    onSchedule={handleSchedule}
-                />
-            ))}
-        </div>
+        <PageCard variant="minimal" className="grid gap-4 border-0 p-0 shadow-none md:grid-cols-2 lg:grid-cols-3">
+          {doctors?.map((doctor: any) => (
+            <DoctorCard 
+              key={doctor.id} 
+              doctor={doctor} 
+              onEdit={handleEdit}
+              onSchedule={handleSchedule}
+            />
+          ))}
+        </PageCard>
       )}
 
       <DoctorFormDialog 
@@ -76,11 +73,11 @@ export default function DoctorsPage() {
 
       {scheduleDoctor && (
         <DoctorAvailability 
-            open={!!scheduleDoctor} 
-            onOpenChange={(open) => !open && setScheduleDoctor(null)}
-            doctor={scheduleDoctor}
+          open={!!scheduleDoctor} 
+          onOpenChange={(open) => !open && setScheduleDoctor(null)}
+          doctor={scheduleDoctor}
         />
       )}
-    </div>
+    </PageContainer>
   )
 }

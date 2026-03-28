@@ -6,7 +6,7 @@ import { WaitlistTable } from "@/components/waiting-list/waitlist-table"
 import { AddToWaitlistDialog } from "@/components/waiting-list/add-to-waitlist-dialog"
 import { Button } from "@/components/ui/button"
 import { Plus, Users, Bell, CheckCircle } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { WaitlistStatus } from "@/types/waiting-list"
 import {
   Select,
@@ -16,6 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader, PageCard, EmptyState, SkeletonLoader } from '@/components/dashboard/PageStructure'
 
 export default function WaitingListPage() {
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -27,18 +30,20 @@ export default function WaitingListPage() {
   })
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Waiting List</h2>
-        <div className="flex items-center space-x-2">
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Waiting List"
+        description="Track and convert patients waiting for available slots."
+        actions={
           <Button onClick={() => setIsAddOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Add to Waitlist
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <PageCard variant="default" padding>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Waiting
@@ -50,8 +55,8 @@ export default function WaitingListPage() {
               {statsLoading ? <Skeleton className="h-8 w-8" /> : stats?.waiting}
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </PageCard>
+        <PageCard variant="default" padding>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Notified
@@ -66,8 +71,8 @@ export default function WaitingListPage() {
               Waiting for response
             </p>
           </CardContent>
-        </Card>
-        <Card>
+        </PageCard>
+        <PageCard variant="default" padding>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Converted
@@ -82,7 +87,7 @@ export default function WaitingListPage() {
               This month
             </p>
           </CardContent>
-        </Card>
+        </PageCard>
       </div>
 
       <div className="flex items-center justify-between space-y-2">
@@ -107,16 +112,22 @@ export default function WaitingListPage() {
       </div>
 
       {listLoading ? (
-        <div className="space-y-2">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-        </div>
+        <SkeletonLoader variant="table" rows={3} />
+      ) : (waitlist || []).length === 0 ? (
+        <EmptyState
+          title="No waiting list records"
+          description="Start by adding patients who are waiting for appointment slots."
+          action={
+            <Button onClick={() => setIsAddOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Add to Waitlist
+            </Button>
+          }
+        />
       ) : (
         <WaitlistTable data={waitlist || []} />
       )}
 
       <AddToWaitlistDialog open={isAddOpen} onOpenChange={setIsAddOpen} />
-    </div>
+    </PageContainer>
   )
 }

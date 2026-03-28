@@ -17,6 +17,7 @@ import { Plus, UserPlus } from 'lucide-react'
 import { getGreeting } from '@/lib/utils/format-date'
 import { motion } from 'framer-motion'
 import { GlowButton } from '@/components/ui/glow-button'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -45,36 +46,30 @@ export default function DashboardPage() {
         animate="show"
         className="space-y-6"
       >
-        <motion.div variants={item}>
-          <Breadcrumbs />
-        </motion.div>
-
-        {/* Page Header */}
         <motion.div
           variants={item}
-          className="mb-2 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"
+          className="mb-2"
         >
-          <div>
-            <h1 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-              {getGreeting(userName)}
-            </h1>
-            <p className="mt-1 text-muted-foreground">
-              Here&apos;s your real-time patient flow, booking performance, and no-show risk for today.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="border-accent/20 hover:bg-accent/10 hover:text-accent"
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              New Patient
-            </Button>
-            <GlowButton>
-              <Plus className="mr-2 h-4 w-4" />
-              New Appointment
-            </GlowButton>
-          </div>
+          <PageHeader
+            breadcrumb={<Breadcrumbs />}
+            title={getGreeting(userName)}
+            description="Here's your real-time patient flow, booking performance, and no-show risk for today."
+            actions={(
+              <>
+                <Button
+                  variant="outline"
+                  className="border-accent/20 hover:bg-accent/10 hover:text-accent"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  New Patient
+                </Button>
+                <GlowButton>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Appointment
+                </GlowButton>
+              </>
+            )}
+          />
         </motion.div>
 
         {/* Alerts */}

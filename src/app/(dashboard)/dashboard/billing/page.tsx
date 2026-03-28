@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Check, CreditCard, Calendar, TrendingUp, AlertCircle } from 'lucide-react'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise, normalizePlanId, type BillingCycle, type PricingPlanId } from '@/lib/billing/plans'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 interface Subscription {
   id: string
@@ -87,13 +90,12 @@ export default function BillingPage() {
   const currentCycle = subscription?.billing_cycle === 'annual' ? 'annual' : 'monthly'
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your subscription and billing details
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Billing & Subscription"
+        description="Manage your subscription and billing details"
+      />
 
       {/* Current Plan */}
       <Card>
@@ -268,6 +270,6 @@ export default function BillingPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   )
 }

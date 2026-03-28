@@ -5,9 +5,12 @@ import { useServices, useCreateService, useUpdateService, useDeleteService, useR
 import { ServiceGrid } from '@/components/services/service-grid'
 import { ServiceFormDialog } from '@/components/services/service-form-dialog'
 import { Button } from '@/components/ui/button'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { CreateServiceValues } from '@/lib/validations/service'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader, PageCard, EmptyState, SkeletonLoader } from '@/components/dashboard/PageStructure'
 
 export default function ServicesPage() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
@@ -68,30 +71,39 @@ export default function ServicesPage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Services</h2>
-          <p className="text-muted-foreground">
-            Manage your appointment types and pricing.
-          </p>
-        </div>
-        <Button onClick={() => { setEditingService(null); setIsDialogOpen(true) }}>
-          <Plus className="mr-2 h-4 w-4" /> Add Service
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Services"
+        description="Manage your appointment types and pricing."
+        actions={
+          <Button onClick={() => { setEditingService(null); setIsDialogOpen(true) }}>
+            <Plus className="mr-2 h-4 w-4" /> Add Service
+          </Button>
+        }
+      />
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      ) : (
-        <ServiceGrid 
-          services={services || []} 
-          onEdit={(s) => { setEditingService(s); setIsDialogOpen(true) }}
-          onDelete={handleDelete}
-          onToggleActive={handleToggleActive}
+        <SkeletonLoader variant="card" rows={4} />
+      ) : (services || []).length === 0 ? (
+        <EmptyState
+          title="No services configured"
+          description="Create your first service to start accepting appointments."
+          action={
+            <Button onClick={() => { setEditingService(null); setIsDialogOpen(true) }}>
+              <Plus className="mr-2 h-4 w-4" /> Add Service
+            </Button>
+          }
         />
+      ) : (
+        <PageCard variant="minimal" className="border-0 p-0 shadow-none">
+          <ServiceGrid 
+            services={services || []} 
+            onEdit={(s) => { setEditingService(s); setIsDialogOpen(true) }}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+          />
+        </PageCard>
       )}
 
       <ServiceFormDialog 
@@ -103,6 +115,6 @@ export default function ServicesPage() {
         initialData={editingService}
         onSubmit={editingService ? handleUpdate : handleCreate}
       />
-    </div>
+    </PageContainer>
   )
 }

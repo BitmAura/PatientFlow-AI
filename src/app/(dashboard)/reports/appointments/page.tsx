@@ -10,9 +10,9 @@ import { BusiestTimesHeatmap } from '@/components/reports/busiest-times-heatmap'
 import { BookingSourcesChart } from '@/components/reports/booking-sources-chart'
 import { ExportReportButton } from '@/components/reports/export-report-button'
 import { useAppointmentReport } from '@/hooks/use-reports'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import { PageContainer } from '@/components/layout/page-container'
+import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function AppointmentsReportPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -23,23 +23,18 @@ export default function AppointmentsReportPage() {
   const { data, isLoading } = useAppointmentReport(date)
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link href="/reports">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h2 className="text-3xl font-bold tracking-tight">Appointment Insights</h2>
-      </div>
-
-      <div className="flex items-center justify-between space-y-2">
-        <p className="text-muted-foreground">Volume, status breakdown, and operational heatmaps.</p>
-        <div className="flex items-center space-x-2">
-          <DateRangeSelector date={date} setDate={setDate} />
-          <ExportReportButton reportType="Appointments" data={data} dateRange={date as any} />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        breadcrumb={<Breadcrumbs />}
+        title="Appointment Insights"
+        description="Volume, status breakdown, and operational heatmaps."
+        actions={
+          <div className="flex items-center space-x-2">
+            <DateRangeSelector date={date} setDate={setDate} />
+            <ExportReportButton reportType="Appointments" data={data} dateRange={date as any} />
+          </div>
+        }
+      />
 
       <div className="space-y-4">
         <AppointmentsTrendChart data={data?.over_time} isLoading={isLoading} />
@@ -51,6 +46,6 @@ export default function AppointmentsReportPage() {
 
         <BusiestTimesHeatmap data={data?.by_hour} isLoading={isLoading} />
       </div>
-    </div>
+    </PageContainer>
   )
 }
