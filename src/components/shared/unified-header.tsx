@@ -7,10 +7,15 @@ import { Menu, X, Phone, ChevronRight, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { useTrackCta } from '@/hooks/use-track-cta'
+import { cn } from '@/lib/utils/cn'
 
 interface UnifiedHeaderProps {
   currentService?: 'noshow'
   logoText?: string
+  /** When set, header + nav use app-shell styling (e.g. dark mode) */
+  variant?: 'marketing' | 'app'
+  /** Merged onto the root `<header>` (e.g. `hidden md:block` for dashboard + mobile subheader) */
+  className?: string
   navigationItems?: Array<{
     label: string
     href: string
@@ -21,6 +26,8 @@ interface UnifiedHeaderProps {
 export function UnifiedHeader({ 
   currentService = 'noshow', 
   logoText,
+  variant = 'marketing',
+  className,
   navigationItems = []
 }: UnifiedHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -58,11 +65,17 @@ export function UnifiedHeader({
     ? `https://wa.me/${whatsappSalesNumber.replace(/\D/g, '')}`
     : null
 
+  const isApp = variant === 'app'
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 shadow-md backdrop-blur-md' : 'border-b border-emerald-100 bg-white/80 backdrop-blur-md'
-      }`}
+      className={cn(
+        'fixed left-0 right-0 top-0 z-50 transition-colors duration-300',
+        isScrolled
+          ? 'border-b border-emerald-100/80 bg-white/90 shadow-md backdrop-blur-md dark:border-emerald-900/30 dark:bg-slate-950/95 dark:shadow-black/40'
+          : 'border-b border-emerald-100 bg-white/80 backdrop-blur-md dark:border-emerald-900/40 dark:bg-slate-950/90 dark:backdrop-blur-xl',
+        className
+      )}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -78,10 +91,17 @@ export function UnifiedHeader({
                />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-emerald-900">
+              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
                 {logoText || config.logo}
               </h1>
-              <p className="text-sm font-medium text-slate-600">{config.tagline}</p>
+              <p
+                className={cn(
+                  'text-sm font-medium text-slate-600 dark:text-slate-400',
+                  isApp && 'hidden lg:block'
+                )}
+              >
+                {config.tagline}
+              </p>
             </div>
           </Link>
 
@@ -91,9 +111,10 @@ export function UnifiedHeader({
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-base font-bold text-zinc-900 transition-colors hover:text-emerald-600 ${
-                  item.external ? 'flex items-center gap-1' : ''
-                }`}
+                className={cn(
+                  'text-base font-bold text-zinc-900 transition-colors hover:text-emerald-600 dark:text-slate-100 dark:hover:text-emerald-400',
+                  item.external && 'flex items-center gap-1'
+                )}
                 {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
               >
                 {item.label}
@@ -115,7 +136,7 @@ export function UnifiedHeader({
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden"
+              className="md:hidden dark:text-slate-200"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -124,13 +145,13 @@ export function UnifiedHeader({
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="border-t border-emerald-100 py-4 md:hidden">
+          <div className="border-t border-emerald-100 py-4 dark:border-emerald-900/50 md:hidden">
             <nav className="flex flex-col gap-3">
               {navItems.map((item: any) => (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 text-zinc-700 transition-colors hover:bg-emerald-50"
+                  className="flex items-center justify-between rounded-lg px-3 py-2 text-zinc-700 transition-colors hover:bg-emerald-50 dark:text-slate-200 dark:hover:bg-emerald-950/50"
                   {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
                 >
                   <span className="font-medium">{item.label}</span>
@@ -149,7 +170,7 @@ export function UnifiedHeader({
         )}
       </div>
 
-      <div className="border-t border-emerald-100 bg-white px-4 py-2 md:hidden">
+      <div className="border-t border-emerald-100 bg-white px-4 py-2 dark:border-emerald-900/50 dark:bg-slate-950/95 md:hidden">
         <div className="mx-auto flex w-full max-w-7xl gap-2">
           <Link href={config.ctaHref} className="flex-1" onClick={() => trackCta('Book Demo', 'header_mobile_sticky', config.ctaHref)}>
             <TwentyOneButton className="w-full" type="button">

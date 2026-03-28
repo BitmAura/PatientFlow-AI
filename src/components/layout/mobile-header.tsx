@@ -19,7 +19,7 @@ export function MobileHeader() {
   }, [pathname])
 
   return (
-    <header className="md:hidden sticky top-0 left-0 right-0 h-16 bg-white border-b z-40 px-4 flex items-center justify-between">
+    <header className="sticky left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur-md md:hidden dark:border-slate-800 dark:bg-slate-950/95">
       <div className="flex items-center gap-3">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>

@@ -32,9 +32,11 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(152_25%_97%)_35%,hsl(var(--background))_100%)] dark:bg-slate-950 dark:bg-none">
       {/* Unified Header - Shows service toggle */}
-      <UnifiedHeader 
-        currentService="noshow" 
+      <UnifiedHeader
+        currentService="noshow"
         logoText="PatientFlow AI"
+        variant="app"
+        className="hidden md:block"
       />
       
       <div className="hidden lg:block">
@@ -47,7 +49,7 @@ export default function DashboardLayout({
       <main
         className={cn(
           'transition-all duration-300',
-          'pt-32 md:pt-24',
+          'pt-2 md:pt-24',
           'lg:ml-64',
           sidebarCollapsed && 'lg:ml-16'
         )}
