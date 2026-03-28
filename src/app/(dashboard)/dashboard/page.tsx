@@ -18,6 +18,7 @@ import { getGreeting } from '@/lib/utils/format-date'
 import { motion } from 'framer-motion'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { PageHeader } from '@/components/dashboard/PageStructure'
+import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -57,15 +58,20 @@ export default function DashboardPage() {
             actions={(
               <>
                 <Button
+                  asChild
                   variant="outline"
                   className="border-accent/20 hover:bg-accent/10 hover:text-accent"
                 >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  New Patient
+                  <Link href="/patients/new">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    New Patient
+                  </Link>
                 </Button>
-                <TwentyOneButton type="button">
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Appointment
+                <TwentyOneButton asChild>
+                  <Link href="/appointments/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Appointment
+                  </Link>
                 </TwentyOneButton>
               </>
             )}

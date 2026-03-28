@@ -69,6 +69,7 @@ export function UnifiedHeader({
 
   return (
     <header
+      role="banner"
       className={cn(
         'fixed left-0 right-0 top-0 z-50 transition-colors duration-300',
         isScrolled
@@ -78,26 +79,27 @@ export function UnifiedHeader({
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-14 h-14">
-               <Image 
-                 src="/logo.png" 
-                 alt="PatientFlow AI Logo" 
-                 fill
-                 className="object-contain"
-                 priority
-               />
+        {/*
+          Mandatory shell: single 80px row, vertically centered.
+          Three zones: brand (min-w-0) | primary nav (centered) | CTA + mobile toggle.
+        */}
+        <div className="flex h-20 min-h-[5rem] w-full items-center justify-between gap-3 md:gap-4">
+          {/* Zone 1 — Brand + tagline */}
+          <Link
+            href="/"
+            className="group flex min-w-0 max-w-[min(100%,18rem)] shrink items-center gap-2 sm:max-w-[min(100%,22rem)] sm:gap-3 lg:max-w-md"
+          >
+            <div className="relative h-11 w-11 shrink-0 sm:h-14 sm:w-14" aria-hidden>
+              <Image src="/logo.png" alt="" fill className="object-contain" priority />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
+            <div className="min-w-0 text-left">
+              <h1 className="truncate text-lg font-bold leading-tight text-emerald-900 sm:text-xl lg:text-2xl dark:text-emerald-100">
                 {logoText || config.logo}
               </h1>
               <p
                 className={cn(
-                  'text-sm font-medium text-slate-600 dark:text-slate-400',
-                  isApp && 'hidden lg:block'
+                  'mt-0.5 text-[11px] font-medium leading-snug text-slate-600 dark:text-slate-400 sm:text-xs lg:text-sm',
+                  isApp ? 'hidden lg:block' : 'block'
                 )}
               >
                 {config.tagline}
@@ -105,48 +107,64 @@ export function UnifiedHeader({
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item: any) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  'text-base font-bold text-zinc-900 transition-colors hover:text-emerald-600 dark:text-slate-100 dark:hover:text-emerald-400',
-                  item.external && 'flex items-center gap-1'
-                )}
-                {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
-              >
-                {item.label}
-                {item.external && <ExternalLink className="w-4 h-4" />}
-              </Link>
-            ))}
-            
-            <Link href={config.ctaHref} onClick={() => trackCta(config.ctaText, 'header_desktop', config.ctaHref)}>
-              <TwentyOneButton className="h-10 px-4" type="button">
-                <Phone className="w-4 h-4 mr-2" />
+          {/* Zone 2 — Primary nav (desktop only; centered in remaining space) */}
+          <nav
+            aria-label="Primary"
+            className="mx-2 hidden min-w-0 flex-1 justify-center md:flex"
+          >
+            <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 lg:gap-x-8">
+              {navItems.map((item: any) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'whitespace-nowrap text-sm font-bold text-zinc-900 transition-colors hover:text-emerald-600 lg:text-base dark:text-slate-100 dark:hover:text-emerald-400',
+                      item.external && 'inline-flex items-center gap-1'
+                    )}
+                    {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
+                  >
+                    {item.label}
+                    {item.external && <ExternalLink className="h-4 w-4 shrink-0" />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Zone 3 — Marketing CTA + mobile menu */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link
+              href={config.ctaHref}
+              className="hidden md:block"
+              onClick={() => trackCta(config.ctaText, 'header_desktop', config.ctaHref)}
+            >
+              <TwentyOneButton className="h-10 px-3 lg:px-4" type="button">
+                <Phone className="mr-2 h-4 w-4" />
                 {config.ctaText}
               </TwentyOneButton>
             </Link>
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center">
             <Button
               variant="ghost"
               size="sm"
+              type="button"
+              aria-expanded={isMenuOpen}
+              aria-controls="unified-header-mobile-panel"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden dark:text-slate-200"
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="border-t border-emerald-100 py-4 dark:border-emerald-900/50 md:hidden">
-            <nav className="flex flex-col gap-3">
+          <div
+            id="unified-header-mobile-panel"
+            className="border-t border-emerald-100 py-4 dark:border-emerald-900/50 md:hidden"
+          >
+            <nav className="flex flex-col gap-3" aria-label="Mobile">
               {navItems.map((item: any) => (
                 <Link
                   key={item.label}
