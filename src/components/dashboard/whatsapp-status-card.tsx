@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, AlertTriangle } from 'lucide-react'
@@ -23,9 +24,14 @@ export function WhatsappStatusCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button className="bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto">
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Connect WhatsApp Now
+        <Button
+          asChild
+          className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto"
+        >
+          <Link href="/dashboard/settings/whatsapp" className="inline-flex items-center justify-center">
+            <MessageSquare className="mr-2 h-4 w-4 shrink-0" aria-hidden />
+            Connect WhatsApp Now
+          </Link>
         </Button>
       </CardContent>
     </Card>
