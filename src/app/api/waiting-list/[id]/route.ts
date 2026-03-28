@@ -1,11 +1,11 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse, notFoundResponse } from '@/lib/utils/api-response';
 import { removeFromWaitlist } from '@/lib/services/waiting-list';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const supabase = createClient();
@@ -16,7 +16,7 @@ export async function GET(
         patient:patients(id, full_name, phone, email),
         service:services(id, name, duration)
       `)
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single();
 
     if (error || !data) return notFoundResponse();
@@ -28,12 +28,13 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
-    await removeFromWaitlist(params.id);
+    await removeFromWaitlist(context.params.id);
     return successResponse({ success: true });
   } catch (error: any) {
     return errorResponse(error.message);
   }
 }
+

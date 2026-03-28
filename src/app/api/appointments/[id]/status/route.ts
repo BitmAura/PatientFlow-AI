@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { statusUpdateSchema } from '@/lib/validations/appointment'
 import { ALLOWED_TRANSITIONS, AppointmentStatus } from '@/constants/appointment-status'
@@ -6,7 +6,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const body = await request.json()
   const result = statusUpdateSchema.safeParse(body)
@@ -26,7 +26,7 @@ export async function PATCH(
   const { data: currentAppt } = await supabase
     .from('appointments')
     .select('status, clinic_id')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .single()
 
   if (!currentAppt) return new NextResponse('Appointment not found', { status: 404 })
@@ -46,7 +46,7 @@ export async function PATCH(
       status,
       internal_notes: reason ? `Status changed to ${status}: ${reason}` : undefined 
     })
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .select()
     .single()
 
@@ -59,7 +59,7 @@ export async function PATCH(
     userId: user?.id || null,
     action: 'update',
     entityType: 'appointment_status',
-    entityId: params.id,
+    entityId: context.params.id,
     oldValues: {
       status: previousStatus,
     },

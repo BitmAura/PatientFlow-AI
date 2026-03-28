@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { updateLeadSchema } from '@/lib/validations/lead'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   
@@ -22,7 +22,7 @@ export async function GET(
   const { data, error } = await supabase
     .from('leads')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (staff as any).clinic_id)
     .single()
 

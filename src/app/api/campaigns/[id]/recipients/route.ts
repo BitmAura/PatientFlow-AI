@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -19,7 +19,7 @@ export async function GET(
   let query = supabase
     .from('campaign_recipients')
     .select('*, patient:patients(full_name, phone)', { count: 'exact' })
-    .eq('campaign_id', params.id)
+    .eq('campaign_id', context.params.id)
     .order('created_at', { ascending: true })
 
   if (status && status !== 'all') {
@@ -47,3 +47,4 @@ export async function GET(
     }
   })
 }
+

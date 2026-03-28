@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { updatePatientSchema } from '@/lib/validations/patient'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
 
@@ -25,7 +25,7 @@ export async function GET(
   const { data: patient, error } = await supabase
     .from('patients')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (staff as any).clinic_id)
     .single()
 
@@ -36,7 +36,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const body = await request.json()
   const result = updatePatientSchema.safeParse({
@@ -66,7 +66,7 @@ export async function PUT(
   const { data: current } = await supabase
     .from('patients')
     .select('id, full_name, phone, email')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (staff as any).clinic_id)
     .single()
 
@@ -75,7 +75,7 @@ export async function PUT(
   const { data, error } = await (supabase as any)
     .from('patients')
     .update(result.data)
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (staff as any).clinic_id)
     .select()
     .single()
@@ -87,7 +87,7 @@ export async function PUT(
     userId: user.id,
     action: 'update',
     entityType: 'patient',
-    entityId: params.id,
+    entityId: context.params.id,
     oldValues: {
       full_name: (current as any).full_name,
       phone: (current as any).phone,

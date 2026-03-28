@@ -3,8 +3,8 @@ import { cookies } from 'next/headers'
 import { Database } from '@/types/database'
 import { getSupabasePublicEnv } from '@/lib/supabase/public-env'
 
-export function createClient() {
-  const cookieStore = cookies()
+export function createClient(): any {
+  const cookieStore = cookies() as any
   const { url, anonKey } = getSupabasePublicEnv()
 
   return createServerClient<Database>(
@@ -35,5 +35,5 @@ export function createClient() {
         },
       },
     }
-  )
+  ) as any
 }

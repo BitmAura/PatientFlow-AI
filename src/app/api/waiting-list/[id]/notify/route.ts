@@ -1,11 +1,11 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { notifyPatient } from '@/lib/services/waiting-list';
 import { notifyPatientSchema } from '@/lib/validations/waiting-list';
 import { successResponse, errorResponse, validationErrorResponse } from '@/lib/utils/api-response';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const json = await req.json();
@@ -15,7 +15,7 @@ export async function POST(
       return validationErrorResponse(result.error);
     }
 
-    await notifyPatient(params.id, {
+    await notifyPatient(context.params.id, {
       date: result.data.available_date,
       start_time: result.data.available_time,
       end_time: '' // Not needed for notification
@@ -26,3 +26,4 @@ export async function POST(
     return errorResponse(error.message);
   }
 }
+

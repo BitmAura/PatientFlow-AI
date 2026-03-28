@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateTimeSlots } from '@/lib/utils/generate-time-slots'
 import { startOfDay, endOfDay, getDay } from 'date-fns'
@@ -8,7 +8,7 @@ const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  context: any
 ) {
   const ip = getClientIp(request)
   const limiter = checkRateLimit(`booking-slots:${ip}`, 180, 60_000)
@@ -35,13 +35,14 @@ export async function GET(
   }
 
   const supabase = createClient()
+  const supabaseAny = supabase as any
 
   // 1. Fetch Clinic and Service in Parallel
   const [clinicResult, serviceResult] = await Promise.all([
     supabase
       .from('clinics')
       .select('id, business_hours, slot_duration')
-      .eq('slug', params.slug)
+      .eq('slug', context.params.slug)
       .single(),
     supabase
       .from('services')
@@ -72,7 +73,7 @@ export async function GET(
         .neq('status', 'cancelled')
         .neq('status', 'no_show')
 
-    let blockQuery = supabase
+    let blockQuery = supabaseAny
         .from('blocked_slots')
         .select('start_time, end_time')
         .eq('clinic_id', (clinic as any).id)

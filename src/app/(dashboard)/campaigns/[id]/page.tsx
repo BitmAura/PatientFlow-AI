@@ -10,8 +10,10 @@ import { CampaignProgress } from '@/components/campaigns/campaign-progress'
 import { CampaignRecipientsTable } from '@/components/campaigns/campaign-recipients-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useParams } from 'next/navigation'
 
-export default function CampaignDetailPage({ params }: { params: { id: string } }) {
+export default function CampaignDetailPage() {
+  const params = useParams<{ id: string }>()
   const { data: campaign, isLoading } = useCampaignDetail(params.id)
 
   if (isLoading) {

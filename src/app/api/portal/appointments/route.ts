@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { verifyPortalSession } from '@/lib/portal/session'
 
 export async function GET(request: Request) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get('portal_session')?.value
   const session = await verifyPortalSession(token)
 

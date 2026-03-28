@@ -1,10 +1,10 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse, notFoundResponse } from '@/lib/utils/api-response';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const supabase = createClient();
@@ -16,7 +16,7 @@ export async function GET(
         *,
         services:doctor_services(service_id)
       `)
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single();
 
     if (error || !doctor) return notFoundResponse();

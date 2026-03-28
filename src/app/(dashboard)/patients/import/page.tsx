@@ -11,7 +11,7 @@ import { ImportResults } from '@/components/patients/import-results'
 import { validateImportData, ValidationResult } from '@/lib/import/validate-data'
 import { useImportPatients } from '@/hooks/use-patient-import'
 import { ArrowLeft, ArrowRight, Download, AlertTriangle } from 'lucide-react'
-import { generateExcelTemplate, generateCSVTemplate } from '@/lib/import/sample-templates'
+import { generateCSVTemplate } from '@/lib/import/sample-templates'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
@@ -58,12 +58,12 @@ export default function ImportPatientsPage() {
     }
   }
 
-  const downloadTemplate = (type: 'excel' | 'csv') => {
-    const blob = type === 'excel' ? generateExcelTemplate() : generateCSVTemplate()
+  const downloadTemplate = () => {
+    const blob = generateCSVTemplate()
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `patient_import_template.${type === 'excel' ? 'xlsx' : 'csv'}`
+    link.download = 'patient_import_template.csv'
     link.click()
   }
 
@@ -76,11 +76,8 @@ export default function ImportPatientsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Import Patients</h1>
           {step === 0 && (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => downloadTemplate('csv')}>
+              <Button variant="outline" size="sm" onClick={downloadTemplate}>
                 <Download className="mr-2 h-4 w-4" /> CSV Template
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => downloadTemplate('excel')}>
-                <Download className="mr-2 h-4 w-4" /> Excel Template
               </Button>
             </div>
           )}

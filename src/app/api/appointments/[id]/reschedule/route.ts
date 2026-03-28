@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { rescheduleSchema } from '@/lib/validations/appointment'
 import { addMinutes } from 'date-fns'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const body = await request.json()
   const result = rescheduleSchema.safeParse({
@@ -24,7 +24,7 @@ export async function POST(
   const { data: original } = await supabase
     .from('appointments')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .single()
 
   if (!original) return new NextResponse('Appointment not found', { status: 404 })
@@ -55,7 +55,7 @@ export async function POST(
       end_time: endTime.toISOString(),
       status: 'confirmed'
     })
-    .eq('id', params.id)
+    .eq('id', context.params.id)
 
   if (error) {
     return new NextResponse('Failed to reschedule', { status: 500 })

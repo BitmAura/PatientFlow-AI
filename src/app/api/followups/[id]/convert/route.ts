@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { convertToAppointment } from '@/lib/services/followups'
 import { convertFollowupSchema } from '@/lib/validations/followup'
@@ -6,7 +6,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -28,14 +28,14 @@ export async function POST(
       clinic_id: (staff as any).clinic_id,
       created_by: user.id
     }
-    const appointment = await convertToAppointment(params.id, appointmentData)
+    const appointment = await convertToAppointment(context.params.id, appointmentData)
 
     await writeAuditLog({
       clinicId: (staff as any).clinic_id,
       userId: user.id,
       action: 'update',
       entityType: 'followup_conversion',
-      entityId: params.id,
+      entityId: context.params.id,
       newValues: {
         appointment_id: appointment.id,
         start_time: appointment.start_time,

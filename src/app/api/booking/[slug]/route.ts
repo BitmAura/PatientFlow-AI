@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  context: any
 ) {
   const ip = getClientIp(request)
   const limiter = checkRateLimit(`booking-clinic:${ip}`, 120, 60_000)
@@ -27,7 +27,7 @@ export async function GET(
   const { data: clinic, error } = await supabase
     .from('clinics')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', context.params.slug)
     .single()
 
   if (error || !clinic) {

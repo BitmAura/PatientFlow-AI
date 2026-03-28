@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,7 +21,7 @@ export async function POST(
   const { data: log } = await supabase
     .from('reminder_logs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', staff.clinic_id)
     .single()
 
@@ -37,9 +37,10 @@ export async function POST(
       updated_at: new Date().toISOString(),
       error_reason: null // Clear previous error
     })
-    .eq('id', params.id)
+    .eq('id', context.params.id)
 
   if (error) return new NextResponse('Failed to resend', { status: 500 })
 
   return NextResponse.json({ success: true })
 }
+

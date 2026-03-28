@@ -15,8 +15,10 @@ import { format } from 'date-fns'
 import { Calendar, Clock, User, Phone, Mail, CreditCard, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { Separator } from '@/components/ui/separator'
+import { useParams } from 'next/navigation'
 
-export default function AppointmentDetailsPage({ params }: { params: { id: string } }) {
+export default function AppointmentDetailsPage() {
+  const params = useParams<{ id: string }>()
   const { data: appointment, isLoading } = useAppointment(params.id)
   
   // Action Dialog State

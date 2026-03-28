@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cancelCampaignSend } from '@/lib/campaigns/send-campaign'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,21 +22,21 @@ export async function POST(
   const { data: campaign } = await supabase
     .from('campaigns')
     .select('id, status')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (staff as any).clinic_id)
     .single()
 
   if (!campaign) return new NextResponse('Campaign not found', { status: 404 })
 
   try {
-    await cancelCampaignSend(params.id)
+    await cancelCampaignSend(context.params.id)
 
     await writeAuditLog({
       clinicId: (staff as any).clinic_id,
       userId: user.id,
       action: 'update',
       entityType: 'campaign',
-      entityId: params.id,
+      entityId: context.params.id,
       oldValues: { status: (campaign as any).status },
       newValues: { status: 'cancelled' },
       request,
@@ -47,3 +47,4 @@ export async function POST(
     return new NextResponse(error.message, { status: 500 })
   }
 }
+

@@ -19,7 +19,8 @@ export async function createPortalSession(patientId: string, clinicId: string, p
     .setExpirationTime('24h')
     .sign(JWT_SECRET)
 
-  cookies().set(SESSION_COOKIE, token, {
+  const cookieStore = await cookies()
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -39,8 +40,9 @@ export async function verifyPortalSession(token: string | undefined): Promise<Po
   }
 }
 
-export function clearPortalSession() {
-  cookies().delete(SESSION_COOKIE)
+export async function clearPortalSession() {
+  const cookieStore = await cookies()
+  cookieStore.delete(SESSION_COOKIE)
 }
 
 export function generateOTP(): string {

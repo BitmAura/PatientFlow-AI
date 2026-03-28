@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { markAsRead } from '@/lib/services/notifications'
 import { createClient } from '@/lib/supabase/server'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,20 +22,20 @@ export async function POST(
   const { data: notification } = await supabase
     .from('notifications')
     .select('id, read')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', (clinic as any).id)
     .single()
 
   if (!notification) return new NextResponse('Not found', { status: 404 })
 
-  await markAsRead(params.id)
+  await markAsRead(context.params.id)
 
   await writeAuditLog({
     clinicId: (clinic as any).id,
     userId: user.id,
     action: 'update',
     entityType: 'notification',
-    entityId: params.id,
+    entityId: context.params.id,
     oldValues: {
       read: (notification as any).read,
     },
@@ -47,3 +47,4 @@ export async function POST(
 
   return NextResponse.json({ success: true })
 }
+

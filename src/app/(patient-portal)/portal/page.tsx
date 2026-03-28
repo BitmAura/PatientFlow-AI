@@ -4,7 +4,7 @@ import { verifyPortalSession } from '@/lib/portal/session'
 import { PatientAppointments } from '@/components/portal/patient-appointments'
 
 export default async function PortalPage() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get('portal_session')?.value
   const session = await verifyPortalSession(token)
 

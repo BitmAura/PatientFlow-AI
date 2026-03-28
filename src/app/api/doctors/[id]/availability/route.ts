@@ -1,18 +1,18 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/utils/api-response';
 import { doctorAvailabilitySchema } from '@/lib/validations/doctor';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('doctors')
       .select('availability_overrides')
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .single();
 
     if (error) throw error;
@@ -24,7 +24,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const json = await req.json();
@@ -42,7 +42,7 @@ export async function PUT(
     const { data, error } = await (supabase as any)
       .from('doctors')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', context.params.id)
       .select('availability_overrides')
       .single();
 

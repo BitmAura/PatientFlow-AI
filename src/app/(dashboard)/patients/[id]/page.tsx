@@ -15,8 +15,10 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { AppointmentCard } from '@/components/appointments/appointment-card'
 import { useAppointments } from '@/hooks/use-appointments'
+import { useParams } from 'next/navigation'
 
-export default function PatientProfilePage({ params }: { params: { id: string } }) {
+export default function PatientProfilePage() {
+  const params = useParams<{ id: string }>()
   const { data: patient, isLoading } = usePatient(params.id)
   
   // Fetch patient appointments

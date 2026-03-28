@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { verifyPortalSession } from '@/lib/portal/session'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get('portal_session')?.value
   const session = await verifyPortalSession(token)
 
@@ -20,7 +20,7 @@ export async function POST(
   const { data: appointment } = await supabase
     .from('appointments')
     .select('id')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('patient_id', session.patient_id)
     .single()
 
@@ -32,7 +32,8 @@ export async function POST(
       status: 'cancellation_requested',
       notes: `Cancellation Request: ${reason}`
     })
-    .eq('id', params.id)
+    .eq('id', context.params.id)
 
   return NextResponse.json({ success: true })
 }
+

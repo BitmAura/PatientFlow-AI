@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceSchema } from '@/lib/validations/service'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,7 +22,7 @@ export async function GET(
   const { data: service, error } = await supabase
     .from('services')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', clinic.id)
     .single()
 
@@ -33,7 +33,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
@@ -50,7 +50,7 @@ export async function PUT(
   const { data: current } = await supabase
     .from('services')
     .select('id, name, price, duration')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', clinic.id)
     .single()
 
@@ -62,7 +62,7 @@ export async function PUT(
   const { data: service, error } = await supabase
     .from('services')
     .update(body)
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', clinic.id)
     .select()
     .single()
@@ -74,7 +74,7 @@ export async function PUT(
     userId: user.id,
     action: 'update',
     entityType: 'service',
-    entityId: params.id,
+    entityId: context.params.id,
     oldValues: {
       name: (current as any).name,
       price: (current as any).price,
@@ -93,7 +93,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
@@ -110,7 +110,7 @@ export async function DELETE(
   const { data: current } = await supabase
     .from('services')
     .select('id, name')
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', clinic.id)
     .single()
 
@@ -120,7 +120,7 @@ export async function DELETE(
   const { error } = await supabase
     .from('services')
     .update({ is_deleted: true })
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .eq('clinic_id', clinic.id)
 
   if (error) return new NextResponse(error.message, { status: 500 })
@@ -130,7 +130,7 @@ export async function DELETE(
     userId: user.id,
     action: 'delete',
     entityType: 'service',
-    entityId: params.id,
+    entityId: context.params.id,
     oldValues: {
       name: (current as any).name,
     },
@@ -142,3 +142,4 @@ export async function DELETE(
 
   return NextResponse.json({ success: true })
 }
+

@@ -17,8 +17,10 @@ import { format } from 'date-fns'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { PatientDetails } from '@/lib/validations/booking'
+import { useParams } from 'next/navigation'
 
-export default function BookingPage({ params }: { params: { slug: string } }) {
+export default function BookingPage() {
+  const params = useParams<{ slug: string }>()
   const { data: info, isLoading: infoLoading, error } = useClinicBookingInfo(params.slug)
   const [step, setStep] = React.useState(0)
   

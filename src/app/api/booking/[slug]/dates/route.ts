@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { addDays, format, isWeekend } from 'date-fns'
 import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  context: any
 ) {
   const ip = getClientIp(request)
   const limiter = checkRateLimit(`booking-dates:${ip}`, 120, 60_000)
@@ -43,3 +43,4 @@ export async function GET(
 
   return NextResponse.json({ dates })
 }
+

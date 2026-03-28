@@ -1,17 +1,17 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/utils/api-response';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('doctor_services')
       .select('service_id, services(name, duration, price)')
-      .eq('doctor_id', params.id);
+      .eq('doctor_id', context.params.id);
 
     if (error) throw error;
     return successResponse(data);
@@ -19,3 +19,4 @@ export async function GET(
     return errorResponse(error.message);
   }
 }
+

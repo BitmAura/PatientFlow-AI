@@ -122,7 +122,7 @@ export function ImportLeadsDialog({ open, onOpenChange }: ImportLeadsDialogProps
             <div className="space-y-4">
               <ImportDropzone onFileSelect={handleFileSelect} />
               <div className="text-sm text-muted-foreground">
-                <p>Supported formats: .csv, .xlsx, .xls</p>
+                <p>Supported formats: .csv</p>
                 <p>Max file size: 5MB</p>
               </div>
             </div>

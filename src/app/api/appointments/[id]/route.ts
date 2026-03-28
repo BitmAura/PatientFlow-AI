@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   
@@ -19,7 +19,7 @@ export async function GET(
         users (full_name)
       )
     `)
-    .eq('id', params.id)
+    .eq('id', context.params.id)
     .single()
 
   if (error) return new NextResponse(error.message, { status: 404 })
@@ -29,16 +29,17 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   const supabase = createClient()
   
   const { error } = await supabase
     .from('appointments')
     .delete()
-    .eq('id', params.id)
+    .eq('id', context.params.id)
 
   if (error) return new NextResponse(error.message, { status: 500 })
 
   return new NextResponse(null, { status: 204 })
 }
+

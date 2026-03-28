@@ -1,11 +1,11 @@
-import { NextRequest } from 'next/server';
+﻿import { NextRequest } from 'next/server';
 import { convertToAppointment } from '@/lib/services/waiting-list';
 import { convertToAppointmentSchema } from '@/lib/validations/waiting-list';
 import { successResponse, errorResponse, validationErrorResponse } from '@/lib/utils/api-response';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
     const json = await req.json();
@@ -15,9 +15,10 @@ export async function POST(
       return validationErrorResponse(result.error);
     }
 
-    await convertToAppointment(params.id, result.data);
+    await convertToAppointment(context.params.id, result.data);
     return successResponse({ success: true });
   } catch (error: any) {
     return errorResponse(error.message);
   }
 }
+

@@ -6,7 +6,6 @@ import { Upload, FileSpreadsheet, FileText, X } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
-import { parseExcel } from '@/lib/import/parse-excel'
 import { parseCSV } from '@/lib/import/parse-csv'
 
 interface ImportDropzoneProps {
@@ -28,11 +27,9 @@ export function ImportDropzone({ onFileSelect }: ImportDropzoneProps) {
 
     try {
       let data: any[] = []
-      
+
       if (selectedFile.name.endsWith('.csv')) {
         data = await parseCSV(selectedFile)
-      } else if (selectedFile.name.match(/\.xlsx?$/)) {
-        data = await parseExcel(selectedFile)
       } else {
         throw new Error('Unsupported file format')
       }
@@ -53,8 +50,6 @@ export function ImportDropzone({ onFileSelect }: ImportDropzoneProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'application/vnd.ms-excel': ['.xls'],
       'text/csv': ['.csv']
     },
     maxFiles: 1,
@@ -105,7 +100,7 @@ export function ImportDropzone({ onFileSelect }: ImportDropzoneProps) {
             {isDragActive ? "Drop the file here" : "Drag & drop your file here"}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Supports .xlsx, .xls, and .csv up to 10MB
+            Supports .csv up to 10MB
           </p>
         </div>
         {error && (
