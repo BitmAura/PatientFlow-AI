@@ -26,9 +26,17 @@ export default function Error({
         </div>
         
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong!</h2>
-        <p className="text-gray-500 mb-8">
-          We apologize for the inconvenience. An unexpected error occurred while processing your request.
-        </p>
+        <div className="mb-8 space-y-2">
+          <p className="text-gray-500">
+            We apologize for the inconvenience. An unexpected error occurred while processing your request.
+          </p>
+          {error.digest ? (
+            <p className="text-xs text-gray-400">
+              Reference:{' '}
+              <code className="rounded bg-gray-100 px-1 py-0.5">{error.digest}</code>
+            </p>
+          ) : null}
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button onClick={reset} className="gap-2">
