@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { PageContainer } from '@/components/layout/page-container'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,7 @@ import { format } from 'date-fns'
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
-export default function NewPatientPage() {
+function NewPatientPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const createPatient = useCreatePatient()
@@ -308,5 +309,26 @@ export default function NewPatientPage() {
         </form>
       </div>
     </PageContainer>
+  )
+}
+
+function NewPatientPageFallback() {
+  return (
+    <PageContainer>
+      <Breadcrumbs />
+      <div className="mx-auto max-w-3xl space-y-6">
+        <div className="h-8 w-56 animate-pulse rounded-md bg-muted" />
+        <div className="h-72 animate-pulse rounded-xl bg-muted" />
+        <div className="h-48 animate-pulse rounded-xl bg-muted" />
+      </div>
+    </PageContainer>
+  )
+}
+
+export default function NewPatientPage() {
+  return (
+    <Suspense fallback={<NewPatientPageFallback />}>
+      <NewPatientPageContent />
+    </Suspense>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { SignupForm } from '@/components/auth/signup-form'
 import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import Link from 'next/link'
@@ -9,7 +10,7 @@ import { motion } from 'framer-motion'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
 import { useSearchParams } from 'next/navigation'
 
-export default function SignupPage() {
+function SignupPageContent() {
   const searchParams = useSearchParams()
   const selectedPlan = normalizePlanId(searchParams.get('plan') || 'starter')
 
@@ -111,5 +112,19 @@ export default function SignupPage() {
         </div>
       </GlassCard>
     </motion.div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[320px] items-center justify-center px-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      }
+    >
+      <SignupPageContent />
+    </Suspense>
   )
 }
