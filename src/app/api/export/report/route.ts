@@ -2,11 +2,42 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import jsPDF from 'jspdf'
 import { format } from 'date-fns'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
+  const ipLimiter = checkRateLimit(`export-report:ip:${ip}`, 30, 60_000)
+  if (!ipLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many export attempts. Please retry shortly.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(ipLimiter.retryAfterSeconds),
+          'X-RateLimit-Remaining': String(ipLimiter.remaining),
+        },
+      }
+    )
+  }
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
+
+  const userLimiter = checkRateLimit(`export-report:user:${user.id}`, 20, 60_000)
+  if (!userLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many exports for this account. Please retry shortly.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(userLimiter.retryAfterSeconds),
+          'X-RateLimit-Remaining': String(userLimiter.remaining),
+        },
+      }
+    )
+  }
 
   const { report_type, date_from, date_to } = await request.json()
 
@@ -37,6 +68,20 @@ export async function POST(request: Request) {
   doc.text('Report generation logic to be implemented.', 14, 50)
   
   const pdfBuffer = doc.output('arraybuffer')
+
+  await writeAuditLog({
+    clinicId: (clinic as any).id,
+    userId: user.id,
+    action: 'export',
+    entityType: 'report',
+    newValues: {
+      report_type,
+      date_from,
+      date_to,
+      format: 'pdf',
+    },
+    request,
+  })
 
   return new NextResponse(pdfBuffer, {
     status: 200,

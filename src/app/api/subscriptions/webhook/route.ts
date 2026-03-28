@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, parseWebhookEvent } from '@/lib/razorpay/subscriptions'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { writeAuditLog } from '@/lib/audit/log'
 
 /**
  * POST /api/subscriptions/webhook
@@ -8,11 +10,33 @@ import { verifyWebhookSignature, parseWebhookEvent } from '@/lib/razorpay/subscr
  */
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request)
+    const limiter = checkRateLimit(`subscriptions-webhook:${ip}`, 120, 60_000)
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: 'Too many webhook requests' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(limiter.retryAfterSeconds),
+          },
+        }
+      )
+    }
+
     // Get webhook signature and body
     const signature = request.headers.get('x-razorpay-signature')
     const body = await request.text()
 
     if (!signature) {
+      await writeAuditLog({
+        action: 'webhook_rejected',
+        entityType: 'subscription_webhook',
+        newValues: {
+          reason: 'missing_signature',
+        },
+        request,
+      })
       return NextResponse.json(
         { error: 'Missing signature' },
         { status: 400 }
@@ -33,6 +57,14 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       console.error('Invalid webhook signature')
+      await writeAuditLog({
+        action: 'webhook_rejected',
+        entityType: 'subscription_webhook',
+        newValues: {
+          reason: 'invalid_signature',
+        },
+        request,
+      })
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -42,6 +74,19 @@ export async function POST(request: NextRequest) {
     // Parse event
     const eventData = parseWebhookEvent(JSON.parse(body))
     const { event, subscriptionId, paymentId, status, amount } = eventData
+
+    await writeAuditLog({
+      action: 'webhook_received',
+      entityType: 'subscription_webhook',
+      entityId: subscriptionId || null,
+      newValues: {
+        event,
+        payment_id: paymentId || null,
+        status: status || null,
+        amount: amount || null,
+      },
+      request,
+    })
 
     console.log(`Received Razorpay webhook: ${event}`)
 
@@ -82,6 +127,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error('Error processing webhook:', error)
+    await writeAuditLog({
+      action: 'webhook_error',
+      entityType: 'subscription_webhook',
+      newValues: {
+        message: error instanceof Error ? error.message : String(error),
+      },
+      request,
+    })
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
