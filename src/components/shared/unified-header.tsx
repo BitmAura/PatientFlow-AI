@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, Phone, ChevronRight, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { TwentyOneButton } from '@/components/ui/twentyone-button'
+import { useTrackCta } from '@/hooks/use-track-cta'
 
 interface UnifiedHeaderProps {
   currentService?: 'noshow'
@@ -23,6 +25,7 @@ export function UnifiedHeader({
 }: UnifiedHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const trackCta = useTrackCta()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,12 +46,17 @@ export function UnifiedHeader({
   const navItems = navigationItems.length > 0 ? navigationItems : defaultNavItems
   
   const config = {
-    logo: 'PatientFlow AI',
-    tagline: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
+    logo: 'No Show Killer',
+    tagline: 'Reduce no-shows with WhatsApp automation for Indian clinics.',
     primaryColor: 'green',
-    ctaText: 'Start Free Trial',
-    ctaHref: '/signup',
+    ctaText: 'Book Free Demo',
+    ctaHref: '/book-demo',
   }
+
+  const whatsappSalesNumber = process.env.NEXT_PUBLIC_WHATSAPP_SALES_NUMBER
+  const whatsappHref = whatsappSalesNumber
+    ? `https://wa.me/${whatsappSalesNumber.replace(/\D/g, '')}`
+    : null
 
   return (
     <header
@@ -93,14 +101,11 @@ export function UnifiedHeader({
               </Link>
             ))}
             
-            <Link href={config.ctaHref}>
-              <Button 
-                className="bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-500"
-                size="sm"
-              >
+            <Link href={config.ctaHref} onClick={() => trackCta(config.ctaText, 'header_desktop', config.ctaHref)}>
+              <TwentyOneButton className="h-10 px-4" type="button">
                 <Phone className="w-4 h-4 mr-2" />
                 {config.ctaText}
-              </Button>
+              </TwentyOneButton>
             </Link>
           </nav>
 
@@ -133,18 +138,32 @@ export function UnifiedHeader({
                 </Link>
               ))}
               
-              <Link href={config.ctaHref} className="w-full">
-                <Button 
-                  className="mt-2 w-full bg-emerald-600 text-white hover:bg-emerald-500"
-                  size="sm"
-                >
+              <Link href={config.ctaHref} className="w-full" onClick={() => trackCta(config.ctaText, 'header_mobile_menu', config.ctaHref)}>
+                <TwentyOneButton className="mt-2 w-full" type="button">
                   <Phone className="w-4 h-4 mr-2" />
                   {config.ctaText}
-                </Button>
+                </TwentyOneButton>
               </Link>
             </nav>
           </div>
         )}
+      </div>
+
+      <div className="border-t border-emerald-100 bg-white px-4 py-2 md:hidden">
+        <div className="mx-auto flex w-full max-w-7xl gap-2">
+          <Link href={config.ctaHref} className="flex-1" onClick={() => trackCta('Book Demo', 'header_mobile_sticky', config.ctaHref)}>
+            <TwentyOneButton className="w-full" type="button">
+              Book Demo
+            </TwentyOneButton>
+          </Link>
+          {whatsappHref && (
+            <a href={whatsappHref} className="flex-1" target="_blank" rel="noreferrer" onClick={() => trackCta('WhatsApp', 'header_mobile_sticky', whatsappHref)}>
+              <TwentyOneButton tone="secondary" className="w-full" type="button">
+                WhatsApp
+              </TwentyOneButton>
+            </a>
+          )}
+        </div>
       </div>
     </header>
   )

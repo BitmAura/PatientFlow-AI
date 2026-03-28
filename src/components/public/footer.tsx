@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Linkedin, Mail, MapPin } from 'lucide-react'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -15,17 +15,17 @@ export function Footer() {
               <div className="relative h-10 w-10">
                  <Image 
                    src="/logo.png" 
-                   alt="PatientFlow AI" 
+                   alt="No Show Killer" 
                    fill
                    className="object-contain"
                  />
               </div>
               <span className="text-2xl font-bold tracking-tight text-zinc-900">
-                PatientFlow AI
+                No Show Killer
               </span>
             </Link>
             <p className="max-w-xs text-sm text-zinc-600">
-              Automated appointment management and WhatsApp reminders for modern healthcare practices.
+              Automated appointment management and WhatsApp reminders for modern Indian healthcare practices.
             </p>
             <div className="flex space-x-4">
               <SocialLink href="#" icon={Facebook} />
@@ -42,6 +42,7 @@ export function Footer() {
               <FooterLink href="/how-it-works">How it Works</FooterLink>
               <FooterLink href="/how-recall-works">Recall System</FooterLink>
               <FooterLink href="/features">Features</FooterLink>
+              <FooterLink href="/blog">Blog</FooterLink>
               <FooterLink href="/pricing">Pricing</FooterLink>
               <FooterLink href="/integration">Integrations</FooterLink>
             </ul>
@@ -64,15 +65,13 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               <li className="flex items-start gap-3 text-sm text-zinc-600">
                 <MapPin className="h-5 w-5 shrink-0 text-green-600" />
-                <span>123 Healthcare Ave,<br />Medical District, NY 10001</span>
-              </li>
-              <li className="flex items-center gap-3 text-sm text-zinc-600">
-                <Phone className="h-5 w-5 shrink-0 text-green-600" />
-                <span>+1 (555) 123-4567</span>
+                <span>Bangalore, Karnataka, India<br />Remote-first, serving clinics across India</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-zinc-600">
                 <Mail className="h-5 w-5 shrink-0 text-green-600" />
-                <span>hello@patientflow.ai</span>
+                <a href="mailto:support@auradigitalservices.me" className="hover:text-green-700">
+                  support@auradigitalservices.me
+                </a>
               </li>
             </ul>
           </div>
@@ -80,7 +79,7 @@ export function Footer() {
         
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 md:flex-row">
           <p className="text-sm text-zinc-500">
-            &copy; {currentYear} PatientFlow AI. All rights reserved.
+            &copy; {currentYear} Aura Digital Services. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-zinc-500">
             <Link href="/privacy" className="hover:text-green-600 transition-colors">Privacy Policy</Link>

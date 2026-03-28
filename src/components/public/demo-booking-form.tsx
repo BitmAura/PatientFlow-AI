@@ -1,28 +1,30 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
+import { TwentyOneButton } from '@/components/ui/twentyone-button'
+import { useTrackCta } from '@/hooks/use-track-cta'
 
 type SubmitState = 'idle' | 'loading' | 'success' | 'error'
 
 export function DemoBookingForm() {
+  const router = useRouter()
+  const trackCta = useTrackCta()
   const [state, setState] = useState<SubmitState>('idle')
   const [error, setError] = useState('')
-  const [calendarUrl, setCalendarUrl] = useState<string | null>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setState('loading')
     setError('')
-    setCalendarUrl(null)
 
     const formData = new FormData(event.currentTarget)
     const payload = {
       name: String(formData.get('name') || ''),
       clinicName: String(formData.get('clinicName') || ''),
       phone: String(formData.get('phone') || ''),
-      city: String(formData.get('city') || ''),
+      monthlyAppointments: String(formData.get('monthlyAppointments') || ''),
     }
 
     try {
@@ -40,9 +42,11 @@ export function DemoBookingForm() {
         return
       }
 
-      setCalendarUrl(result?.calendarUrl || null)
+      trackCta('Book Demo Submit', 'book_demo_form', '/book-demo/thank-you')
       setState('success')
       event.currentTarget.reset()
+      const encodedPhone = encodeURIComponent(payload.phone)
+      router.push(`/book-demo/thank-you?phone=${encodedPhone}`)
     } catch {
       setError('Network error. Please try again in a moment.')
       setState('error')
@@ -51,9 +55,9 @@ export function DemoBookingForm() {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-      <h2 className="text-2xl font-bold tracking-tight text-slate-900">Book Your Free Demo</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900">Book Your 15-Min Demo</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Submit your details and we will send a WhatsApp confirmation instantly.
+        Submit your details and we will send WhatsApp confirmation instantly.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -73,40 +77,36 @@ export function DemoBookingForm() {
 
         <div>
           <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">
-            Phone
+            Phone Number (WhatsApp)
           </label>
-          <Input id="phone" name="phone" placeholder="e.g. 9876543210" required />
+          <Input id="phone" name="phone" placeholder="e.g. +91 98765 43210" required />
         </div>
 
         <div>
-          <label htmlFor="city" className="mb-1 block text-sm font-medium text-slate-700">
-            City
+          <label htmlFor="monthlyAppointments" className="mb-1 block text-sm font-medium text-slate-700">
+            Monthly appointments
           </label>
-          <Input id="city" name="city" placeholder="Your city" required />
+          <select
+            id="monthlyAppointments"
+            name="monthlyAppointments"
+            required
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Select monthly volume
+            </option>
+            <option value="50-100">50-100</option>
+            <option value="100-200">100-200</option>
+            <option value="200-500">200-500</option>
+            <option value="500+">500+</option>
+          </select>
         </div>
 
-        <Button type="submit" className="w-full" disabled={state === 'loading'}>
+        <TwentyOneButton type="submit" className="w-full" disabled={state === 'loading'}>
           {state === 'loading' ? 'Submitting...' : 'Book Demo'}
-        </Button>
+        </TwentyOneButton>
       </form>
-
-      {state === 'success' && (
-        <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
-          Demo booked successfully. We have sent your WhatsApp message.
-          {calendarUrl && (
-            <div className="mt-2">
-              <a
-                href={calendarUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold underline"
-              >
-                Optional: choose a calendar slot
-              </a>
-            </div>
-          )}
-        </div>
-      )}
 
       {state === 'error' && (
         <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>

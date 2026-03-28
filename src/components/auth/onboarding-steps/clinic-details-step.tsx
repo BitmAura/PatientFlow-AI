@@ -78,7 +78,7 @@ export function ClinicDetailsStep({ defaultValues, onNext }: ClinicDetailsStepPr
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="+1 (555) 000-0000" {...field} />
+                  <Input placeholder="+91 98765 43210" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

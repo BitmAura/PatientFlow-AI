@@ -414,7 +414,7 @@ function CompleteStep({ onFinish }: { onFinish: () => void }) {
       </Button>
 
       <p className="text-xs text-gray-500">
-        Need help? Our support team is available 24/7 at support@patientflow.ai
+        Need help? Our support team is available 24/7 at support@auradigitalservices.me
       </p>
     </div>
   )

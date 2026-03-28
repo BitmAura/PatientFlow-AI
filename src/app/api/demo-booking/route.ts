@@ -6,7 +6,7 @@ interface DemoBookingPayload {
   name?: string
   clinicName?: string
   phone?: string
-  city?: string
+  monthlyAppointments?: string
 }
 
 function normalizePhone(input: string): string {
@@ -19,11 +19,11 @@ export async function POST(request: Request) {
 
     const name = body.name?.trim() || ''
     const clinicName = body.clinicName?.trim() || ''
-    const city = body.city?.trim() || ''
+    const monthlyAppointments = body.monthlyAppointments?.trim() || ''
     const rawPhone = body.phone?.trim() || ''
     const phone = normalizePhone(rawPhone)
 
-    if (!name || !clinicName || !city || !rawPhone) {
+    if (!name || !clinicName || !monthlyAppointments || !rawPhone) {
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 })
     }
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         source: 'website',
         status: 'new',
         interest: 'demo_booking',
-        notes: `Clinic Name: ${clinicName}; City: ${city}`,
+        notes: `Clinic Name: ${clinicName}; Monthly Appointments: ${monthlyAppointments}`,
         followup_count: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not save your request. Please try again.' }, { status: 500 })
     }
 
-    const autoMessage = "Hi, thanks for booking demo. Here's how PatientFlow AI works..."
+    const autoMessage = `Hi ${name}, thanks for booking a No Show Killer demo for ${clinicName}. Our team will confirm your slot shortly on WhatsApp. We will also send reminders 24 hours and 1 hour before the demo.`
     const waResult = await sendWhatsAppMessage(clinicId, phone, autoMessage, {
       type: 'demo_booking',
       leadId: lead.id,

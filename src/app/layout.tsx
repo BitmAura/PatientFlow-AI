@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import QueryProvider from '@/components/providers/query-provider'
@@ -24,38 +25,40 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'PatientFlow AI',
-    template: '%s | PatientFlow AI',
+    default: 'No Show Killer',
+    template: '%s | No Show Killer',
   },
-  description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
+  description:
+    'Indian dental and skin clinics use No Show Killer to recover ₹40,000+/month from missed appointments with WhatsApp automation.',
   keywords: [
-    'PatientFlow AI',
-    'clinic automation',
-    'patient bookings',
-    'no-show reduction',
-    'whatsapp reminders',
-    'healthcare SaaS',
+    'clinic appointment software India',
+    'WhatsApp clinic automation',
+    'reduce no-shows',
+    'dental clinic software',
+    'patient recall system',
   ],
   authors: [
     {
-      name: 'PatientFlow AI',
-      url: 'https://patientflow.ai',
+      name: 'Aura Digital Services',
+      url: 'https://auradigitalservices.me',
     },
   ],
-  creator: 'PatientFlow AI',
-  metadataBase: new URL('https://patientflow.ai'),
+  creator: 'Aura Digital Services',
+  metadataBase: new URL('https://auradigitalservices.me'),
   openGraph: {
-    title: 'PatientFlow AI',
-    description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
-    url: 'https://patientflow.ai',
-    siteName: 'PatientFlow AI',
+    title: 'No Show Killer',
+    description:
+      'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
+    url: 'https://auradigitalservices.me',
+    siteName: 'No Show Killer',
     images: ['/logo.png'],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PatientFlow AI',
-    description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
+    title: 'No Show Killer',
+    description:
+      'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
     images: ['/logo.png'],
   },
   icons: {
@@ -88,6 +91,7 @@ export default function RootLayout({
           <QueryProvider>
             {children}
             <Toaster position="top-right" />
+            <Analytics />
           </QueryProvider>
         </ThemeProvider>
       </body>

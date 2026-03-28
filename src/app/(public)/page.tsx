@@ -1,23 +1,43 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import {
   ArrowRight,
+  Building2,
   CalendarCheck2,
   CheckCircle2,
   Clock3,
+  Landmark,
+  Languages,
   MessageCircleMore,
-  PhoneCall,
+  ShieldCheck,
   Sparkles,
+  Stethoscope,
   WalletCards,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { RoiCalculator } from '@/components/public/roi-calculator'
+import { TrackedCtaLink } from '@/components/public/tracked-cta-link'
 import { PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
+
+export const metadata: Metadata = {
+  title: 'No Show Killer - Reduce Clinic No-Shows with WhatsApp Automation',
+  description:
+    'Indian dental and skin clinics use No Show Killer to recover ₹40,000+/month from missed appointments. WhatsApp automation, booking, reminders and recalls.',
+  keywords: [
+    'clinic appointment software India',
+    'WhatsApp clinic automation',
+    'reduce no-shows',
+    'dental clinic software',
+    'patient recall system',
+  ],
+}
 
 export default function LandingPage() {
   const solutionPoints = [
-    'WhatsApp auto-replies for every inquiry',
-    'Instant appointment booking links',
-    'Multi-step follow-up automation',
-    'Recall campaigns for old patients',
+    'WhatsApp auto-replies for every new dental inquiry',
+    'Instant dental consultation booking links',
+    'Root canal confirmation and reminder automation',
+    'Recall patients for cleanings on autopilot',
   ]
 
   const pricingPlans = [
@@ -25,11 +45,11 @@ export default function LandingPage() {
       name: PRICING_PLANS.starter.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise),
       subtitle: '/month',
-      description: 'For single-doctor clinics getting started with automation.',
+      description: 'For single-doctor clinics starting WhatsApp automation.',
       features: [
         'Up to 500 conversations/month',
-        'WhatsApp auto-replies',
-        'Booking links + reminders',
+        'WhatsApp auto-replies for inquiries',
+        'Dental consultation links + reminders',
         'Basic analytics dashboard',
       ],
       cta: 'Book Free Demo',
@@ -39,7 +59,7 @@ export default function LandingPage() {
       name: PRICING_PLANS.growth.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.growth.monthlyPricePaise),
       subtitle: '/month',
-      description: 'For fast-growing clinics focused on predictable bookings.',
+      description: 'For high-intent dental clinics focused on predictable bookings.',
       features: [
         'Up to 2,000 conversations/month',
         'Advanced follow-up sequences',
@@ -53,7 +73,7 @@ export default function LandingPage() {
       name: PRICING_PLANS.pro.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.pro.monthlyPricePaise),
       subtitle: '/month',
-      description: 'For multi-doctor and multi-location clinic groups.',
+      description: 'For multi-doctor and multi-location healthcare groups.',
       features: [
         'Unlimited conversations',
         'Multi-branch automation',
@@ -65,64 +85,107 @@ export default function LandingPage() {
     },
   ]
 
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'No Show Killer',
+    areaServed: ['Bangalore', 'Mumbai', 'Delhi', 'Pune'],
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Bangalore',
+      addressRegion: 'Karnataka',
+      addressCountry: 'IN',
+    },
+    description:
+      'WhatsApp appointment automation for Indian clinics focused on fewer no-shows and higher bookings.',
+    provider: {
+      '@type': 'Organization',
+      name: 'Aura Digital Services',
+    },
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
+      />
       <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] pt-16 pb-14 md:pt-24 md:pb-20">
         <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
         <div className="container mx-auto px-4">
           <div className="relative mx-auto max-w-5xl text-center">
             <div className="mb-6 inline-flex items-center rounded-full border border-emerald-300 bg-white/80 px-4 py-1.5 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur">
-              Built for dental, skin, and general clinics
+              Built in India, for Indian healthcare teams
             </div>
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-              Turn Missed Inquiries into Booked Patients Automatically
+            <h1 className="text-balance text-[clamp(2rem,6vw,4.2rem)] font-bold tracking-tight text-slate-900">
+              Turn Your Dental Clinic&apos;s WhatsApp Into an Automated Booking Machine
             </h1>
             <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-relaxed text-slate-600 sm:text-lg">
-              PatientFlow AI uses WhatsApp automation to follow up, confirm, and convert patients without extra staff.
+              Recover ₹40,000+/month from missed appointments. Built for Indian dental practices.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/book-demo">
-                <Button
-                  size="lg"
-                  className="h-12 w-full bg-emerald-600 px-7 text-base text-white shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500 sm:w-auto"
-                >
+              <TrackedCtaLink
+                href="/book-demo"
+                label="Book Free Demo"
+                location="homepage_hero"
+                className="w-full px-7 text-base sm:w-auto"
+              >
                   Book Free Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="#pricing">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-12 w-full border-slate-300 bg-white/90 px-7 text-base shadow-sm backdrop-blur transition hover:bg-white sm:w-auto"
-                >
+              </TrackedCtaLink>
+              <TrackedCtaLink
+                href="#pricing"
+                label="View Pricing"
+                location="homepage_hero"
+                tone="secondary"
+                className="w-full px-7 text-base sm:w-auto"
+              >
                   View Pricing
-                </Button>
-              </Link>
+              </TrackedCtaLink>
             </div>
             <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 text-left sm:grid-cols-3">
-              <StatChip label="Avg. response time" value="< 10 sec" />
-              <StatChip label="Demo-to-signup focus" value="ROI-first" />
-              <StatChip label="Works with staff" value="No extra hires" />
+              <StatChip label="Avg. WhatsApp response" value="< 10 sec" />
+              <StatChip label="Recall drop-off benchmark" value="30%" />
+              <StatChip label="No-show benchmark (RCT)" value="20%" />
             </div>
           </div>
         </div>
       </section>
 
+      <section className="pb-12">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Early Access Program</h2>
+            <p className="mt-2 text-sm text-slate-700 sm:text-base">
+              Join 50 clinics in our pilot program. Limited spots: 15 remaining. Free for the first 60 days in exchange for feedback.
+            </p>
+            <div className="mt-5 inline-block">
+              <TrackedCtaLink href="/book-demo" label="Reserve Pilot Spot" location="homepage_early_access">
+                Reserve Pilot Spot
+              </TrackedCtaLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <RoiCalculator />
+
       <section className="py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Why Clinics Lose High-Intent Patients
+              Why Dental Clinics Lose High-Intent Patients
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-              Most clinics are not short on inquiries. They are short on instant, consistent follow-up.
+              Most dental teams are not short on inquiries. They are short on instant, consistent follow-up.
             </p>
           </div>
           <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <ProblemCard icon={WalletCards} text="Clinics lose 30-50% patients due to no follow-up." />
-            <ProblemCard icon={Clock3} text="Front desk staff cannot respond instantly during busy hours." />
-            <ProblemCard icon={PhoneCall} text="Leads go cold when there is no structured nurturing." />
+            <ProblemCard icon={WalletCards} text="30% of cleaning recalls never book." />
+            <ProblemCard icon={Clock3} text="20% no-show rate on RCT appointments hurts revenue consistency." />
+            <ProblemCard icon={Stethoscope} text="Front desk gets buried in WhatsApp during peak hours." />
           </div>
         </div>
       </section>
@@ -132,10 +195,10 @@ export default function LandingPage() {
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div className="flex-1">
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                The Conversion Engine for Clinic Inquiries
+                The Conversion Engine for Dental WhatsApp Inquiries
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-                PatientFlow AI runs a complete WhatsApp workflow from inquiry to confirmed appointment, with follow-ups and recalls built in.
+                No Show Killer runs a complete WhatsApp workflow from inquiry to confirmed dental consultation, with cleanings recall automation built in.
               </p>
               <div className="mt-6 space-y-3">
                 {solutionPoints.map((point) => (
@@ -146,27 +209,25 @@ export default function LandingPage() {
                 ))}
               </div>
               <div className="mt-7">
-                <Link href="/book-demo">
-                  <Button className="h-11 px-6">
+                <TrackedCtaLink href="/book-demo" label="Book Free Demo" location="homepage_solution" className="px-6">
                     Book Free Demo
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                </TrackedCtaLink>
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/70">
               <h3 className="text-lg font-semibold text-slate-900">Visual Demo: WhatsApp Flow</h3>
-              <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed booking.</p>
+              <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed dental consultation.</p>
               <div className="mt-5 rounded-2xl bg-[#ece5dd] p-4">
                 <div className="rounded-xl bg-[#075e54] px-3 py-2 text-sm font-medium text-white">
-                  PatientFlow AI Assistant
+                  No Show Killer Assistant
                 </div>
                 <div className="mt-3 space-y-2 text-sm">
-                  <ChatBubble incoming text="Hi, do you have a skin consultation slot this week?" />
-                  <ChatBubble outgoing text="Yes, we have slots tomorrow at 11:30 AM and 4:00 PM. Reply 1 or 2 to confirm." />
-                  <ChatBubble incoming text="2" />
-                  <ChatBubble outgoing text="Great! You're booked for tomorrow at 4:00 PM. Sharing location and prep details now." />
-                  <ChatBubble outgoing text="Reminder set: We will ping you 24h and 2h before your appointment." />
+                  <ChatBubble incoming text="Hi, do you have a teeth cleaning appointment this week?" />
+                  <ChatBubble outgoing text="Yes, Dr. Sharma has a slot tomorrow at 3 PM. Reply YES to confirm." />
+                  <ChatBubble incoming text="YES" />
+                  <ChatBubble outgoing text="Done. Your dental consultation is confirmed for tomorrow at 3 PM." />
+                  <ChatBubble outgoing text="Root canal confirmation and cleaning recall reminders are also active." />
                 </div>
               </div>
             </div>
@@ -176,11 +237,15 @@ export default function LandingPage() {
 
       <section className="py-14 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-100 bg-emerald-50 p-6 text-center sm:p-10">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Proven Results for Clinics</h2>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <ResultCard value="Recover 20-40% lost patients" description="Re-engage inquiries and past patients automatically." />
-              <ResultCard value="Reduce no-shows by 50%" description="Increase attendance with smart reminder timing." />
+          <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-6 shadow-md sm:p-10">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">India-Market Trust Signals</h2>
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ResultCard value="Secure payments via Razorpay" description="All plans billed in INR with GST invoicing available." icon={Landmark} />
+              <ResultCard value="GDPR-compliant handling" description="No patient data is shared with third parties." icon={ShieldCheck} />
+              <ResultCard value="Regional language support" description="WhatsApp flows can support Hindi and Kannada workflows." icon={Languages} />
+              <ResultCard value="Built in India" description="Bangalore-led product team serving clinics across India." icon={Building2} />
+              <ResultCard value="Powered by Gupshup" description="Meta partner infrastructure for reliable WhatsApp delivery." icon={MessageCircleMore} />
+              <ResultCard value="Hosted with secure infra" description="Production systems designed for healthcare-grade operations." icon={Sparkles} />
             </div>
           </div>
         </div>
@@ -194,7 +259,7 @@ export default function LandingPage() {
             </h2>
             <p className="mt-4 text-base text-slate-600 sm:text-lg">Choose Starter, Growth, or Pro based on inquiry volume and branches.</p>
           </div>
-          <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
               <PricingCard key={plan.name} {...plan} />
             ))}
@@ -212,18 +277,18 @@ export default function LandingPage() {
               Get Your First 10 Bookings Guaranteed
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-              See exactly how PatientFlow AI fits your clinic process in a personalized demo.
+              See exactly how No Show Killer fits your clinic process in a personalized demo.
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/book-demo">
-                <Button
-                  size="lg"
-                  className="h-12 w-full bg-emerald-500 px-7 text-base text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400 sm:w-auto"
-                >
+              <TrackedCtaLink
+                href="/book-demo"
+                label="Book Free Demo"
+                location="homepage_bottom_cta"
+                className="w-full px-7 text-base sm:w-auto"
+              >
                   Book Free Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              </TrackedCtaLink>
               <Link href="/how-it-works">
                 <Button size="lg" variant="outline" className="h-12 w-full border-slate-500 bg-transparent px-7 text-base text-white hover:bg-slate-700 sm:w-auto">
                   See How It Works
@@ -270,11 +335,19 @@ function ChatBubble({ incoming, outgoing, text }: { incoming?: boolean; outgoing
   )
 }
 
-function ResultCard({ value, description }: { value: string; description: string }) {
+function ResultCard({
+  value,
+  description,
+  icon: Icon = Sparkles,
+}: {
+  value: string
+  description: string
+  icon?: any
+}) {
   return (
     <div className="rounded-2xl border border-emerald-200 bg-white p-5 text-left shadow-sm">
       <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-        <Sparkles className="h-4 w-4" />
+        <Icon className="h-4 w-4" />
       </div>
       <h3 className="text-lg font-semibold text-slate-900">{value}</h3>
       <p className="mt-1 text-sm text-slate-600">{description}</p>
@@ -326,18 +399,18 @@ function PricingCard({
           </li>
         ))}
       </ul>
-      <Link href="/book-demo" className="mt-6 block">
-        <Button
-          className={`h-11 w-full transition ${
-            featured
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 hover:bg-emerald-500'
-              : 'bg-white hover:bg-slate-100'
-          }`}
+      <div className="mt-6 block">
+        <TrackedCtaLink
+          href="/book-demo"
+          label={cta}
+          location={`homepage_pricing_${name.toLowerCase()}`}
+          tone={featured ? 'primary' : 'secondary'}
+          className="h-11 w-full"
         >
           <MessageCircleMore className="mr-2 h-4 w-4" />
           {cta}
-        </Button>
-      </Link>
+        </TrackedCtaLink>
+      </div>
     </div>
   )
 }

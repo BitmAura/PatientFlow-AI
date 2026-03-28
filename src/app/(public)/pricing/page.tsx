@@ -1,9 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useTrackCta } from '@/hooks/use-track-cta'
 import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
 export default function PricingPage() {
+  const trackCta = useTrackCta()
   const plans = [
     {
       name: PRICING_PLANS.starter.name,
@@ -73,7 +77,7 @@ export default function PricingPage() {
             Simple, Transparent <span className="text-green-600">Pricing</span>
           </h1>
           <p className="mb-8 text-xl text-slate-600">
-            Choose the perfect plan for your practice. Reduce no-shows by 70% and recover lost revenue.
+            Choose the perfect plan for your practice. Reduce no-shows with consistent WhatsApp reminders and recover lost revenue.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
             <div className="flex items-center gap-2">
@@ -90,7 +94,7 @@ export default function PricingPage() {
             </div>
           </div>
           <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-            <PricingSignal value="70%" label="No-show reduction target" />
+            <PricingSignal value="50%" label="Conservative no-show reduction" />
             <PricingSignal value="< 10s" label="Lead response benchmark" />
             <PricingSignal value={`${FREE_TRIAL_DAYS} days`} label="Risk-free evaluation" />
           </div>
@@ -137,7 +141,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link href={`/signup?plan=${plan.planId}`}>
+                <Link href={`/signup?plan=${plan.planId}`} onClick={() => trackCta('Start Free Trial', `pricing_plan_${plan.planId}`, `/signup?plan=${plan.planId}`)}>
                   <Button 
                     className={`w-full ${
                       plan.popular
@@ -216,30 +220,30 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Social Proof */}
+      {/* Early Access */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="mb-4 text-3xl font-bold text-slate-900">
-              Trusted by Healthcare Providers Across India
+              Early Access Program for Indian Clinics
             </h2>
             <p className="text-slate-600">
-              Join hundreds of doctors and clinics saving thousands each month
+              We are onboarding pilot clinics in limited batches so implementation remains hands-on.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">70%</div>
-              <p className="text-slate-600">Average reduction in no-shows</p>
+              <div className="text-4xl font-bold text-green-600 mb-2">50</div>
+              <p className="text-slate-600">Pilot clinics target cohort</p>
             </div>
             <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">₹2.5L+</div>
-              <p className="text-slate-600">Average monthly revenue recovered</p>
+              <div className="text-4xl font-bold text-green-600 mb-2">15</div>
+              <p className="text-slate-600">Spots remaining in current batch</p>
             </div>
             <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
-              <p className="text-slate-600">Active clinics using PatientFlow AI</p>
+              <div className="text-4xl font-bold text-green-600 mb-2">60 days</div>
+              <p className="text-slate-600">Free pilot period for selected clinics</p>
             </div>
           </div>
         </div>
@@ -286,7 +290,7 @@ export default function PricingPage() {
           <p className="mb-8 text-lg text-slate-600">
             Start your free {FREE_TRIAL_DAYS}-day trial today. No credit card required.
           </p>
-          <Link href="/signup?plan=starter">
+          <Link href="/signup?plan=starter" onClick={() => trackCta('Start Your Free Trial', 'pricing_bottom_cta', '/signup?plan=starter')}>
             <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 h-12 text-lg shadow-lg shadow-green-600/20">
               Start Your Free Trial
             </Button>
