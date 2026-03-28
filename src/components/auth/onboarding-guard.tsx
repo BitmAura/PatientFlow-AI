@@ -18,7 +18,9 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        setAllowed(true)
+        const next = encodeURIComponent(pathname || '/dashboard')
+        router.replace(`/login?next=${next}`)
+        setAllowed(false)
         return
       }
 
@@ -50,6 +52,12 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
       </div>
     )
   }
-  if (allowed === false) return null
+  if (allowed === false) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
   return <>{children}</>
 }

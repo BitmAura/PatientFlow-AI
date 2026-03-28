@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not save your request. Please try again.' }, { status: 500 })
     }
 
-    const autoMessage = `Hi ${name}, thanks for booking a No Show Killer demo for ${clinicName}. Our team will confirm your slot shortly on WhatsApp. We will also send reminders 24 hours and 1 hour before the demo.`
+    const autoMessage = `Hi ${name}, thanks for booking a PatientFlow AI demo for ${clinicName}. Our team will confirm your slot shortly on WhatsApp. We will also send reminders 24 hours and 1 hour before the demo.`
     const waResult = await sendWhatsAppMessage(clinicId, phone, autoMessage, {
       type: 'demo_booking',
       leadId: lead.id,

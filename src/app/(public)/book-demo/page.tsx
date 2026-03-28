@@ -3,8 +3,8 @@ import { CalendarCheck2, Clock3, IndianRupee, Rocket } from 'lucide-react'
 import { DemoBookingForm } from '@/components/public/demo-booking-form'
 
 export const metadata: Metadata = {
-  title: 'See No Show Killer in Action',
-  description: 'Book a 15-minute demo and see how No Show Killer reduces clinic no-shows by 30%.',
+  title: 'See PatientFlow AI in Action',
+  description: 'Book a 15-minute demo and see how PatientFlow AI reduces clinic no-shows by 30%.',
 }
 
 export default function BookDemoPage() {
@@ -18,7 +18,7 @@ export default function BookDemoPage() {
             15-minute strategy call
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            See No Show Killer in Action
+            See PatientFlow AI in Action
           </h1>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
             15-minute demo showing how we reduce no-shows by 30%.

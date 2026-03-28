@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { Skeleton } from '@/components/ui/skeleton'
-import { GlassCard } from '@/components/ui/glass-card'
+import { TwentyOneCard } from '@/components/ui/twentyone-card'
 import { motion } from 'framer-motion'
 
 export function StatsCards() {
@@ -103,7 +103,7 @@ export function StatsCards() {
     >
       {items.map((item, index) => (
         <motion.div key={item.title} variants={itemAnim}>
-          <GlassCard className="group relative h-full overflow-hidden">
+          <TwentyOneCard className="group relative h-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 bg-transparent pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {item.title}
@@ -160,8 +160,7 @@ export function StatsCards() {
               )}
             </CardContent>
 
-            {/* Hover Glow Effect handled by GlassCard, but we can add more */}
-          </GlassCard>
+          </TwentyOneCard>
         </motion.div>
       ))}
     </motion.div>

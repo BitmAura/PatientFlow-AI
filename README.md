@@ -1,6 +1,6 @@
-# No Show Killer
+# PatientFlow AI
 
-No Show Killer is a clinic operations platform that helps healthcare teams reduce missed appointments using automation, reminders, recall workflows, and conversion-focused lead follow-ups.
+PatientFlow AI is a clinic operations platform that helps healthcare teams reduce missed appointments using automation, reminders, recall workflows, and conversion-focused lead follow-ups.
 
 It is built for Aura Digital Services using Next.js + Supabase and supports WhatsApp delivery via Gupshup (primary) and Meta Cloud API (fallback/optional).
 

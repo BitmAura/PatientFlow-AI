@@ -81,10 +81,12 @@ export async function updateSession(request: NextRequest) {
       '/services',
       '/settings',
       '/waiting-list',
-      '/notifications'
+      '/notifications',
+      '/journeys',
+      '/recalls',
     ]
 
-    // Auth routes where logged in users shouldn't go
+    // Auth routes where logged-in users are sent to the app (onboarding still allowed separately)
     const authPaths = ['/login', '/signup', '/forgot-password']
 
     const pathname = request.nextUrl.pathname
@@ -99,10 +101,21 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Redirect authenticated users to dashboard if they try to access auth pages
+    // Redirect authenticated users away from auth pages (preserve ?next= when safe)
     if (user && isAuthPath) {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
+      const nextParam = request.nextUrl.searchParams.get('next')
+      if (
+        nextParam &&
+        nextParam.startsWith('/') &&
+        !nextParam.startsWith('//')
+      ) {
+        url.pathname = nextParam
+        url.searchParams.delete('next')
+      } else {
+        url.pathname = '/dashboard'
+        url.search = ''
+      }
       return NextResponse.redirect(url)
     }
   } catch (e) {

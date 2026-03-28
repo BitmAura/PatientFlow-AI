@@ -1,8 +1,8 @@
-# No Show Killer - Product Brief
+# PatientFlow AI - Product Brief
 
 ## 1) What We Are Building
 
-No Show Killer (PatientFlow AI) is a clinic growth and operations platform that turns missed inquiries into booked appointments and reduces no-shows through WhatsApp-first automation.
+PatientFlow AI is a clinic growth and operations platform that turns missed inquiries into booked appointments and reduces no-shows through WhatsApp-first automation.
 
 The product is built for Indian clinics (dental, skin, general, and multi-specialty) that need:
 - faster lead response,

@@ -15,13 +15,13 @@ export function Footer() {
               <div className="relative h-10 w-10">
                  <Image 
                    src="/logo.png" 
-                   alt="No Show Killer" 
+                   alt="PatientFlow AI" 
                    fill
                    className="object-contain"
                  />
               </div>
               <span className="text-2xl font-bold tracking-tight text-zinc-900">
-                No Show Killer
+                PatientFlow AI
               </span>
             </Link>
             <p className="max-w-xs text-sm text-zinc-600">

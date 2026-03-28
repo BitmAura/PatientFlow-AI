@@ -46,7 +46,7 @@ export function UnifiedHeader({
   const navItems = navigationItems.length > 0 ? navigationItems : defaultNavItems
   
   const config = {
-    logo: 'No Show Killer',
+    logo: 'PatientFlow AI',
     tagline: 'Reduce no-shows with WhatsApp automation for Indian clinics.',
     primaryColor: 'green',
     ctaText: 'Book Free Demo',

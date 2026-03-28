@@ -88,7 +88,7 @@ export function RoiCalculator() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg md:p-6">
               <div className="space-y-4">
                 <MetricRow label="You're losing / month" value={formatInr(metrics.monthlyLost)} tone="danger" />
-                <MetricRow label="No Show Killer could save / month" value={formatInr(metrics.monthlyRecovered)} tone="success" />
+                <MetricRow label="PatientFlow AI could save / month" value={formatInr(metrics.monthlyRecovered)} tone="success" />
                 <MetricRow label="Annual revenue recovered" value={formatInr(metrics.annualRecovered)} tone="neutral" />
                 <MetricRow
                   label={`ROI vs ${formatInr(MONTHLY_FEE)} monthly fee`}

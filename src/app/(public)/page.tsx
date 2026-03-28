@@ -20,9 +20,9 @@ import { TrackedCtaLink } from '@/components/public/tracked-cta-link'
 import { PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
 export const metadata: Metadata = {
-  title: 'No Show Killer - Reduce Clinic No-Shows with WhatsApp Automation',
+  title: 'PatientFlow AI - Reduce Clinic No-Shows with WhatsApp Automation',
   description:
-    'Indian dental and skin clinics use No Show Killer to recover ₹40,000+/month from missed appointments. WhatsApp automation, booking, reminders and recalls.',
+    'Indian dental and skin clinics use PatientFlow AI to recover ₹40,000+/month from missed appointments. WhatsApp automation, booking, reminders and recalls.',
   keywords: [
     'clinic appointment software India',
     'WhatsApp clinic automation',
@@ -88,7 +88,7 @@ export default function LandingPage() {
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: 'No Show Killer',
+    name: 'PatientFlow AI',
     areaServed: ['Bangalore', 'Mumbai', 'Delhi', 'Pune'],
     address: {
       '@type': 'PostalAddress',
@@ -198,7 +198,7 @@ export default function LandingPage() {
                 The Conversion Engine for Dental WhatsApp Inquiries
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-                No Show Killer runs a complete WhatsApp workflow from inquiry to confirmed dental consultation, with cleanings recall automation built in.
+                PatientFlow AI runs a complete WhatsApp workflow from inquiry to confirmed dental consultation, with cleanings recall automation built in.
               </p>
               <div className="mt-6 space-y-3">
                 {solutionPoints.map((point) => (
@@ -220,7 +220,7 @@ export default function LandingPage() {
               <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed dental consultation.</p>
               <div className="mt-5 rounded-2xl bg-[#ece5dd] p-4">
                 <div className="rounded-xl bg-[#075e54] px-3 py-2 text-sm font-medium text-white">
-                  No Show Killer Assistant
+                  PatientFlow AI Assistant
                 </div>
                 <div className="mt-3 space-y-2 text-sm">
                   <ChatBubble incoming text="Hi, do you have a teeth cleaning appointment this week?" />
@@ -277,7 +277,7 @@ export default function LandingPage() {
               Get Your First 10 Bookings Guaranteed
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">
-              See exactly how No Show Killer fits your clinic process in a personalized demo.
+              See exactly how PatientFlow AI fits your clinic process in a personalized demo.
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <TrackedCtaLink

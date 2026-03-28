@@ -66,7 +66,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold leading-9 text-slate-900 dark:text-white">
+          <h1 className="bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-800 bg-clip-text text-3xl font-bold leading-9 text-transparent dark:from-white dark:via-emerald-100 dark:to-slate-200">
             {title}
           </h1>
           {description && (

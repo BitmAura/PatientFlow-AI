@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
 import { getGreeting } from '@/lib/utils/format-date'
 import { motion } from 'framer-motion'
-import { GlowButton } from '@/components/ui/glow-button'
+import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { PageHeader } from '@/components/dashboard/PageStructure'
 
 export default function DashboardPage() {
@@ -63,10 +63,10 @@ export default function DashboardPage() {
                   <UserPlus className="mr-2 h-4 w-4" />
                   New Patient
                 </Button>
-                <GlowButton>
+                <TwentyOneButton type="button">
                   <Plus className="mr-2 h-4 w-4" />
                   New Appointment
-                </GlowButton>
+                </TwentyOneButton>
               </>
             )}
           />

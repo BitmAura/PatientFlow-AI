@@ -16,7 +16,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: 'white' },
     { media: '(prefers-color-scheme: dark)', color: 'black' },
@@ -25,11 +25,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'No Show Killer',
-    template: '%s | No Show Killer',
+    default: 'PatientFlow AI',
+    template: '%s | PatientFlow AI',
   },
   description:
-    'Indian dental and skin clinics use No Show Killer to recover ₹40,000+/month from missed appointments with WhatsApp automation.',
+    'Indian dental and skin clinics use PatientFlow AI to recover ₹40,000+/month from missed appointments with WhatsApp automation.',
   keywords: [
     'clinic appointment software India',
     'WhatsApp clinic automation',
@@ -46,17 +46,17 @@ export const metadata: Metadata = {
   creator: 'Aura Digital Services',
   metadataBase: new URL('https://auradigitalservices.me'),
   openGraph: {
-    title: 'No Show Killer',
+    title: 'PatientFlow AI',
     description:
       'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
     url: 'https://auradigitalservices.me',
-    siteName: 'No Show Killer',
+    siteName: 'PatientFlow AI',
     images: ['/logo.png'],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'No Show Killer',
+    title: 'PatientFlow AI',
     description:
       'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
     images: ['/logo.png'],

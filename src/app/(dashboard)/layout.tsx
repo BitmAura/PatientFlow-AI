@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { UnifiedHeader } from '@/components/shared/unified-header'
 import { OnboardingGuard } from '@/components/auth/onboarding-guard'
 import { DashboardThemeToggle } from '@/components/dashboard/theme-toggle'
+import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 
 export default function DashboardLayout({
   children,
@@ -29,7 +30,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-slate-950">
+    <div className="min-h-screen bg-[linear-gradient(180deg,hsl(var(--background))_0%,hsl(152_25%_97%)_35%,hsl(var(--background))_100%)] dark:bg-slate-950 dark:bg-none">
       {/* Unified Header - Shows service toggle */}
       <UnifiedHeader 
         currentService="noshow" 
@@ -46,14 +47,15 @@ export default function DashboardLayout({
       <main
         className={cn(
           'transition-all duration-300',
+          'pt-32 md:pt-24',
           'lg:ml-64',
           sidebarCollapsed && 'lg:ml-16'
         )}
       >
-        <div className="container mx-auto p-4 lg:p-6">
+        <div className="container mx-auto px-3 pb-6 pt-2 sm:px-4 lg:px-6">
           <OnboardingGuard>
             <PullToRefresh onRefresh={handleRefresh}>
-              {children}
+              <DashboardShell>{children}</DashboardShell>
             </PullToRefresh>
           </OnboardingGuard>
         </div>

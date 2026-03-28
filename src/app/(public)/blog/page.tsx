@@ -15,7 +15,7 @@ export default function BlogIndexPage() {
   return (
     <div className="bg-white py-14 md:py-20">
       <div className="container mx-auto max-w-5xl px-4">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">No Show Killer Blog</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">PatientFlow AI Blog</h1>
         <p className="mt-4 max-w-3xl text-slate-600">
           Practical growth and operations playbooks for Indian clinics using WhatsApp to reduce no-shows and recover revenue.
         </p>

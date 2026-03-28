@@ -4,8 +4,8 @@ import { MessageCircleMore, ArrowRight } from 'lucide-react'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 
 export const metadata: Metadata = {
-  title: 'Demo Booked | No Show Killer',
-  description: 'Your No Show Killer demo has been booked successfully.',
+  title: 'Demo Booked | PatientFlow AI',
+  description: 'Your PatientFlow AI demo has been booked successfully.',
 }
 
 export default function DemoThankYouPage() {
