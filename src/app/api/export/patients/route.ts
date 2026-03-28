@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { exportToExcel } from '@/lib/export/to-excel'
 import { exportToCSV } from '@/lib/export/to-csv'
 import { PATIENT_COLUMNS } from '@/lib/export/column-definitions'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -43,6 +44,19 @@ export async function POST(request: Request) {
   // Convert Blob to Buffer
   const arrayBuffer = await fileBlob.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
+
+  await writeAuditLog({
+    clinicId: (clinic as any).id,
+    userId: user.id,
+    action: 'export',
+    entityType: 'patients',
+    newValues: {
+      format,
+      selected_columns: selectedKeys?.length || 0,
+      record_count: patients?.length || 0,
+    },
+    request,
+  })
 
   return new NextResponse(buffer, {
     status: 200,

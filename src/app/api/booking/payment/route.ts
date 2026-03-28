@@ -16,6 +16,8 @@
 import { NextResponse } from 'next/server'
 import { createPaymentOrder } from '@/services/payment'
 import { z } from 'zod'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { writeAuditLog } from '@/lib/audit/log'
 
 const createPaymentOrderSchema = z.object({
   amount: z.number().positive('Amount must be greater than 0'),
@@ -28,6 +30,21 @@ const createPaymentOrderSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const limiter = checkRateLimit(`booking-payment:${ip}`, 10, 60_000)
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: 'Too many payment attempts. Please retry shortly.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(limiter.retryAfterSeconds),
+            'X-RateLimit-Remaining': String(limiter.remaining),
+          },
+        }
+      )
+    }
+
     const body = await request.json()
 
     // Validate input
@@ -58,6 +75,19 @@ export async function POST(request: Request) {
         patient_phone,
         patient_name,
       },
+    })
+
+    await writeAuditLog({
+      clinicId: clinic_id,
+      action: 'create',
+      entityType: 'payment_order',
+      entityId: order.id,
+      newValues: {
+        amount,
+        service_id,
+        patient_phone: patient_phone.slice(-4),
+      },
+      request,
     })
 
     // Return order details for frontend Razorpay checkout

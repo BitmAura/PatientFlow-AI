@@ -7,13 +7,11 @@ import { Check } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
 import { motion } from 'framer-motion'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
+import { useSearchParams } from 'next/navigation'
 
-export default function SignupPage({
-  searchParams,
-}: {
-  searchParams: { plan?: string }
-}) {
-  const selectedPlan = normalizePlanId(searchParams.plan || 'starter')
+export default function SignupPage() {
+  const searchParams = useSearchParams()
+  const selectedPlan = normalizePlanId(searchParams.get('plan') || 'starter')
 
   const planDetails: Record<
     string,

@@ -20,6 +20,8 @@ import { createClient } from '@/lib/supabase/server'
 import { confirmBookingSchema } from '@/lib/validations/booking'
 import { getPaymentDetails, verifyPaymentSignature, isPaymentSuccessful } from '@/services/payment'
 import { z } from 'zod'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { writeAuditLog } from '@/lib/audit/log'
 
 // Extended schema with payment details
 const confirmBookingWithPaymentSchema = confirmBookingSchema.extend({
@@ -31,6 +33,21 @@ const confirmBookingWithPaymentSchema = confirmBookingSchema.extend({
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request)
+    const limiter = checkRateLimit(`booking-confirm:${ip}`, 6, 60_000)
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: 'Too many booking confirmation attempts. Please retry shortly.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(limiter.retryAfterSeconds),
+            'X-RateLimit-Remaining': String(limiter.remaining),
+          },
+        }
+      )
+    }
+
     const supabase = createClient()
     const body = await request.json()
 
@@ -207,6 +224,20 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    await writeAuditLog({
+      clinicId: clinic_id,
+      action: 'create',
+      entityType: 'appointment',
+      entityId: (appointment as any).id,
+      newValues: {
+        patient_id: patientId,
+        service_id,
+        doctor_id: doctor_id || null,
+        source: 'online_booking',
+      },
+      request,
+    })
 
     // 5. Send confirmation (async - don't wait)
     // TODO: Trigger WhatsApp confirmation message via automation service

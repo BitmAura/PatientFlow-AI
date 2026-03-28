@@ -1,10 +1,26 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 
 export async function GET(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
+  const ip = getClientIp(request)
+  const limiter = checkRateLimit(`booking-clinic:${ip}`, 120, 60_000)
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please retry shortly.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(limiter.retryAfterSeconds),
+          'X-RateLimit-Remaining': String(limiter.remaining),
+        },
+      }
+    )
+  }
+
   const supabase = createClient()
 
   // 1. Get clinic by slug

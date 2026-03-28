@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { statusUpdateSchema } from '@/lib/validations/appointment'
 import { ALLOWED_TRANSITIONS, AppointmentStatus } from '@/constants/appointment-status'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function PATCH(
   request: Request,
@@ -16,6 +17,10 @@ export async function PATCH(
 
   const { status, reason } = result.data
   const supabase = createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   // Get current appointment status
   const { data: currentAppt } = await supabase
@@ -32,6 +37,8 @@ export async function PATCH(
     return new NextResponse(`Cannot transition from ${(currentAppt as any).status} to ${status}`, { status: 400 })
   }
 
+  const previousStatus = (currentAppt as any).status
+
   // Update - cast to any to bypass TypeScript strict checking
   const { data, error } = await (supabase as any)
     .from('appointments')
@@ -46,6 +53,22 @@ export async function PATCH(
   if (error) {
     return new NextResponse('Failed to update status', { status: 500 })
   }
+
+  await writeAuditLog({
+    clinicId: (currentAppt as any).clinic_id,
+    userId: user?.id || null,
+    action: 'update',
+    entityType: 'appointment_status',
+    entityId: params.id,
+    oldValues: {
+      status: previousStatus,
+    },
+    newValues: {
+      status,
+      reason: reason || null,
+    },
+    request,
+  })
 
   return NextResponse.json(data)
 }

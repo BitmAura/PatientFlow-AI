@@ -4,6 +4,7 @@ import { exportToExcel } from '@/lib/export/to-excel'
 import { exportToCSV } from '@/lib/export/to-csv'
 import { exportTableToPDF } from '@/lib/export/to-pdf'
 import { APPOINTMENT_COLUMNS } from '@/lib/export/column-definitions'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -91,6 +92,22 @@ export async function POST(request: Request) {
   // Convert Blob to Buffer
   const arrayBuffer = await fileBuffer.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
+
+  await writeAuditLog({
+    clinicId: (clinic as any).id,
+    userId: user.id,
+    action: 'export',
+    entityType: 'appointments',
+    newValues: {
+      format,
+      date_from,
+      date_to,
+      status: status || 'all',
+      selected_columns: finalColumns.length,
+      record_count: exportData.length,
+    },
+    request,
+  })
 
   return new NextResponse(buffer, {
     status: 200,

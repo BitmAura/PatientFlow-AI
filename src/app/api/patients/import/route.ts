@@ -1,9 +1,26 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const { data, options } = await request.json()
   const supabase = createClient() as any
+  const ip = getClientIp(request)
+
+  const ipLimiter = checkRateLimit(`patients-import:ip:${ip}`, 10, 60_000)
+  if (!ipLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many import attempts. Please retry shortly.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(ipLimiter.retryAfterSeconds),
+          'X-RateLimit-Remaining': String(ipLimiter.remaining),
+        },
+      }
+    )
+  }
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
@@ -15,6 +32,20 @@ export async function POST(request: Request) {
     .single()
 
   if (!staff) return new NextResponse('Unauthorized', { status: 403 })
+
+  const userLimiter = checkRateLimit(`patients-import:user:${user.id}`, 5, 10 * 60_000)
+  if (!userLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many imports by this account. Please wait and retry.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(userLimiter.retryAfterSeconds),
+          'X-RateLimit-Remaining': String(userLimiter.remaining),
+        },
+      }
+    )
+  }
 
   const results = {
     total: data.length,
@@ -85,6 +116,22 @@ export async function POST(request: Request) {
       }
     }
   }
+
+  await writeAuditLog({
+    clinicId: (staff as any).clinic_id,
+    userId: user.id,
+    action: 'import',
+    entityType: 'patients',
+    newValues: {
+      total_rows: results.total,
+      success: results.success,
+      failed: results.failed,
+      skipped: results.skipped,
+      duplicate_handling: options?.duplicate_handling || null,
+      default_source: options?.default_source || null,
+    },
+    request,
+  })
 
   return NextResponse.json(results)
 }
