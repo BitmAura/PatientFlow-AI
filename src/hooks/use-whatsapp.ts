@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 export type WhatsAppStatus = {
-  status: 'disconnected' | 'connecting' | 'connected' | 'expired'
+  status: 'disconnected' | 'connecting' | 'connected' | 'expired' | 'active'
   connected: boolean
   setupMode?: 'auto' | 'manual'
   lastActivity?: string | null
@@ -9,17 +9,85 @@ export type WhatsAppStatus = {
   provider?: string | null
 }
 
-export function useWhatsApp() {
-  const [data, setData] = useState<WhatsAppStatus | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+function normalizeWhatsAppStatus(payload: any): WhatsAppStatus {
+  const rawStatus = payload?.status === 'active' ? 'connected' : payload?.status
+  const status =
+    rawStatus === 'connected' ||
+    rawStatus === 'connecting' ||
+    rawStatus === 'expired' ||
+    rawStatus === 'disconnected'
+      ? rawStatus
+      : 'disconnected'
 
-  const refresh = useCallback(async () => {
+  return {
+    ...payload,
+    status,
+    connected: Boolean(payload?.connected || status === 'connected'),
+  }
+}
+
+async function getApiErrorMessage(response: Response, fallback: string): Promise<string> {
+  const bodyText = await response.text().catch(() => '')
+  if (!bodyText) return fallback
+
+  try {
+    const parsed = JSON.parse(bodyText)
+    if (typeof parsed?.error === 'string' && parsed.error) return parsed.error
+    if (typeof parsed?.message === 'string' && parsed.message) return parsed.message
+  } catch {
+    // Ignore JSON parse errors and fall back to raw text.
+  }
+
+  return bodyText || fallback
+}
+
+const STATUS_CACHE_TTL_MS = 15_000
+let cachedStatus: WhatsAppStatus | null = null
+let cachedStatusAt = 0
+let inFlightStatusRequest: Promise<WhatsAppStatus> | null = null
+
+function writeStatusCache(status: WhatsAppStatus) {
+  cachedStatus = status
+  cachedStatusAt = Date.now()
+}
+
+async function fetchWhatsAppStatus(force = false): Promise<WhatsAppStatus> {
+  const now = Date.now()
+  if (!force && cachedStatus && now - cachedStatusAt < STATUS_CACHE_TTL_MS) {
+    return cachedStatus
+  }
+
+  if (!force && inFlightStatusRequest) {
+    return inFlightStatusRequest
+  }
+
+  inFlightStatusRequest = (async () => {
+    const response = await fetch('/api/whatsapp/status', { cache: 'no-store' })
+    if (!response.ok) {
+      throw new Error(await getApiErrorMessage(response, 'Failed to fetch WhatsApp status'))
+    }
+    const json = await response.json()
+    const normalized = normalizeWhatsAppStatus(json)
+    writeStatusCache(normalized)
+    return normalized
+  })()
+
+  try {
+    return await inFlightStatusRequest
+  } finally {
+    inFlightStatusRequest = null
+  }
+}
+
+export function useWhatsApp() {
+  const [data, setData] = useState<WhatsAppStatus | null>(cachedStatus)
+  const [isLoading, setIsLoading] = useState(!cachedStatus)
+
+  const refresh = useCallback(async (force = false) => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/whatsapp/status', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch WhatsApp status')
-      const json = await response.json()
-      setData(json)
+      const status = await fetchWhatsAppStatus(force)
+      setData(status)
     } catch {
       setData({ status: 'disconnected', connected: false })
     } finally {
@@ -28,7 +96,7 @@ export function useWhatsApp() {
   }, [])
 
   useEffect(() => {
-    refresh()
+    refresh(false)
   }, [refresh])
 
   const startAutoSetup = async (phoneNumber: string) => {
@@ -39,12 +107,14 @@ export function useWhatsApp() {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to start WhatsApp setup')
+      throw new Error(await getApiErrorMessage(response, 'Failed to start WhatsApp setup'))
     }
 
     const json = await response.json()
-    setData(json)
-    return json
+    const normalized = normalizeWhatsAppStatus(json)
+    writeStatusCache(normalized)
+    setData(normalized)
+    return normalized
   }
 
   const saveApiKeys = async (keys: { phoneNumberId: string; accessToken: string; webhookSecret?: string }) => {
@@ -55,23 +125,27 @@ export function useWhatsApp() {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to save WhatsApp configuration')
+      throw new Error(await getApiErrorMessage(response, 'Failed to save WhatsApp configuration'))
     }
 
     const json = await response.json()
-    setData(json)
-    return json
+    const normalized = normalizeWhatsAppStatus(json)
+    writeStatusCache(normalized)
+    setData(normalized)
+    return normalized
   }
 
   const disconnect = async () => {
     const response = await fetch('/api/whatsapp/disconnect', { method: 'POST' })
     if (!response.ok) {
-      throw new Error('Failed to disconnect WhatsApp')
+      throw new Error(await getApiErrorMessage(response, 'Failed to disconnect WhatsApp'))
     }
 
     const json = await response.json()
-    setData(json)
-    return json
+    const normalized = normalizeWhatsAppStatus(json)
+    writeStatusCache(normalized)
+    setData(normalized)
+    return normalized
   }
 
   const sendTestMessage = async (phone: string, message: string) => {
@@ -82,7 +156,7 @@ export function useWhatsApp() {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to send test message')
+      throw new Error(await getApiErrorMessage(response, 'Failed to send test message'))
     }
 
     return response.json()

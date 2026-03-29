@@ -26,14 +26,22 @@ export async function GET() {
     .single()
 
   const sessionData = (connection?.session_data || {}) as Record<string, any>
-  const status = connection?.status || 'disconnected'
+  const rawStatus = connection?.status || 'disconnected'
+  const status = rawStatus === 'active' ? 'connected' : rawStatus
+  const rawProvider = String(sessionData.provider || '').toLowerCase()
+  const provider =
+    rawProvider === 'meta_cloud'
+      ? 'meta'
+      : rawProvider === 'meta' || rawProvider === 'gupshup'
+        ? rawProvider
+        : null
 
   return NextResponse.json({
     connected: status === 'connected',
     status,
     lastActivity: connection?.last_activity_at || null,
     setupMode: sessionData.setup_mode || null,
-    phoneNumberId: sessionData.phone_number_id || null,
-    provider: sessionData.provider || null
+    phoneNumberId: sessionData.phone_number_id || sessionData.phoneNumberId || null,
+    provider
   })
 }

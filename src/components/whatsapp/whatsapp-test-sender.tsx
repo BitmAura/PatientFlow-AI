@@ -16,7 +16,7 @@ export function WhatsAppTestSender() {
   const [message, setMessage] = React.useState('Hello from PatientFlow AI! This is a test message.')
   const [status, setStatus] = React.useState<'idle' | 'sending' | 'success' | 'error'>('idle')
 
-  const isConnected = data?.status === 'connected'
+  const isConnected = data?.status === 'connected' || data?.status === 'active'
 
   const handleSend = async () => {
     if (!phone || !message) return

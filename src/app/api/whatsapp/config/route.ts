@@ -54,12 +54,30 @@ export async function PUT(request: Request) {
     return new NextResponse('Phone number ID and access token are required', { status: 400 })
   }
 
+  const { data: existingConfig } = await supabase
+    .from('whatsapp_configs')
+    .select('phone_number')
+    .eq('clinic_id', staff.clinic_id)
+    .maybeSingle()
+
+  const { data: existingConnection } = await supabase
+    .from('whatsapp_connections')
+    .select('session_data')
+    .eq('clinic_id', staff.clinic_id)
+    .maybeSingle()
+
+  const existingSession = (existingConnection?.session_data || {}) as Record<string, any>
+
   const sessionData = {
-    provider: 'meta_cloud',
+    ...existingSession,
+    provider: 'meta',
     setup_mode: 'manual',
     phone_number_id: phoneNumberId,
+    phoneNumberId,
     access_token: accessToken,
+    accessToken,
     webhook_secret: webhookSecret || null,
+    webhookSecret: webhookSecret || null,
     updated_at: new Date().toISOString()
   }
 
@@ -77,9 +95,32 @@ export async function PUT(request: Request) {
     return new NextResponse('Failed to save configuration', { status: 500 })
   }
 
+  const { error: configError } = await supabase
+    .from('whatsapp_configs')
+    .upsert(
+      {
+        clinic_id: staff.clinic_id,
+        provider: 'meta',
+        phone_number: existingConfig?.phone_number || String(existingSession.phone_number || ''),
+        credentials: {
+          phoneNumberId,
+          accessToken,
+          webhookSecret: webhookSecret || null,
+        },
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'clinic_id' }
+    )
+
+  if (configError) {
+    return new NextResponse('Failed to persist provider configuration', { status: 500 })
+  }
+
   return NextResponse.json({
     connected: true,
     status: 'connected',
-    phoneNumberId
+    phoneNumberId,
+    provider: 'meta',
   })
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyNumber } from '@/services/messaging'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
@@ -27,31 +28,37 @@ export async function POST(request: Request) {
     return new NextResponse('Phone number must include country code', { status: 400 })
   }
 
-  const sessionData = {
-    provider: 'meta_cloud',
-    setup_mode: 'auto',
-    requested_phone: normalizedPhone,
-    requested_at: new Date().toISOString()
+  const hasMetaDefaults = Boolean(
+    process.env.WHATSAPP_API_KEY && process.env.WHATSAPP_PHONE_NUMBER_ID
+  )
+  if (!hasMetaDefaults) {
+    return NextResponse.json(
+      {
+        error:
+          'Quick setup is unavailable. Configure WHATSAPP_API_KEY and WHATSAPP_PHONE_NUMBER_ID or use Advanced Setup.',
+      },
+      { status: 400 }
+    )
   }
 
-  const { error } = await supabase
-    .from('whatsapp_connections')
-    .upsert({
-      clinic_id: staff.clinic_id,
-      status: 'connecting',
-      session_data: sessionData,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'clinic_id' })
+  const result = await verifyNumber({
+    clinicId: staff.clinic_id,
+    phoneNumber: normalizedPhone,
+    provider: 'meta',
+  })
 
-  if (error) {
-    return new NextResponse('Failed to start setup', { status: 500 })
+  if (!result.success) {
+    return NextResponse.json(
+      { error: result.error || 'Failed to start WhatsApp setup' },
+      { status: 502 }
+    )
   }
 
   return NextResponse.json({
-    connected: false,
-    status: 'connecting',
+    connected: true,
+    status: 'connected',
     setupMode: 'auto',
-    phoneNumberId: null,
-    provider: 'meta_cloud'
+    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || null,
+    provider: 'meta',
   })
 }

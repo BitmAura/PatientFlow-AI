@@ -13,7 +13,7 @@ export function Header() {
   const { toggleMobileNav, toggleSidebarCollapse } = useUIStore()
   const { data: whatsappStatus } = useWhatsApp()
   
-  const isConnected = whatsappStatus?.status === 'connected'
+  const isConnected = whatsappStatus?.status === 'connected' || whatsappStatus?.status === 'active'
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">

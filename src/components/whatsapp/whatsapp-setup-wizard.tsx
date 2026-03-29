@@ -60,9 +60,10 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
         description: 'We are verifying your WhatsApp Business account.',
       })
     } catch (error) {
+      const description = error instanceof Error ? error.message : 'Please try again or contact support.'
       toast({
         title: 'Setup failed',
-        description: 'Please try again or contact support.',
+        description,
         variant: 'destructive'
       })
       setStep(1)
@@ -95,9 +96,10 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
         description: 'Your API credentials are saved and active.',
       })
     } catch (error) {
+      const description = error instanceof Error ? error.message : 'Please verify the credentials and try again.'
       toast({
         title: 'Connection failed',
-        description: 'Please verify the credentials and try again.',
+        description,
         variant: 'destructive'
       })
     } finally {

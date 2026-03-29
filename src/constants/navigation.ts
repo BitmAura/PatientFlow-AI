@@ -78,7 +78,7 @@ export const COMMUNICATION_NAV: NavItem[] = [
     icon: MessageSquare,
     items: [
       { title: 'Logs', href: '/reminders/logs', icon: MessageSquare },
-      { title: 'Settings', href: '/reminders/settings', icon: Settings },
+      { title: 'Settings', href: '/settings/reminders', icon: Settings },
     ],
   },
   {
@@ -117,8 +117,10 @@ export const SETTINGS_NAV: NavItem[] = [
     href: '/settings',
     icon: Settings,
     items: [
-      { title: 'Clinic Profile', href: '/settings/clinic', icon: Building },
-      { title: 'Account', href: '/settings/account', icon: User },
+      { title: 'General', href: '/settings', icon: Building },
+      { title: 'Doctors & Staff', href: '/settings/doctors', icon: User },
+      { title: 'WhatsApp', href: '/settings/whatsapp', icon: MessageSquare },
+      { title: 'Reminders', href: '/settings/reminders', icon: Bell },
       { title: 'Billing', href: '/settings/billing', icon: CreditCard },
     ],
   },

@@ -18,7 +18,7 @@ export function WhatsAppConnectionCard() {
     )
   }
 
-  const isConnected = data?.status === 'connected'
+  const isConnected = data?.status === 'connected' || data?.status === 'active'
 
   return (
     <Card className={isConnected ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-muted'}>
@@ -42,7 +42,7 @@ export function WhatsAppConnectionCard() {
         {data?.phoneNumberId ? `Phone Number ID: ${data.phoneNumberId}` : 'No number configured yet.'}
       </CardContent>
       <CardFooter className="flex justify-between border-t py-4">
-        <Button variant="outline" onClick={refresh}>Refresh Status</Button>
+        <Button variant="outline" onClick={() => refresh(true)}>Refresh Status</Button>
         {isConnected && (
           <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => disconnect()}>
             Disconnect

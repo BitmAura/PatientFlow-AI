@@ -9,8 +9,10 @@ import { useWhatsApp } from '@/hooks/use-whatsapp'
 
 export function WhatsappStatusCard() {
   const { data: whatsappStatus, isLoading } = useWhatsApp()
+  const isConnected =
+    whatsappStatus?.status === 'connected' || whatsappStatus?.status === 'active'
   
-  if (isLoading || whatsappStatus?.status === 'connected') return null
+  if (isLoading || isConnected) return null
 
   return (
     <Card className="bg-amber-50 border-amber-200">
@@ -28,7 +30,7 @@ export function WhatsappStatusCard() {
           asChild
           className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto"
         >
-          <Link href="/dashboard/settings/whatsapp" className="inline-flex items-center justify-center">
+          <Link href="/settings/whatsapp" className="inline-flex items-center justify-center">
             <MessageSquare className="mr-2 h-4 w-4 shrink-0" aria-hidden />
             Connect WhatsApp Now
           </Link>

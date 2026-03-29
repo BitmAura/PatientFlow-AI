@@ -36,7 +36,10 @@ async function getClinicConfig(clinicId: string): Promise<ClinicMessagingConfig>
 
   const cfgCredentials = asRecord(providerConfig?.credentials)
   if (providerConfig?.provider) {
-    const provider = (providerConfig.provider === 'meta' ? 'meta' : 'gupshup') as MessagingProviderType
+    const provider =
+      (providerConfig.provider === 'meta' || providerConfig.provider === 'meta_cloud'
+        ? 'meta'
+        : 'gupshup') as MessagingProviderType
     return {
       clinicId,
       provider,
@@ -58,7 +61,12 @@ async function getClinicConfig(clinicId: string): Promise<ClinicMessagingConfig>
     .maybeSingle()
 
   const raw = asRecord(connection?.session_data)
-  const provider = (raw.provider === 'gupshup' || raw.provider === 'meta' ? raw.provider : 'gupshup') as MessagingProviderType
+  const provider =
+    (raw.provider === 'gupshup'
+      ? 'gupshup'
+      : raw.provider === 'meta' || raw.provider === 'meta_cloud'
+        ? 'meta'
+        : 'gupshup') as MessagingProviderType
 
   return {
     clinicId,
@@ -250,7 +258,12 @@ export async function verifyNumber(input: VerifyNumberInput): Promise<VerifyNumb
     ? await provider.verifyOtp(config, input.phoneNumber, input.otp)
     : await provider.initiateVerification(config, input.phoneNumber)
 
-  const nextStatus = response.status === 'connected' ? 'active' : response.status === 'connecting' ? 'connecting' : 'disconnected'
+  const nextStatus =
+    response.status === 'connected'
+      ? 'connected'
+      : response.status === 'connecting'
+        ? 'connecting'
+        : 'disconnected'
 
   await admin.from('whatsapp_connections').upsert(
     {
@@ -261,6 +274,10 @@ export async function verifyNumber(input: VerifyNumberInput): Promise<VerifyNumb
         provider: provider.type,
         phone_number: input.phoneNumber,
         verified_number: response.status === 'connected' ? input.phoneNumber : config.phoneNumber,
+        phone_number_id: config.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || null,
+        access_token: config.accessToken || process.env.WHATSAPP_API_KEY || null,
+        verify_token: config.verifyToken || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || null,
+        webhook_secret: config.webhookSecret || process.env.GUPSHUP_WEBHOOK_SECRET || null,
       },
       updated_at: new Date().toISOString(),
     },
