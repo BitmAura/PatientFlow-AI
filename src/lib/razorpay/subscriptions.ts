@@ -3,7 +3,6 @@
  * Handles subscription creation, updates, and cancellation via Razorpay API
  */
 
-// @ts-ignore
 import Razorpay from 'razorpay'
 import {
   FREE_TRIAL_DAYS,

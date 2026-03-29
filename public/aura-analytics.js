@@ -9,7 +9,7 @@
   // Configuration
   const TRACKING_CONFIG = {
     googleAnalyticsId: 'GA_MEASUREMENT_ID', // Replace with your GA4 ID
-    debugMode: true, // Set to false in production
+    debugMode: process.env.NODE_ENV === 'development', // Disabled in production
     trackLocalStorage: true,
     trackSessionStorage: true,
     trackCookies: true

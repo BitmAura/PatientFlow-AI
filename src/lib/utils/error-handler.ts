@@ -12,8 +12,7 @@ export function handleApiError(error: unknown): { message: string, status: numbe
 
   if (error instanceof Error) {
     // Supabase errors often come as objects with code/message
-    // @ts-ignore
-    if (error.code === 'PGRST116') {
+    if ((error as any).code === 'PGRST116') {
       return { message: 'Resource not found', status: 404 }
     }
     return { message: error.message, status: 500 }
@@ -29,7 +28,6 @@ export function getErrorMessage(error: unknown): string {
 }
 
 export function isSupabaseError(error: unknown): boolean {
-  // @ts-ignore
   return !!error && typeof error === 'object' && 'code' in error && 'details' in error
 }
 
