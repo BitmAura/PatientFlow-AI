@@ -34,8 +34,8 @@ export async function POST(request: Request) {
     const clinicId = process.env.DEMO_BOOKING_CLINIC_ID
     if (!clinicId) {
       return NextResponse.json(
-        { error: 'Demo booking is not configured. Add DEMO_BOOKING_CLINIC_ID.' },
-        { status: 500 }
+        { error: 'Demo booking is temporarily unavailable. Please try again later.' },
+        { status: 503 }
       )
     }
 

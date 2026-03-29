@@ -1,4 +1,4 @@
-const CACHE_NAME = 'noshowkiller-v2'
+const CACHE_NAME = 'noshowkiller-v3'
 const DYNAMIC_CACHE = 'noshowkiller-dynamic-v1'
 
 const STATIC_ASSETS = [
@@ -6,7 +6,7 @@ const STATIC_ASSETS = [
   '/dashboard',
   '/manifest.webmanifest',
   '/favicon.ico',
-  '/icon.png',
+  '/icon',
   '/offline',
 ]
 

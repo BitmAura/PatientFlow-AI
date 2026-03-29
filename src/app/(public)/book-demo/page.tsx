@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 export default function BookDemoPage() {
   const calendarUrl = process.env.NEXT_PUBLIC_DEMO_CALENDAR_URL
+  const isDemoBookingConfigured = Boolean(process.env.DEMO_BOOKING_CLINIC_ID)
 
   return (
     <div className="bg-slate-50 py-12 md:py-20">
@@ -63,7 +64,7 @@ export default function BookDemoPage() {
             </p>
           )}
         </div>
-        <DemoBookingForm />
+        <DemoBookingForm isConfigured={isDemoBookingConfigured} />
       </div>
     </div>
   )

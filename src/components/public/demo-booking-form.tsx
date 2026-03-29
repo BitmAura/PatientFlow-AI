@@ -8,7 +8,11 @@ import { useTrackCta } from '@/hooks/use-track-cta'
 
 type SubmitState = 'idle' | 'loading' | 'success' | 'error'
 
-export function DemoBookingForm() {
+interface DemoBookingFormProps {
+  isConfigured: boolean
+}
+
+export function DemoBookingForm({ isConfigured }: DemoBookingFormProps) {
   const router = useRouter()
   const trackCta = useTrackCta()
   const [state, setState] = useState<SubmitState>('idle')
@@ -16,6 +20,13 @@ export function DemoBookingForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (!isConfigured) {
+      setState('error')
+      setError('Demo booking is temporarily unavailable. Please contact support.')
+      return
+    }
+
     setState('loading')
     setError('')
 
@@ -103,10 +114,20 @@ export function DemoBookingForm() {
           </select>
         </div>
 
-        <TwentyOneButton type="submit" className="w-full" disabled={state === 'loading'}>
+        <TwentyOneButton
+          type="submit"
+          className="w-full"
+          disabled={state === 'loading' || !isConfigured}
+        >
           {state === 'loading' ? 'Submitting...' : 'Book Demo'}
         </TwentyOneButton>
       </form>
+
+      {!isConfigured && (
+        <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          Demo booking is temporarily unavailable. Please contact us at support@auradigitalservices.me.
+        </div>
+      )}
 
       {state === 'error' && (
         <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>
