@@ -5,6 +5,7 @@ import { buildMessage } from '@/lib/whatsapp/templates'
 import { FOLLOWUP_TYPES } from '@/constants/followup-types'
 import { addDays } from 'date-fns'
 import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard'
+import { buildBookingLink } from '@/lib/utils/public-url'
 
 export async function createFollowup(data: CreateFollowupInput & { clinic_id: string, created_by: string }) {
   const supabase = createClient() as any
@@ -47,8 +48,8 @@ export async function sendFollowup(followupId: string) {
     patient_name: followup.patient.full_name,
     patient_first_name: followup.patient.first_name || followup.patient.full_name.split(' ')[0],
     clinic_name: followup.clinic?.name || 'Clinic',
-    service: 'Appointment', // Placeholder if not linked
-    booking_link: `https://app.patientflow.ai/book/${followup.clinic_id}`
+    service: followup.type || 'Appointment',
+    booking_link: buildBookingLink(followup.clinic?.slug || followup.clinic_id)
   })
 
   // 3. Send
@@ -144,7 +145,7 @@ export async function autoCreateFollowup(
   const dueDate = addDays(new Date(appt.start_time), typeConfig.defaultDays)
   
   // Build default message
-  const message = typeConfig.defaultTemplate // Placeholder, real impl would parse variables here or store template
+  const message = typeConfig.defaultTemplate
 
   await createFollowup({
     patient_id: appt.patient_id,
@@ -159,12 +160,32 @@ export async function autoCreateFollowup(
 
 export async function processDueFollowups() {
   const supabase = createClient() as any
-  const today = new Date().toISOString().split('T')[0]
-  
-  // Find due followups
-  // In real app, check for 'auto_send' flag on followup or settings
-  // For MVP, we might only send if explicitly marked for auto-send (which we haven't built yet)
-  // So we'll skip auto-sending for now to be safe, or only send specific types
-  
-  return { processed: 0, sent: 0, skipped: 0 }
+  const now = new Date().toISOString()
+
+  const { data: dueFollowups } = await supabase
+    .from('followups')
+    .select('id')
+    .eq('status', 'pending')
+    .lte('due_date', now)
+    .order('due_date', { ascending: true })
+    .limit(100)
+
+  if (!dueFollowups?.length) {
+    return { processed: 0, sent: 0, skipped: 0 }
+  }
+
+  let sent = 0
+  let skipped = 0
+
+  for (const followup of dueFollowups) {
+    try {
+      const result = await sendFollowup(followup.id)
+      if (result.success) sent++
+      else skipped++
+    } catch (error) {
+      skipped++
+    }
+  }
+
+  return { processed: dueFollowups.length, sent, skipped }
 }

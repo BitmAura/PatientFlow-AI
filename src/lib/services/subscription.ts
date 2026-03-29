@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { SUBSCRIPTION_PLANS } from '@/constants/plans'
 import { startOfMonth, endOfMonth } from 'date-fns'
-import { normalizePlanId } from '@/lib/billing/plans'
+import { BillingCycle, normalizePlanId, PricingPlanId } from '@/lib/billing/plans'
+import {
+  cancelSubscription as cancelRazorpaySubscription,
+  createSubscription as createRazorpaySubscription,
+  parseWebhookEvent,
+} from '@/lib/razorpay/subscriptions'
 
 // Define types locally if needed or import from types/database
 type RazorpayEvent = any 
@@ -57,32 +63,150 @@ export async function checkUsageLimit(clinicId: string) {
   return usage < limit
 }
 
-export async function createSubscription(clinicId: string, planId: string) {
-  // In a real app, this would call Razorpay API to create subscription
-  // For now, we mock it by returning a subscription ID
+export async function createSubscription(
+  clinicId: string,
+  planId: string,
+  billingCycle: BillingCycle = 'monthly'
+) {
+  const admin = createAdminClient() as any
+  const normalizedPlanId = normalizePlanId(planId)
+
+  const { data: clinic } = await admin
+    .from('clinics')
+    .select('user_id')
+    .eq('id', clinicId)
+    .single()
+
+  if (!clinic?.user_id) {
+    throw new Error('Clinic owner not found')
+  }
+
+  const ownerUserId = clinic.user_id
+  const { data: ownerUser } = await admin
+    .from('users')
+    .select('email')
+    .eq('id', ownerUserId)
+    .single()
+
+  if (!ownerUser?.email) {
+    throw new Error('Owner email is required to create subscription')
+  }
+
+  const { data: existingSubscription } = await admin
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', ownerUserId)
+    .single()
+
+  const created = await createRazorpaySubscription({
+    userId: ownerUserId,
+    userEmail: ownerUser.email,
+    planId: normalizedPlanId as PricingPlanId,
+    billingCycle,
+    customerId: existingSubscription?.razorpay_customer_id || undefined,
+  })
+
+  const upsertPayload = {
+    user_id: ownerUserId,
+    plan_id: normalizedPlanId,
+    status: created.status || 'active',
+    billing_cycle: billingCycle,
+    razorpay_subscription_id: created.subscriptionId,
+    razorpay_customer_id: created.customerId,
+    razorpay_plan_id: created.planId,
+    current_period_start: created.currentPeriodStart
+      ? new Date(created.currentPeriodStart * 1000).toISOString()
+      : null,
+    current_period_end: created.currentPeriodEnd
+      ? new Date(created.currentPeriodEnd * 1000).toISOString()
+      : null,
+    updated_at: new Date().toISOString(),
+  }
+
+  await admin
+    .from('subscriptions')
+    .upsert(upsertPayload, { onConflict: 'user_id' })
+
   return {
-    id: `sub_${Math.random().toString(36).substring(7)}`,
-    plan_id: planId,
-    status: 'created'
+    id: created.subscriptionId,
+    plan_id: normalizedPlanId,
+    status: created.status,
+    short_url: created.shortUrl,
   }
 }
 
-export async function cancelSubscription(clinicId: string) {
-  // Call Razorpay API to cancel
+export async function cancelSubscription(
+  clinicId: string,
+  cancelAtPeriodEnd: boolean = true
+) {
+  const admin = createAdminClient() as any
+
+  const { data: clinic } = await admin
+    .from('clinics')
+    .select('user_id')
+    .eq('id', clinicId)
+    .single()
+
+  if (!clinic?.user_id) {
+    throw new Error('Clinic owner not found')
+  }
+
+  const { data: subscription } = await admin
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', clinic.user_id)
+    .single()
+
+  if (!subscription) return false
+
+  if (subscription.razorpay_subscription_id) {
+    await cancelRazorpaySubscription(subscription.razorpay_subscription_id, cancelAtPeriodEnd)
+  }
+
+  await admin
+    .from('subscriptions')
+    .update({
+      status: cancelAtPeriodEnd ? subscription.status : 'cancelled',
+      cancel_at_period_end: cancelAtPeriodEnd,
+      cancelled_at: cancelAtPeriodEnd ? null : new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', clinic.user_id)
+
   return true
 }
 
 export async function handleSubscriptionWebhook(event: RazorpayEvent) {
-  const supabase = createClient() as any
-  
-  // Verify signature first (middleware usually handles this)
+  const admin = createAdminClient() as any
+  const parsed = parseWebhookEvent(event)
+  if (!parsed.subscriptionId) return
 
-  if (event.event === 'subscription.activated') {
-    // Update clinic subscription status
-    const { payload } = event
-    // Find clinic by subscription_id (stored in DB)
-    // Update status to 'active'
+  let nextStatus = String(parsed.status || 'active')
+  switch (parsed.event) {
+    case 'subscription.activated':
+    case 'subscription.charged':
+      nextStatus = 'active'
+      break
+    case 'subscription.cancelled':
+      nextStatus = 'cancelled'
+      break
+    case 'subscription.completed':
+      nextStatus = 'expired'
+      break
+    case 'subscription.paused':
+    case 'subscription.halted':
+    case 'payment.failed':
+      nextStatus = 'past_due'
+      break
+    default:
+      break
   }
-  
-  // Handle other events...
+
+  await admin
+    .from('subscriptions')
+    .update({
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('razorpay_subscription_id', parsed.subscriptionId)
 }

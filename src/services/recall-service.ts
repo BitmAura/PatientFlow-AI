@@ -6,8 +6,32 @@ import { Database } from '@/types/database'
 type RecallStatus = Database['public']['Enums']['recall_status']
 const ATTEMPT_CAP = 3
 const ACTIVE_STATUSES: RecallStatus[] = ['pending', 'contacted', 'overdue']
+const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+function parseTimeToMinutes(value: string | null | undefined): number | null {
+  if (!value) return null
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(value.trim())
+  if (!match) return null
+  return Number(match[1]) * 60 + Number(match[2])
+}
 
 export class RecallService {
+  private static async getClinicAverageServicePrice(clinicId: string): Promise<number> {
+    const supabase = createClient() as any
+    const { data: services } = await supabase
+      .from('services')
+      .select('price')
+      .eq('clinic_id', clinicId)
+
+    const prices = (services || [])
+      .map((service: any) => Number(service.price || 0))
+      .filter((price: number) => Number.isFinite(price) && price > 0)
+
+    if (prices.length === 0) return 500
+    const sum = prices.reduce((acc: number, price: number) => acc + price, 0)
+    return Math.round(sum / prices.length)
+  }
+
   /**
    * Get all recalls for a specific clinic
    */
@@ -156,6 +180,8 @@ export class RecallService {
     const supabase = createClient() as any
     const now = new Date()
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const ninetyDaysAgo = new Date(now)
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
     
     // 1. Total Patients Recalled This Month
     const { count: recalledCount } = await supabase
@@ -172,8 +198,9 @@ export class RecallService {
       .eq('status', 'booked')
       .gte('updated_at', firstDayOfMonth)
 
-    // 3. Estimated Revenue Recovered
-    const estimatedRevenue = (bookedCount || 0) * 500 // Placeholder logic
+    // 3. Estimated Revenue Recovered based on clinic average service value.
+    const avgServicePrice = await this.getClinicAverageServicePrice(clinicId)
+    const estimatedRevenue = (bookedCount || 0) * avgServicePrice
 
     // 4. Critical Overdue (Patients > 90 days overdue)
     const { count: overdueCount } = await supabase
@@ -181,12 +208,13 @@ export class RecallService {
       .select('*', { count: 'exact', head: true })
       .eq('clinic_id', clinicId)
       .eq('status', 'overdue')
+      .lt('recall_due_date', ninetyDaysAgo.toISOString())
 
     return {
       recalled_this_month: recalledCount || 0,
       booked_from_recall: bookedCount || 0,
       estimated_recoverable_value: estimatedRevenue,
-      revenue_recovered: 0,
+      revenue_recovered: estimatedRevenue,
       critical_overdue: overdueCount || 0
     }
   }
@@ -220,10 +248,36 @@ export class RecallService {
       .in('status', ['pending', 'overdue'])
   }
 
-  private static checkBusinessHours(clinicId: string): boolean {
-    // TODO: Implement actual DB check against clinic_settings
-    const hour = new Date().getHours()
-    return hour >= 9 && hour <= 19 // 9 AM - 7 PM
+  private static async checkBusinessHours(clinicId: string): Promise<boolean> {
+    const supabase = createClient() as any
+    const now = new Date()
+    const fallbackHour = now.getHours()
+
+    const { data: clinic } = await supabase
+      .from('clinics')
+      .select('business_hours')
+      .eq('id', clinicId)
+      .single()
+
+    const businessHours = clinic?.business_hours || null
+    if (!businessHours || typeof businessHours !== 'object') {
+      return fallbackHour >= 9 && fallbackHour < 19
+    }
+
+    const dayName = DAYS[now.getDay()]
+    const daySchedule = (businessHours as any)[dayName]
+    if (!daySchedule || daySchedule.is_off === true || daySchedule.closed === true) {
+      return false
+    }
+
+    const start = parseTimeToMinutes(daySchedule.start || daySchedule.open)
+    const end = parseTimeToMinutes(daySchedule.end || daySchedule.close)
+    if (start === null || end === null || end <= start) {
+      return fallbackHour >= 9 && fallbackHour < 19
+    }
+
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+    return currentMinutes >= start && currentMinutes < end
   }
 
   /**
@@ -232,6 +286,8 @@ export class RecallService {
    */
   static async getMoneyLeakList(clinicId: string) {
     const supabase = createClient() as any
+    const avgServicePrice = await this.getClinicAverageServicePrice(clinicId)
+    const withinBusinessHours = await this.checkBusinessHours(clinicId)
     
     // Fetch recalls that are overdue
     const { data, error } = await supabase
@@ -269,9 +325,12 @@ export class RecallService {
         days_overdue: daysOverdue,
         last_visit: (recall as any).patients.last_visit_date,
         status: (recall as any).status,
-        estimated_recoverable_value: 500,
+        estimated_recoverable_value: avgServicePrice,
         actual_revenue: null,
-        action_needed: (recall as any).attempt_count > 0 ? 'Manual Call' : 'Auto-Message Pending'
+        action_needed:
+          (recall as any).attempt_count > 0 || !withinBusinessHours
+            ? 'Manual Call'
+            : 'Auto-Message Pending'
       }
     })
   }

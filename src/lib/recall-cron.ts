@@ -7,9 +7,37 @@ import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
 import { RecallService } from '@/services/recall-service'
 import { Database } from '@/types/database'
 
-function checkBusinessHours(): boolean {
-  const hour = new Date().getHours()
-  return hour >= 9 && hour <= 19
+const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+function parseTimeToMinutes(value: string | null | undefined): number | null {
+  if (!value) return null
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(value.trim())
+  if (!match) return null
+  return Number(match[1]) * 60 + Number(match[2])
+}
+
+function checkBusinessHours(businessHours: any): boolean {
+  const now = new Date()
+  const fallbackHour = now.getHours()
+
+  if (!businessHours || typeof businessHours !== 'object') {
+    return fallbackHour >= 9 && fallbackHour < 19
+  }
+
+  const dayName = DAYS[now.getDay()]
+  const schedule = businessHours[dayName]
+  if (!schedule || schedule.is_off === true || schedule.closed === true) {
+    return false
+  }
+
+  const start = parseTimeToMinutes(schedule.start || schedule.open)
+  const end = parseTimeToMinutes(schedule.end || schedule.close)
+  if (start === null || end === null || end <= start) {
+    return fallbackHour >= 9 && fallbackHour < 19
+  }
+
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  return currentMinutes >= start && currentMinutes < end
 }
 
 async function cancelRecall(recallId: string, reason: string, supabase: SupabaseClient) {
@@ -95,13 +123,13 @@ async function seedInactivePatientRecalls(clinicId: string, supabase: SupabaseCl
 async function safeSendRecall(recallId: string, clinicId: string, supabase: SupabaseClient) {
   const db = supabase as any
 
-  const { data: clinic } = await db.from('clinics').select('status').eq('id', clinicId).single()
+  const { data: clinic } = await db.from('clinics').select('status, business_hours').eq('id', clinicId).single()
   if (!clinic || clinic.status !== 'active') {
     console.warn(`Clinic ${clinicId} is not active. Aborting send.`)
     return
   }
 
-  if (!checkBusinessHours()) throw new Error('Outside business hours')
+  if (!checkBusinessHours(clinic.business_hours)) throw new Error('Outside business hours')
 
   const { data: recall } = await db.from('patient_recalls').select('*, patients(*)').eq('id', recallId).single()
   if (!recall) throw new Error('Recall not found')

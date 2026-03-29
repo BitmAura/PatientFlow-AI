@@ -5,6 +5,7 @@ import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message';
 import { RecallService } from './recall-service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard';
+import { buildBookingLink } from '@/lib/utils/public-url';
 
 type DbLeadStatus = Database['public']['Enums']['lead_status'];
 
@@ -468,9 +469,9 @@ export class LeadService {
     }
 
     const firstName = lead.full_name.split(' ')[0];
-    const bookingLink = clinic.slug 
-      ? `https://${process.env.NEXT_PUBLIC_APP_URL || 'patientflow.ai'}/book/${clinic.slug}` // Adjust domain as needed
-      : clinic.website || '#';
+      const bookingLink = clinic.slug 
+        ? buildBookingLink(clinic.slug)
+        : clinic.website || '#';
 
     // 4. Construct Message
     // "Hi [Name], thanks for reaching out to [Clinic Name]. Here is a link to book your appointment: [Link]. - [Clinic Name]"

@@ -9,34 +9,38 @@ export async function GET() {
   const { data: staff } = await supabase.from('staff').select('clinic_id').eq('user_id', user.id).single()
   if (!(staff as any)?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
 
-  const today = new Date().toISOString().split('T')[0]
-  
-  // Mock aggregation for MVP or simple count queries
-  // Real implementation would ideally use a single SQL query or separate counts
-  
-  const { count: due_today } = await supabase
-    .from('followups')
-    .select('*', { count: 'exact', head: true })
-    .eq('clinic_id', (staff as any).clinic_id)
-    .eq('due_date', today)
-    .eq('status', 'pending')
+  const clinicId = (staff as any).clinic_id
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const startOfTomorrow = new Date(startOfToday)
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1)
 
-  const { count: overdue } = await supabase
-    .from('followups')
-    .select('*', { count: 'exact', head: true })
-    .eq('clinic_id', (staff as any).clinic_id)
-    .lt('due_date', today)
-    .eq('status', 'pending')
-
-  const { count: completed_today } = await supabase
-    .from('followups')
-    .select('*', { count: 'exact', head: true })
-    .eq('clinic_id', (staff as any).clinic_id)
-    .eq('completed_date', today)
+  const [dueTodayResult, overdueResult, completedTodayResult] = await Promise.all([
+    supabase
+      .from('followups')
+      .select('*', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .eq('status', 'pending')
+      .gte('due_date', startOfToday.toISOString())
+      .lt('due_date', startOfTomorrow.toISOString()),
+    supabase
+      .from('followups')
+      .select('*', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .eq('status', 'pending')
+      .lt('due_date', startOfToday.toISOString()),
+    supabase
+      .from('followups')
+      .select('*', { count: 'exact', head: true })
+      .eq('clinic_id', clinicId)
+      .in('status', ['sent', 'converted', 'completed'])
+      .gte('updated_at', startOfToday.toISOString())
+      .lt('updated_at', startOfTomorrow.toISOString()),
+  ])
 
   return NextResponse.json({
-    due_today: due_today || 0,
-    overdue: overdue || 0,
-    completed_today: completed_today || 0
+    due_today: dueTodayResult.count || 0,
+    overdue: overdueResult.count || 0,
+    completed_today: completedTodayResult.count || 0
   })
 }

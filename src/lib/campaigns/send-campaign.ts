@@ -3,6 +3,7 @@ import { createCampaignRecipients } from '@/lib/services/campaign-recipients'
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message' // Assuming this exists from previous step
 import { buildMessage } from '@/lib/whatsapp/templates'
 import { getClinicSubscriptionEligibility, trackClinicUsage } from '@/lib/billing/subscription-guard'
+import { buildBookingLink } from '@/lib/utils/public-url'
 
 export async function startCampaignSend(campaignId: string): Promise<{
   success: boolean
@@ -105,7 +106,7 @@ export async function processCampaignBatch(campaignId: string): Promise<{
         patient_name: recipient.patient.full_name,
         patient_first_name: recipient.patient.first_name || recipient.patient.full_name.split(' ')[0],
         clinic_name: campaign.clinic?.name || 'Clinic',
-        booking_link: `https://app.patientflow.ai/book/${campaign.clinic_id}` // Mock link
+        booking_link: buildBookingLink(campaign.clinic?.slug || campaign.clinic_id)
       })
 
       // Send

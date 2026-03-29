@@ -27,7 +27,13 @@ export async function POST(request: Request) {
     .eq('clinic_id', clinicId)
     .single();
 
-  const phoneNumber = connection?.session_data?.phoneNumber || '';
+  const sessionData = (connection?.session_data || {}) as Record<string, any>;
+  const phoneNumber =
+    sessionData.phoneNumber ||
+    sessionData.phone_number ||
+    sessionData.verified_number ||
+    sessionData.phoneNumberId ||
+    '';
 
   // 3. Pause Automation (Immediate Safety)
   // Lock all active journeys to prevent further processing
@@ -44,13 +50,12 @@ export async function POST(request: Request) {
   const provider = WhatsAppProviderFactory.getProvider('gupshup');
   
   try {
-    // We pass the phone number and config. 
-    // In a real scenario, we might need the specific appId used for this clinic if it differs,
-    // but assuming single master app for now.
-    await provider.deregisterNumber(phoneNumber, {
-      apiKey: gupshupConfig.appToken,
-      appId: gupshupConfig.appId
-    });
+    if (phoneNumber) {
+      await provider.deregisterNumber(phoneNumber, {
+        apiKey: sessionData.apiKey || gupshupConfig.appToken,
+        appId: sessionData.appId || gupshupConfig.appId,
+      });
+    }
   } catch (error) {
     console.error('[Deregister] Provider error:', error);
     // We continue even if provider fails, to ensure local state is updated and safe.
