@@ -40,13 +40,38 @@ export async function GET(request: Request) {
     cancelled: trends.reduce((sum, t) => sum + t.cancelled, 0)
   }
 
-  // Aggregate by Source (Mock data for now as source column might not exist yet)
-  const bySource = {
-    dashboard: Math.round(byStatus.completed * 0.4),
-    booking_page: Math.round(byStatus.completed * 0.3),
-    walk_in: Math.round(byStatus.completed * 0.2),
-    phone: Math.round(byStatus.completed * 0.1)
+  const bySourceBase = {
+    dashboard: 0,
+    booking_page: 0,
+    walk_in: 0,
+    phone: 0,
+    other: 0,
   }
+
+  const { data: sourceRows } = await (supabase as any)
+    .from('appointments')
+    .select('source')
+    .eq('clinic_id', clinic.id)
+    .gte('start_time', dateRange.from.toISOString())
+    .lte('start_time', dateRange.to.toISOString())
+
+  const bySource = (sourceRows || []).reduce((acc: any, row: any) => {
+    const source = String(row?.source || '').toLowerCase()
+
+    if (source === 'online_booking' || source.includes('booking')) {
+      acc.booking_page += 1
+    } else if (source.includes('walk')) {
+      acc.walk_in += 1
+    } else if (source.includes('phone') || source.includes('call')) {
+      acc.phone += 1
+    } else if (source === 'dashboard' || source === 'manual') {
+      acc.dashboard += 1
+    } else {
+      acc.other += 1
+    }
+
+    return acc
+  }, bySourceBase)
 
   return NextResponse.json({
     over_time: trends,

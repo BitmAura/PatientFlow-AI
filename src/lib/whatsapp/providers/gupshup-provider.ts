@@ -9,37 +9,41 @@ import {
 
 export class GupshupProvider implements WhatsAppProvider {
   private readonly baseUrl = 'https://api.gupshup.io/wa/api/v1';
+  private readonly partnerBaseUrl = 'https://partner.gupshup.io/partner/app';
 
   async registerNumber(phone: string, config: WhatsAppProviderConfig): Promise<RegistrationResult> {
     try {
-      // 1. Verify API Key
       if (!this.validateConfig(config)) {
         throw new Error('Invalid Gupshup configuration');
       }
 
-      // 2. Call Gupshup API to initiate registration & Trigger OTP
-      // Endpoint: https://partner.gupshup.io/partner/app/{appId}/register
-      const endpoint = `https://partner.gupshup.io/partner/app/${config.appId}/register`;
+      const endpoint = `${this.partnerBaseUrl}/${config.appId}/register`;
       const params = new URLSearchParams();
       params.append('phone', phone);
-      params.append('verify_method', 'otp'); // or 'voice'
+      params.append('verify_method', 'otp');
       params.append('apikey', config.apiKey);
 
       console.log(`[Gupshup] Initiating registration for ${phone} on App ${config.appId}`);
-      
-      // Mocking the fetch call
-      // const response = await fetch(endpoint, { method: 'POST', body: params });
-      // const data = await response.json();
-      
-      // if (!response.ok) throw new Error(data.message || 'Gupshup registration failed');
 
-      // 3. Return Pending Verification status
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const error = (data as any)?.message || (data as any)?.status || response.statusText;
+        throw new Error(error || 'Gupshup registration failed');
+      }
+
       return {
         success: true,
-        status: 'pending_verification', // Will be mapped to 'connecting' in DB
+        status: 'pending_verification',
         providerData: { 
           appId: config.appId,
           otpSent: true,
+          response: data,
           timestamp: new Date().toISOString()
         }
       };
@@ -55,8 +59,11 @@ export class GupshupProvider implements WhatsAppProvider {
 
   async verifyOtp(phone: string, otp: string, config: WhatsAppProviderConfig): Promise<RegistrationResult> {
     try {
-      // Endpoint: https://partner.gupshup.io/partner/app/{appId}/verify
-      const endpoint = `https://partner.gupshup.io/partner/app/${config.appId}/verify`;
+      if (!this.validateConfig(config)) {
+        throw new Error('Invalid Gupshup configuration');
+      }
+
+      const endpoint = `${this.partnerBaseUrl}/${config.appId}/verify`;
       const params = new URLSearchParams();
       params.append('phone', phone);
       params.append('otp', otp);
@@ -64,19 +71,25 @@ export class GupshupProvider implements WhatsAppProvider {
 
       console.log(`[Gupshup] Verifying OTP for ${phone}`);
 
-      // Mock Fetch
-      // const response = await fetch(endpoint, { method: 'POST', body: params });
-      // const data = await response.json();
-      
-      // if (!response.ok) throw new Error(data.message || 'OTP verification failed');
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      });
+      const data = await response.json().catch(() => ({}));
 
-      // Success
+      if (!response.ok) {
+        const error = (data as any)?.message || (data as any)?.status || response.statusText;
+        throw new Error(error || 'OTP verification failed');
+      }
+
       return {
         success: true,
         status: 'connected',
-        numberId: `ph_${phone}`, // Gupshup doesn't always give a unique ID, phone is key
+        numberId: `ph_${phone}`,
         providerData: { 
           appId: config.appId,
+          response: data,
           verifiedAt: new Date().toISOString()
         }
       };
@@ -91,9 +104,27 @@ export class GupshupProvider implements WhatsAppProvider {
   }
 
   async deregisterNumber(phone: string, config: WhatsAppProviderConfig): Promise<void> {
+    if (!this.validateConfig(config)) {
+      throw new Error('Invalid Gupshup configuration');
+    }
+
+    const endpoint = `${this.partnerBaseUrl}/${config.appId}/deregister`;
+    const params = new URLSearchParams();
+    params.append('phone', phone);
+    params.append('apikey', config.apiKey);
+
     console.log(`[Gupshup] Deregistering number ${phone}`);
-    // Call Gupshup API to remove number or disable app
-    // await fetch(...)
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = (data as any)?.message || (data as any)?.status || response.statusText;
+      throw new Error(error || 'Failed to deregister number');
+    }
   }
 
   async sendMessage(to: string, options: SendMessageOptions, config: WhatsAppProviderConfig): Promise<SendMessageResult> {

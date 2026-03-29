@@ -22,6 +22,7 @@ import { getPaymentDetails, verifyPaymentSignature, isPaymentSuccessful } from '
 import { z } from 'zod'
 import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
+import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
 
 // Extended schema with payment details
 const confirmBookingWithPaymentSchema = confirmBookingSchema.extend({
@@ -239,16 +240,49 @@ export async function POST(request: Request) {
       request,
     })
 
-    // 5. Send confirmation (async - don't wait)
-    // TODO: Trigger WhatsApp confirmation message via automation service
-    // triggerAutomation({ type: 'appointment.booked_online', ... })
+    // 5. Send confirmation message without blocking booking success.
+    let confirmationSent = false
+    try {
+      const bookingDate = startTime.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+      const bookingTime = startTime.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+
+      const confirmation = await sendWhatsAppMessage(
+        clinic_id,
+        patient.phone,
+        `Hi ${patient.name.split(' ')[0]}, your appointment for ${(service as any).name} is confirmed on ${bookingDate} at ${bookingTime}. Reply here if you need to reschedule.`,
+        {
+          type: 'booking_confirmation',
+          appointmentId: (appointment as any).id,
+          patientId,
+        }
+      )
+
+      confirmationSent = confirmation.success
+      if (confirmationSent) {
+        await (supabase as any)
+          .from('appointments')
+          .update({ confirmation_sent: true })
+          .eq('id', (appointment as any).id)
+      }
+    } catch (sendError) {
+      console.error('[Booking Confirm] Confirmation message failed:', sendError)
+    }
 
     return NextResponse.json(
       {
         success: true,
         appointment_id: (appointment as any).id,
         patient_id: patientId,
-        message: 'Appointment confirmed! You will receive a confirmation message shortly.',
+        message: confirmationSent
+          ? 'Appointment confirmed and confirmation message sent.'
+          : 'Appointment confirmed. Confirmation message will be retried shortly.',
       },
       { status: 201 }
     )

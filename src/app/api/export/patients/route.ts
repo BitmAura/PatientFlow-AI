@@ -25,12 +25,16 @@ export async function POST(request: Request) {
     .select('*')
     .eq('clinic_id', (clinic as any).id)
 
-  const columns = PATIENT_COLUMNS.filter(c => selectedKeys.includes(c.key))
-  const filename = `patients_list.${format === 'excel' ? 'xlsx' : format}`
+  const selected = Array.isArray(selectedKeys) && selectedKeys.length > 0
+    ? selectedKeys
+    : PATIENT_COLUMNS.map((column) => column.key)
+  const columns = PATIENT_COLUMNS.filter(c => selected.includes(c.key))
+  const targetFormat = format === 'excel' ? 'excel' : 'csv'
+  const filename = `patients_list.${targetFormat === 'excel' ? 'xlsx' : 'csv'}`
 
   let fileBlob: Blob
 
-  switch (format) {
+  switch (targetFormat) {
     case 'excel':
       fileBlob = await exportToExcel(patients || [], filename)
       break
@@ -51,8 +55,8 @@ export async function POST(request: Request) {
     action: 'export',
     entityType: 'patients',
     newValues: {
-      format,
-      selected_columns: selectedKeys?.length || 0,
+      format: targetFormat,
+      selected_columns: selected.length,
       record_count: patients?.length || 0,
     },
     request,
@@ -61,7 +65,7 @@ export async function POST(request: Request) {
   return new NextResponse(buffer, {
     status: 200,
     headers: {
-      'Content-Type': format === 'excel' 
+      'Content-Type': targetFormat === 'excel'
         ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
         : 'text/csv',
       'Content-Disposition': `attachment; filename="${filename}"`,

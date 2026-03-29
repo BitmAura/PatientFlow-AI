@@ -9,24 +9,59 @@ import { ReminderLogFilters } from '@/components/reminders/reminder-log-filters'
 import { useReminderLogs, useReminderStats } from '@/hooks/use-reminder-logs'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 export default function ReminderLogsPage() {
   const [filters, setFilters] = React.useState({
     page: 1,
     limit: 20,
     search: '',
-    status: undefined,
-    type: undefined,
+    statuses: undefined as string[] | undefined,
+    types: undefined as string[] | undefined,
     date_from: undefined,
     date_to: undefined
   })
 
   const { data: logsData, isLoading: logsLoading } = useReminderLogs(filters)
   const { data: statsData, isLoading: statsLoading } = useReminderStats()
+  const { toast } = useToast()
 
   const handleExport = () => {
-    // Placeholder for CSV export
-    alert('Exporting CSV...')
+    const rows = logsData?.data || []
+    if (rows.length === 0) {
+      toast({ variant: 'destructive', title: 'No data', description: 'No logs available to export.' })
+      return
+    }
+
+    const header = ['Sent At', 'Patient', 'Phone', 'Type', 'Status', 'Message']
+    const escapeCsv = (value: string) => {
+      const safe = String(value ?? '')
+      if (safe.includes(',') || safe.includes('"') || safe.includes('\n')) {
+        return `"${safe.replace(/"/g, '""')}"`
+      }
+      return safe
+    }
+
+    const csvRows = rows.map((log: any) => [
+      new Date(log.created_at).toISOString(),
+      log.patients?.full_name || '',
+      log.patients?.phone || '',
+      log.type,
+      log.status,
+      log.message || log.content || '',
+    ])
+
+    const csv = [header, ...csvRows].map((row) => row.map((item) => escapeCsv(String(item))).join(',')).join('\n')
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `reminder-logs-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -53,7 +88,17 @@ export default function ReminderLogsPage() {
           <ReminderLogFilters 
             filters={filters} 
             onFilterChange={setFilters}
-            onClear={() => setFilters({ page: 1, limit: 20, search: '', status: undefined, type: undefined, date_from: undefined, date_to: undefined })}
+            onClear={() =>
+              setFilters({
+                page: 1,
+                limit: 20,
+                search: '',
+                statuses: undefined,
+                types: undefined,
+                date_from: undefined,
+                date_to: undefined,
+              })
+            }
           />
           
           <ReminderLogTable 

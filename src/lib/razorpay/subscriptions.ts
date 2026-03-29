@@ -42,18 +42,22 @@ interface SubscriptionResponse {
   shortUrl?: string
 }
 
-function getRazorpayPlanEnvId(planId: PricingPlanId, billingCycle: BillingCycle): string | undefined {
+export function resolveRazorpayPlanId(planId: PricingPlanId, billingCycle: BillingCycle): string {
   const cycleKey = billingCycle === 'monthly' ? 'MONTHLY' : 'ANNUAL'
   const primaryKey = `RAZORPAY_PLAN_${planId.toUpperCase()}_${cycleKey}` as const
 
   if (process.env[primaryKey]) {
-    return process.env[primaryKey]
+    return process.env[primaryKey] as string
   }
 
   // Backward compatibility with older tier names.
   const legacyPlanId = planId === 'starter' ? 'CLINIC' : planId === 'growth' ? 'HOSPITAL' : 'PRO'
   const legacyKey = `RAZORPAY_PLAN_${legacyPlanId}_${cycleKey}` as const
-  return process.env[legacyKey]
+  const resolved = process.env[legacyKey]
+  if (!resolved) {
+    throw new Error(`Razorpay plan ID not configured for ${planId} ${billingCycle}`)
+  }
+  return resolved
 }
 
 /**
@@ -133,11 +137,7 @@ export async function createSubscription(
     const rzpCustomerId = customerId || (await getOrCreateCustomer(userId, userEmail))
 
     // Get Razorpay plan ID from environment variables
-    const razorpayPlanId = getRazorpayPlanEnvId(planId, billingCycle)
-
-    if (!razorpayPlanId) {
-      throw new Error(`Razorpay plan ID not configured for ${planId} ${billingCycle}`)
-    }
+    const razorpayPlanId = resolveRazorpayPlanId(planId, billingCycle)
 
     // Create subscription
     const subscription = await getRazorpay().subscriptions.create({

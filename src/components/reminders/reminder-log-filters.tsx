@@ -51,8 +51,8 @@ export function ReminderLogFilters({ filters, onFilterChange, onClear }: Reminde
 
       <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
         <Select 
-          value={filters.status} 
-          onValueChange={(val) => onFilterChange({ ...filters, statuses: val === 'all' ? undefined : [val] })}
+          value={filters.statuses?.[0] || 'all'} 
+          onValueChange={(val) => onFilterChange({ ...filters, page: 1, statuses: val === 'all' ? undefined : [val] })}
         >
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Status" />
@@ -67,8 +67,8 @@ export function ReminderLogFilters({ filters, onFilterChange, onClear }: Reminde
         </Select>
 
         <Select 
-          value={filters.type} 
-          onValueChange={(val) => onFilterChange({ ...filters, types: val === 'all' ? undefined : [val] })}
+          value={filters.types?.[0] || 'all'} 
+          onValueChange={(val) => onFilterChange({ ...filters, page: 1, types: val === 'all' ? undefined : [val] })}
         >
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Message Type" />

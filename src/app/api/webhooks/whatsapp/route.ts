@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { handleIncomingMessage } from '@/services/messages/handler'
-import { receiveWebhook } from '@/services/messaging'
+import { receiveWebhook, verifyWebhookSignature } from '@/services/messaging'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -17,7 +17,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const payload = await request.json()
+    const body = await request.text()
+    if (!verifyWebhookSignature({ provider: 'meta', request, body })) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const payload = JSON.parse(body)
     const result = await receiveWebhook({ provider: 'meta', payload })
 
     for (let i = 0; i < result.messages.length; i += 1) {

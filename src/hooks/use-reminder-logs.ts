@@ -2,16 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export interface ReminderLog {
   id: string
+  patient_id?: string | null
   created_at: string
   type: string
   status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed'
-  content: string
-  error_reason?: string
-  response?: string
-  patients: {
-    full_name: string
-    phone: string
-  }
+  message: string
+  content?: string
+  error?: string | null
+  error_reason?: string | null
+  response?: string | null
+  metadata?: Record<string, unknown> | null
+  patients?: {
+    full_name: string | null
+    phone: string | null
+  } | null
 }
 
 export interface ReminderStats {

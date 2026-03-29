@@ -13,8 +13,12 @@ export async function GET(request: Request) {
   
   const from = searchParams.get('date_from')
   const to = searchParams.get('date_to')
-  const types = searchParams.get('types')?.split(',')
-  const statuses = searchParams.get('statuses')?.split(',')
+  const typeParam = searchParams.get('type')
+  const statusParam = searchParams.get('status')
+  const types = (searchParams.get('types')?.split(',') || (typeParam ? [typeParam] : undefined))
+    ?.filter(Boolean)
+  const statuses = (searchParams.get('statuses')?.split(',') || (statusParam ? [statusParam] : undefined))
+    ?.filter(Boolean)
   const search = searchParams.get('search')
 
   const { data: staff } = await supabase
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('reminder_logs')
-    .select('*, patients!inner(full_name, phone)', { count: 'exact' })
+    .select('*, patients(full_name, phone)', { count: 'exact' })
     .eq('clinic_id', staff.clinic_id)
     .order('created_at', { ascending: false })
 

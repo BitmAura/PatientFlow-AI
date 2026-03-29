@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
   const { data: clinic } = await supabase
     .from('clinics')
-    .select('id, subscription_plan_id, subscription_status, subscription_id')
+    .select('id')
     .eq('user_id', user.id)
     .single()
 
@@ -17,9 +17,15 @@ export async function GET(request: Request) {
 
   const usage = await getCurrentUsage(clinic.id)
 
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('razorpay_subscription_id, status')
+    .eq('user_id', user.id)
+    .single()
+
   return NextResponse.json({
     ...usage,
-    subscription_id: clinic.subscription_id,
-    status: clinic.subscription_status
+    subscription_id: subscription?.razorpay_subscription_id || null,
+    status: subscription?.status || usage.status,
   })
 }

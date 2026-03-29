@@ -13,14 +13,24 @@ export async function getCurrentUsage(clinicId: string) {
   const start = startOfMonth(now).toISOString()
   const end = endOfMonth(now).toISOString()
 
-  // Get current plan from clinic settings or subscription table
+  // Resolve owner user from clinic and fetch canonical subscription row.
   const { data: clinic } = await supabase
     .from('clinics')
-    .select('subscription_plan_id, subscription_status')
+    .select('user_id')
     .eq('id', clinicId)
     .single()
 
-  const planId = normalizePlanId(clinic?.subscription_plan_id)
+  const ownerUserId = clinic?.user_id || null
+
+  const { data: subscription } = ownerUserId
+    ? await supabase
+        .from('subscriptions')
+        .select('plan_id, status')
+        .eq('user_id', ownerUserId)
+        .single()
+    : { data: null }
+
+  const planId = normalizePlanId(subscription?.plan_id)
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId) || SUBSCRIPTION_PLANS[0]
 
   // Count appointments in current period
@@ -33,6 +43,7 @@ export async function getCurrentUsage(clinicId: string) {
 
   return {
     plan,
+    status: subscription?.status || 'trialing',
     usage: count || 0,
     limit: plan.appointments_limit,
     period_start: start,

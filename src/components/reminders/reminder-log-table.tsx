@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { MessageStatusIcon } from './message-status-icon'
-import { ReminderLog } from '@/hooks/use-reminder-logs'
+import { ReminderLog, useResendMessage } from '@/hooks/use-reminder-logs'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MessageDetailSheet } from './message-detail-sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 
 interface ReminderLogTableProps {
   data: ReminderLog[]
@@ -32,10 +33,25 @@ interface ReminderLogTableProps {
 export function ReminderLogTable({ data, isLoading }: ReminderLogTableProps) {
   const [selectedLog, setSelectedLog] = React.useState<ReminderLog | null>(null)
   const [sheetOpen, setSheetOpen] = React.useState(false)
+  const resend = useResendMessage()
+  const { toast } = useToast()
 
   const handleView = (log: ReminderLog) => {
     setSelectedLog(log)
     setSheetOpen(true)
+  }
+
+  const handleResend = async (logId: string) => {
+    try {
+      await resend.mutateAsync(logId)
+      toast({ title: 'Reminder queued', description: 'Reminder resend has been initiated.' })
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Resend failed',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      })
+    }
   }
 
   if (isLoading) {
@@ -66,7 +82,7 @@ export function ReminderLogTable({ data, isLoading }: ReminderLogTableProps) {
               <TableHead>Patient</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Response</TableHead>
+              <TableHead>Message</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -82,8 +98,8 @@ export function ReminderLogTable({ data, isLoading }: ReminderLogTableProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-medium">{log.patients.full_name}</span>
-                    <span className="text-xs text-muted-foreground">{log.patients.phone}</span>
+                    <span className="font-medium">{log.patients?.full_name || 'Unknown patient'}</span>
+                    <span className="text-xs text-muted-foreground">{log.patients?.phone || '-'}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -98,9 +114,9 @@ export function ReminderLogTable({ data, isLoading }: ReminderLogTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {log.response ? (
-                    <span className="text-sm truncate max-w-[200px] block" title={log.response}>
-                      {log.response}
+                  {log.message || log.content ? (
+                    <span className="text-sm truncate max-w-[280px] block" title={log.message || log.content}>
+                      {log.message || log.content}
                     </span>
                   ) : (
                     <span className="text-xs text-muted-foreground">-</span>
@@ -119,7 +135,7 @@ export function ReminderLogTable({ data, isLoading }: ReminderLogTableProps) {
                         View Details
                       </DropdownMenuItem>
                       {(log.status === 'failed') && (
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => void handleResend(log.id)}>
                           <RefreshCw className="mr-2 h-4 w-4" />
                           Resend
                         </DropdownMenuItem>

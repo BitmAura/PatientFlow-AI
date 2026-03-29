@@ -1,63 +1,123 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { BillingCycle, normalizePlanId, PricingPlanId } from '@/lib/billing/plans'
+import {
+  createSubscription,
+  resolveRazorpayPlanId,
+  updateSubscriptionPlan,
+} from '@/lib/razorpay/subscriptions'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const supabase = createClient() as any
-  const { data: { user } } = await supabase.auth.getUser()
+  const admin = createAdminClient() as any
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { plan_id } = await request.json()
-  const normalizedPlanId = normalizePlanId(plan_id)
+  const body = await request.json()
+  const normalizedPlanId = normalizePlanId(body?.plan_id) as PricingPlanId
+  const billingCycle: BillingCycle = body?.billing_cycle === 'annual' ? 'annual' : 'monthly'
 
-  // 1. Get clinic
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id, subscription_id')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  const { data: existingSubscription, error: subError } = await admin
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
 
-  // 2. Interact with Razorpay to update/create subscription
-  // Mock logic:
-  const newSubId = 'sub_' + Math.random().toString(36).substring(7)
-  
-  // 3. Update DB
-  const { error } = await supabase
-    .from('clinics')
-    .update({
-      subscription_plan_id: normalizedPlanId,
-      subscription_id: newSubId,
-      subscription_status: 'active'
+  if (subError || !existingSubscription) {
+    return new NextResponse('Subscription not found', { status: 404 })
+  }
+
+  let gatewayResult: any
+
+  if (existingSubscription.razorpay_subscription_id) {
+    const targetRazorpayPlanId = resolveRazorpayPlanId(normalizedPlanId, billingCycle)
+    gatewayResult = await updateSubscriptionPlan(
+      existingSubscription.razorpay_subscription_id,
+      targetRazorpayPlanId
+    )
+  } else {
+    if (!user.email) {
+      return NextResponse.json({ error: 'Missing user email for billing' }, { status: 400 })
+    }
+
+    const created = await createSubscription({
+      userId: user.id,
+      userEmail: user.email,
+      planId: normalizedPlanId,
+      billingCycle,
+      customerId: existingSubscription.razorpay_customer_id || undefined,
     })
-    .eq('id', clinic.id)
+
+    gatewayResult = {
+      id: created.subscriptionId,
+      customer_id: created.customerId,
+      plan_id: created.planId,
+      status: created.status,
+      current_start: created.currentPeriodStart,
+      current_end: created.currentPeriodEnd,
+      short_url: created.shortUrl,
+    }
+  }
+
+  const nextStatus = String(gatewayResult.status || existingSubscription.status || 'active')
+  const currentStart = gatewayResult.current_start
+    ? new Date(gatewayResult.current_start * 1000).toISOString()
+    : existingSubscription.current_period_start
+  const currentEnd = gatewayResult.current_end
+    ? new Date(gatewayResult.current_end * 1000).toISOString()
+    : existingSubscription.current_period_end
+
+  const { error } = await admin
+    .from('subscriptions')
+    .update({
+      plan_id: normalizedPlanId,
+      billing_cycle: billingCycle,
+      status: nextStatus,
+      razorpay_subscription_id:
+        gatewayResult.id || existingSubscription.razorpay_subscription_id || null,
+      razorpay_customer_id:
+        gatewayResult.customer_id || existingSubscription.razorpay_customer_id || null,
+      razorpay_plan_id: gatewayResult.plan_id || existingSubscription.razorpay_plan_id || null,
+      current_period_start: currentStart,
+      current_period_end: currentEnd,
+      cancel_at_period_end: false,
+      cancelled_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', user.id)
 
   if (error) return new NextResponse(error.message, { status: 500 })
 
-  // 4. Create Invoice Record (Mock)
-  await supabase
-    .from('invoices')
-    .insert({
-      clinic_id: clinic.id,
-      amount: PRICING_PLANS[normalizedPlanId].monthlyPricePaise / 100,
-      status: 'paid',
-      description: `Upgrade to ${normalizedPlanId} plan`
-    })
-
   await writeAuditLog({
-    clinicId: clinic.id,
+    clinicId: staff?.clinic_id || null,
     userId: user.id,
     action: 'update',
     entityType: 'subscription_plan',
-    entityId: newSubId,
+    entityId: gatewayResult.id || null,
     newValues: {
       plan_id: normalizedPlanId,
-      status: 'active',
+      billing_cycle: billingCycle,
+      status: nextStatus,
+      mode: 'upgrade',
     },
     request,
   })
 
-  return NextResponse.json({ success: true, subscription_id: newSubId })
+  return NextResponse.json({
+    success: true,
+    subscription_id: gatewayResult.id || existingSubscription.razorpay_subscription_id,
+    shortUrl: gatewayResult.short_url || null,
+    requiresAction: Boolean(gatewayResult.short_url),
+  })
 }

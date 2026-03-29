@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
 
 export async function POST(
   request: Request,
@@ -27,20 +28,47 @@ export async function POST(
 
   if (!log) return new NextResponse('Log not found', { status: 404 })
 
-  // Here we would trigger the actual resend logic via queue or direct call
-  // For MVP, we'll just update the status to 'pending' to simulate a retry
-  
+  let phone = (log as any).phone
+  if (!phone && (log as any).patient_id) {
+    const { data: patient } = await supabase
+      .from('patients')
+      .select('phone')
+      .eq('id', (log as any).patient_id)
+      .single()
+    phone = patient?.phone
+  }
+
+  if (!phone) {
+    return new NextResponse('Patient phone not found for this reminder', { status: 400 })
+  }
+
+  const result = await sendWhatsAppMessage(
+    (log as any).clinic_id,
+    phone,
+    (log as any).message,
+    {
+      type: (log as any).type || 'manual_resend',
+      appointmentId: (log as any).appointment_id || null,
+      patientId: (log as any).patient_id || null,
+      resentFromLogId: (log as any).id,
+    }
+  )
+
   const { error } = await supabase
     .from('reminder_logs')
-    .update({ 
-      status: 'pending', 
-      updated_at: new Date().toISOString(),
-      error_reason: null // Clear previous error
+    .update({
+      status: result.success ? 'sent' : 'failed',
+      error: result.success ? null : result.error || 'Failed to resend',
+      message_id: result.messageId || null,
     })
     .eq('id', context.params.id)
 
   if (error) return new NextResponse('Failed to resend', { status: 500 })
 
-  return NextResponse.json({ success: true })
+  if (!result.success) {
+    return NextResponse.json({ success: false, error: result.error || 'Failed to resend' }, { status: 502 })
+  }
+
+  return NextResponse.json({ success: true, messageId: result.messageId || null })
 }
 

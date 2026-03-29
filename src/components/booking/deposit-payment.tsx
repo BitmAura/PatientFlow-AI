@@ -46,6 +46,9 @@ export function DepositPayment({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount })
       })
+      if (!res.ok) {
+        throw new Error('Unable to create payment order')
+      }
       const order = await res.json()
 
       // 2. Load Razorpay (Mock logic included)
@@ -77,13 +80,17 @@ export function DepositPayment({
 
       // Check if Razorpay is loaded
       if (typeof window.Razorpay === 'undefined') {
-        // Mock success for development/demo without real keys
-        console.warn('Razorpay SDK not loaded. Simulating success.')
-        setTimeout(() => {
-          onSuccess('mock_payment_' + Math.random().toString(36).substring(7))
-          setLoading(false)
-        }, 1500)
-        return
+        if (process.env.NODE_ENV === 'development') {
+          // Allow local flow testing without gateway availability.
+          console.warn('Razorpay SDK not loaded in development. Simulating success.')
+          setTimeout(() => {
+            onSuccess('mock_payment_' + Math.random().toString(36).substring(7))
+            setLoading(false)
+          }, 1500)
+          return
+        }
+
+        throw new Error('Payment gateway unavailable. Please try again.')
       }
 
       const rzp = new window.Razorpay(options)

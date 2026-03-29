@@ -20,7 +20,10 @@ export function useUpgradePlan() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan_id: planId, payment_method_id: paymentMethodId })
       })
-      if (!res.ok) throw new Error('Failed to upgrade plan')
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null)
+        throw new Error(payload?.error || 'Failed to upgrade plan')
+      }
       return res.json()
     },
     onSuccess: () => {
@@ -38,7 +41,10 @@ export function useDowngradePlan() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan_id: planId })
       })
-      if (!res.ok) throw new Error('Failed to downgrade plan')
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null)
+        throw new Error(payload?.error || 'Failed to downgrade plan')
+      }
       return res.json()
     },
     onSuccess: () => {

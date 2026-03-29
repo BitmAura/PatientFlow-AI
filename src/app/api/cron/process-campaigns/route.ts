@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { processCampaignBatch } from '@/lib/campaigns/send-campaign'
 
 export async function POST(request: Request) {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  const supabase = createClient()
+  const supabase = createAdminClient() as any
 
   // Find active sending campaigns
   const { data: campaigns } = await supabase

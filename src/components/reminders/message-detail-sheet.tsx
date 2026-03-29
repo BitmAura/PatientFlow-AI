@@ -58,14 +58,16 @@ export function MessageDetailSheet({ log, open, onOpenChange }: MessageDetailShe
               <User className="h-5 w-5 text-muted-foreground" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold">{log.patients.full_name}</h4>
-              <p className="text-sm text-muted-foreground">{log.patients.phone}</p>
+              <h4 className="font-semibold">{log.patients?.full_name || 'Unknown patient'}</h4>
+              <p className="text-sm text-muted-foreground">{log.patients?.phone || '-'}</p>
             </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={`/patients/${log.patients.phone}`}>
-                Profile <ExternalLink className="ml-2 h-3 w-3" />
-              </Link>
-            </Button>
+            {log.patient_id ? (
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={`/patients/${log.patient_id}`}>
+                  Profile <ExternalLink className="ml-2 h-3 w-3" />
+                </Link>
+              </Button>
+            ) : null}
           </div>
 
           {/* Message Content */}
@@ -73,16 +75,16 @@ export function MessageDetailSheet({ log, open, onOpenChange }: MessageDetailShe
             <h4 className="text-sm font-medium text-muted-foreground">Message Content</h4>
             <div className="bg-[#e5ddd5] p-4 rounded-lg relative border shadow-sm">
               <div className="bg-white p-3 rounded-md text-sm whitespace-pre-wrap shadow-sm">
-                {log.content}
+                {log.message || log.content || '-'}
               </div>
             </div>
           </div>
 
           {/* Error Details (if failed) */}
-          {log.status === 'failed' && log.error_reason && (
+          {log.status === 'failed' && (log.error || log.error_reason) && (
             <div className="bg-red-50 p-4 rounded-lg border border-red-100 space-y-1">
               <h4 className="text-sm font-medium text-red-900">Delivery Failed</h4>
-              <p className="text-sm text-red-700">{log.error_reason}</p>
+              <p className="text-sm text-red-700">{log.error || log.error_reason}</p>
             </div>
           )}
 

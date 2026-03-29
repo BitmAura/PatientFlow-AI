@@ -1,9 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { SignJWT, jwtVerify } from 'jose'
+import crypto from 'crypto'
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-key-change-in-prod')
 const SESSION_COOKIE = 'portal_session'
+
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET?.trim()
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET is required in production for portal sessions')
+    }
+    return new TextEncoder().encode('dev-only-jwt-secret')
+  }
+  return new TextEncoder().encode(secret)
+}
+
+function hashOtp(phone: string, otp: string, clinicId: string): string {
+  const secret = (process.env.OTP_SECRET || process.env.JWT_SECRET || 'dev-otp-secret').trim()
+  return crypto
+    .createHmac('sha256', secret)
+    .update(`${clinicId}:${phone}:${otp}`)
+    .digest('hex')
+}
 
 export type PortalSession = {
   patient_id: string
@@ -13,11 +32,12 @@ export type PortalSession = {
 
 export async function createPortalSession(patientId: string, clinicId: string, phone: string) {
   const session: PortalSession = { patient_id: patientId, clinic_id: clinicId, phone }
+  const jwtSecret = getJwtSecret()
   
   const token = await new SignJWT(session)
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('24h')
-    .sign(JWT_SECRET)
+    .sign(jwtSecret)
 
   const cookieStore = await cookies()
   cookieStore.set(SESSION_COOKIE, token, {
@@ -33,7 +53,8 @@ export async function createPortalSession(patientId: string, clinicId: string, p
 export async function verifyPortalSession(token: string | undefined): Promise<PortalSession | null> {
   if (!token) return null
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const jwtSecret = getJwtSecret()
+    const { payload } = await jwtVerify(token, jwtSecret)
     return payload as unknown as PortalSession
   } catch (error) {
     return null
@@ -56,10 +77,11 @@ export async function storeOTP(phone: string, otp: string, clinicId: string) {
   // Assuming table exists: patient_otps (phone, otp, expires_at, clinic_id)
   
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString() // 5 mins
+  const otpHash = hashOtp(phone, otp, clinicId)
   
   await supabase.from('patient_otps').upsert({
     phone,
-    otp, // In prod, hash this!
+    otp: otpHash,
     expires_at: expiresAt,
     clinic_id: clinicId
   }, { onConflict: 'phone' })
@@ -81,7 +103,8 @@ export async function verifyOTP(phone: string, otp: string): Promise<{ success: 
     return { success: false } // Expired
   }
 
-  if (record.otp !== otp) {
+  const expectedHash = hashOtp(phone, otp, record.clinic_id)
+  if (record.otp !== expectedHash) {
     // Increment failed attempts here
     return { success: false }
   }

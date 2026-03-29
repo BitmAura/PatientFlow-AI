@@ -27,11 +27,16 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
   const handleConfirmUpgrade = async () => {
     if (!selectedPlan) return
     try {
-      await upgradePlan.mutateAsync({ planId: selectedPlan.id })
-      toast({ title: 'Upgrade Initiated', description: 'Redirecting to payment...' })
-      // In real app, redirect to Razorpay URL from response
+      const response = await upgradePlan.mutateAsync({ planId: selectedPlan.id })
+      if (response?.shortUrl) {
+        toast({ title: 'Upgrade Initiated', description: 'Redirecting to payment...' })
+        window.location.href = response.shortUrl
+        return
+      }
+      toast({ title: 'Plan Updated', description: 'Subscription plan has been updated.' })
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to initiate upgrade' })
+      const message = err instanceof Error ? err.message : 'Failed to initiate upgrade'
+      toast({ variant: 'destructive', title: 'Error', description: message })
       throw err
     }
   }

@@ -277,7 +277,7 @@ async function handlePaymentFailed(
     })
     .eq('id', subscription.id)
 
-  // TODO: Send email notification to user about failed payment
+  console.warn(`Subscription payment failed; notify user externally. subscription=${subscriptionId} payment=${paymentId}`)
   console.log(`Payment failed for subscription: ${subscriptionId}`)
 }
 

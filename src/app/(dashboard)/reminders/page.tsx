@@ -1,83 +1,41 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
-import { Trash2, Send, Filter, Bell } from 'lucide-react';
+import { Send, Filter, Bell } from 'lucide-react';
 import { PageHeader, PageCard, EmptyState, SkeletonLoader } from '@/components/dashboard/PageStructure';
 import { Button } from '@/components/dashboard/FormComponents';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { cn } from '@/lib/design-tokens';
-
-interface Reminder {
-  id: string;
-  type: 'sms' | 'email' | 'whatsapp';
-  patientName: string;
-  patientPhone: string;
-  appointmentDate: Date;
-  scheduledDate: Date;
-  status: 'pending' | 'sent' | 'failed';
-  message: string;
-  retries: number;
-}
-
-// Mock data - replace with actual API call
-const mockReminders: Reminder[] = [
-  {
-    id: '1',
-    type: 'whatsapp',
-    patientName: 'Rajesh Kumar',
-    patientPhone: '+91-98765-43210',
-    appointmentDate: new Date(Date.now() + 86400000),
-    scheduledDate: new Date(Date.now() - 3600000),
-    status: 'sent',
-    message: 'Hi Rajesh, your appointment is tomorrow at 10:00 AM. Reply CONFIRM to confirm.',
-    retries: 0,
-  },
-  {
-    id: '2',
-    type: 'sms',
-    patientName: 'Priya Sharma',
-    patientPhone: '+91-87654-32109',
-    appointmentDate: new Date(Date.now() + 172800000),
-    scheduledDate: new Date(),
-    status: 'pending',
-    message: 'Reminder: Your dental appointment is scheduled for tomorrow.',
-    retries: 0,
-  },
-  {
-    id: '3',
-    type: 'email',
-    patientName: 'Amit Patel',
-    patientPhone: 'amit@example.com',
-    appointmentDate: new Date(Date.now() + 259200000),
-    scheduledDate: new Date(Date.now() - 86400000),
-    status: 'failed',
-    message: 'Your appointment reminder - Please confirm or call us to cancel.',
-    retries: 2,
-  },
-];
+import { useReminderLogs, useResendMessage } from '@/hooks/use-reminder-logs';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RemindersPage() {
-  const [reminders, setReminders] = useState<Reminder[]>(mockReminders);
   const [filter, setFilter] = useState<'all' | 'pending' | 'sent' | 'failed'>('all');
-  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const filteredReminders = reminders.filter(
-    (r) => filter === 'all' || r.status === filter
-  );
+  const { data, isLoading, isFetching, refetch } = useReminderLogs({
+    page: 1,
+    limit: 100,
+    statuses: filter === 'all' ? undefined : [filter],
+  });
+  const resendMutation = useResendMessage();
 
-  const handleDelete = useCallback((id: string) => {
-    setReminders((prev) => prev.filter((r) => r.id !== id));
-  }, []);
+  const reminders = data?.data || [];
 
-  const handleSendNow = useCallback((id: string) => {
-    // TODO: Implement API call to send reminder now
-    setReminders((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: 'sent' as const, scheduledDate: new Date() } : r
-      )
-    );
-  }, []);
+  const handleSendNow = async (id: string) => {
+    try {
+      await resendMutation.mutateAsync(id);
+      toast({ title: 'Reminder queued', description: 'Reminder is scheduled for resend.' });
+      await refetch();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to resend',
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -136,9 +94,9 @@ export default function RemindersPage() {
       />
 
       {/* Reminders Table */}
-      {loading ? (
+      {isLoading ? (
         <SkeletonLoader rows={5} variant="table" />
-      ) : filteredReminders.length > 0 ? (
+      ) : reminders.length > 0 ? (
         <PageCard variant="default" padding={false} className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -151,7 +109,7 @@ export default function RemindersPage() {
                     Patient
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
-                    Appointment
+                    Message
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
                     Scheduled
@@ -165,7 +123,7 @@ export default function RemindersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {filteredReminders.map((reminder) => (
+                {reminders.map((reminder) => (
                   <tr
                     key={reminder.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors"
@@ -178,17 +136,20 @@ export default function RemindersPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <div className="font-medium text-slate-900 dark:text-white">
-                        {reminder.patientName}
+                        {reminder.patients?.full_name || 'Unknown patient'}
                       </div>
                       <div className="text-slate-600 dark:text-slate-400">
-                        {reminder.patientPhone}
+                        {reminder.patients?.phone || '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                      {format(reminder.appointmentDate, 'MMM d, yyyy h:mm a')}
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 max-w-sm truncate" title={reminder.message}>
+                      {reminder.message}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                      {formatDistanceToNow(reminder.scheduledDate, { addSuffix: true })}
+                      {formatDistanceToNow(new Date(reminder.created_at), { addSuffix: true })}
+                      <div className="text-xs text-slate-500 dark:text-slate-500">
+                        {format(new Date(reminder.created_at), 'MMM d, yyyy h:mm a')}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span
@@ -198,24 +159,17 @@ export default function RemindersPage() {
                         )}
                       >
                         {reminder.status.toUpperCase()}
-                        {reminder.status === 'failed' && ` (${reminder.retries} retries)`}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-right">
                       <div className="flex justify-end gap-2">
                         <button
-                          onClick={() => handleSendNow(reminder.id)}
+                          onClick={() => void handleSendNow(reminder.id)}
                           title="Send now"
-                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
+                          disabled={resendMutation.isPending || isFetching}
+                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors disabled:opacity-50"
                         >
                           <Send className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(reminder.id)}
-                          title="Delete"
-                          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                         </button>
                       </div>
                     </td>
@@ -229,7 +183,7 @@ export default function RemindersPage() {
           <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Showing {filteredReminders.length} of {reminders.length} reminders
+                Showing {reminders.length} reminder logs
               </p>
               <div className="flex gap-2">
                 <Button variant="secondary" size="sm">

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generateOTP, storeOTP } from '@/lib/portal/session'
 import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
+import { sendMessage } from '@/services/messaging'
 
 // Since this is a public route, we need to know which clinic context we are in.
 // Ideally, the portal URL is clinic-specific (e.g. portal.app.com/clinic-slug)
@@ -76,8 +77,35 @@ export async function POST(request: Request) {
   const otp = generateOTP()
   await storeOTP(phone, otp, patient.clinic_id)
 
-  // Send via WhatsApp (Mock for now, replace with real provider)
-  console.log(`[OTP] Sending ${otp} to ${phone}`)
+  const delivery = await sendMessage({
+    clinicId: patient.clinic_id,
+    to: phone,
+    content: `Your PatientFlow login OTP is ${otp}. It expires in 5 minutes.`,
+    metadata: {
+      type: 'portal_otp',
+      patient_id: patient.id,
+    },
+  })
+
+  if (!delivery.success) {
+    await writeAuditLog({
+      clinicId: patient.clinic_id,
+      action: 'otp_send_failed',
+      entityType: 'portal_auth',
+      entityId: patient.id,
+      newValues: {
+        phone_last4: phone.slice(-4),
+        provider: delivery.provider,
+        error: delivery.error || 'delivery_failed',
+      },
+      request,
+    })
+
+    return NextResponse.json(
+      { error: 'Unable to deliver OTP right now. Please try again.' },
+      { status: 502 }
+    )
+  }
 
   await writeAuditLog({
     clinicId: patient.clinic_id,
@@ -87,11 +115,11 @@ export async function POST(request: Request) {
     newValues: {
       phone_last4: phone.slice(-4),
       channel: 'whatsapp',
+      provider: delivery.provider,
+      message_id: delivery.messageId || null,
     },
     request,
   })
-  
-  // In prod: await sendWhatsApp(phone, `Your login OTP is ${otp}`)
 
   return NextResponse.json({ success: true, expires_in: 300 })
 }

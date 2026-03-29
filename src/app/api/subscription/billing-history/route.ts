@@ -6,19 +6,32 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: clinic } = await supabase
-    .from('clinics')
+  const { data: subscription } = await supabase
+    .from('subscriptions')
     .select('id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!subscription?.id) return new NextResponse('Subscription not found', { status: 404 })
 
-  const { data: invoices } = await supabase
-    .from('invoices')
-    .select('*')
-    .eq('clinic_id', clinic.id)
+  const { data: payments, error } = await supabase
+    .from('subscription_payments')
+    .select('id, amount, currency, status, paid_at, created_at, razorpay_payment_id')
+    .eq('subscription_id', subscription.id)
     .order('created_at', { ascending: false })
 
-  return NextResponse.json(invoices || [])
+  if (error) {
+    return new NextResponse('Failed to fetch billing history', { status: 500 })
+  }
+
+  const invoices = (payments || []).map((payment: any) => ({
+    id: payment.id,
+    created_at: payment.paid_at || payment.created_at,
+    description: `Subscription payment ${payment.razorpay_payment_id || payment.id}`,
+    amount: Number(payment.amount || 0) / 100,
+    status: payment.status === 'captured' ? 'paid' : payment.status,
+    currency: payment.currency || 'INR',
+  }))
+
+  return NextResponse.json(invoices)
 }
