@@ -10,15 +10,15 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const limit = parseInt(searchParams.get('limit') || '10')
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
 
-  const activities = await getRecentActivity((clinic as any).id, limit)
+  const activities = await getRecentActivity((staff as any).clinic_id, limit)
 
   return NextResponse.json(activities)
 }

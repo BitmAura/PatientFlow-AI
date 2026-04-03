@@ -13,13 +13,14 @@ export async function POST(request: Request) {
 
   const { date_from, date_to, status, columns: selectedKeys, format } = await request.json()
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('*')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+  const clinic = { id: staff.clinic_id as string }
 
   // Build query
   let query = supabase

@@ -18,13 +18,14 @@ export async function GET(request: Request) {
     
   // Assuming clinic_id is stored in user metadata or a separate profile table
   // For MVP, fetch clinic where user is member
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+  const clinic = { id: staff.clinic_id }
 
   const currentRange: DateRange = {
     from: new Date(from),

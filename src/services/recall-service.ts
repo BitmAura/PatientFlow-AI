@@ -159,8 +159,7 @@ export class RecallService {
           full_name,
           phone,
           email,
-          lifecycle_stage,
-          last_visit_date
+          lifecycle_stage
         )
       `)
       .eq('clinic_id', clinicId)
@@ -297,7 +296,6 @@ export class RecallService {
         patients!inner (
           full_name,
           phone,
-          last_visit_date,
           lifecycle_stage
         )
       `)
@@ -323,7 +321,7 @@ export class RecallService {
         patient_name: (recall as any).patients.full_name,
         treatment: (recall as any).treatment_category,
         days_overdue: daysOverdue,
-        last_visit: (recall as any).patients.last_visit_date,
+        last_visit: null,
         status: (recall as any).status,
         estimated_recoverable_value: avgServicePrice,
         actual_revenue: null,

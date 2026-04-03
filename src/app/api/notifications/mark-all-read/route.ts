@@ -8,24 +8,25 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+  const clinicId = staff.clinic_id as string
 
   const { count: unreadCount } = await supabase
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .eq('clinic_id', (clinic as any).id)
+    .eq('clinic_id', clinicId)
     .eq('read', false)
 
-  await markAllAsRead((clinic as any).id)
+  await markAllAsRead(clinicId)
 
   await writeAuditLog({
-    clinicId: (clinic as any).id,
+    clinicId,
     userId: user.id,
     action: 'update',
     entityType: 'notification_bulk',

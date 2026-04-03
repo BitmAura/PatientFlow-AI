@@ -68,16 +68,10 @@ export default function BillingPage() {
              <CardDescription>Managed securely via Razorpay</CardDescription>
           </CardHeader>
           <CardContent>
-             <div className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50">
-               <div className="w-12 h-8 bg-white border rounded flex items-center justify-center font-bold text-blue-800 text-xs">
-                 VISA
-               </div>
-               <div>
-                 <p className="font-medium">•••• •••• •••• 4242</p>
-                 <p className="text-xs text-muted-foreground">Expires 12/28</p>
-               </div>
-               <div className="ml-auto text-sm text-blue-600 font-medium cursor-pointer">
-                 Update
+             <div className="flex items-center gap-4 p-4 border-2 border-dashed rounded-lg bg-muted/30">
+               <div className="flex-1">
+                 <p className="text-sm font-medium text-muted-foreground">No payment method on file</p>
+                 <p className="text-xs text-muted-foreground mt-1">A payment method will be added when you upgrade to a paid plan via Razorpay.</p>
                </div>
              </div>
           </CardContent>

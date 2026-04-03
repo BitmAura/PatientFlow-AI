@@ -3,23 +3,27 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceSchema } from '@/lib/validations/service'
 import { writeAuditLog } from '@/lib/audit/log'
 
+async function getClinicId(supabase: any, userId: string): Promise<string | null> {
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
+    .eq('user_id', userId)
+    .single()
+  return staff?.clinic_id ?? null
+}
+
 export async function GET(request: Request) {
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  const clinicId = await getClinicId(supabase, user.id)
+  if (!clinicId) return new NextResponse('Clinic not found', { status: 404 })
 
   const { data: services, error } = await supabase
     .from('services')
     .select('*')
-    .eq('clinic_id', clinic.id)
+    .eq('clinic_id', clinicId)
     .eq('is_deleted', false)
     .order('display_order', { ascending: true })
 
@@ -33,22 +37,16 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  const clinicId = await getClinicId(supabase, user.id)
+  if (!clinicId) return new NextResponse('Clinic not found', { status: 404 })
 
   const json = await request.json()
   const body = createServiceSchema.parse(json)
 
-  // Get max display order
   const { data: maxOrder } = await supabase
     .from('services')
     .select('display_order')
-    .eq('clinic_id', clinic.id)
+    .eq('clinic_id', clinicId)
     .order('display_order', { ascending: false })
     .limit(1)
     .single()
@@ -59,7 +57,7 @@ export async function POST(request: Request) {
     .from('services')
     .insert({
       ...body,
-      clinic_id: clinic.id,
+      clinic_id: clinicId,
       display_order: nextOrder
     })
     .select()
@@ -68,7 +66,7 @@ export async function POST(request: Request) {
   if (error) return new NextResponse(error.message, { status: 500 })
 
   await writeAuditLog({
-    clinicId: clinic.id,
+    clinicId,
     userId: user.id,
     action: 'create',
     entityType: 'service',

@@ -56,10 +56,18 @@ export async function POST(request: Request) {
 
   const { report_type, date_from, date_to, format = 'pdf' } = await request.json()
 
+  const { data: staffRow } = await supabase
+    .from('staff')
+    .select('clinic_id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!staffRow?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+
   const { data: clinic } = await supabase
     .from('clinics')
     .select('id, name')
-    .eq('user_id', user.id)
+    .eq('id', staffRow.clinic_id)
     .single()
 
   if (!clinic) return new NextResponse('Clinic not found', { status: 404 })

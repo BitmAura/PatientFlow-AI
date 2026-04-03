@@ -12,18 +12,19 @@ export async function POST(request: Request) {
 
   const { columns: selectedKeys, format } = await request.json()
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+  const clinic = { id: staff.clinic_id as string }
 
   const { data: patients } = await supabase
     .from('patients')
     .select('*')
-    .eq('clinic_id', (clinic as any).id)
+    .eq('clinic_id', clinic.id)
 
   const selected = Array.isArray(selectedKeys) && selectedKeys.length > 0
     ? selectedKeys
