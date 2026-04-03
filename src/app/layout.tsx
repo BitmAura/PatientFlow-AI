@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import QueryProvider from '@/components/providers/query-provider'
-import { LanguageProviderComponent } from '@/hooks/use-language'
-import { Toaster } from '@/components/ui/sonner'
+import { Providers } from '@/components/providers'
 import { cn } from '@/lib/utils/cn'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -81,20 +78,10 @@ export default function RootLayout({
           plusJakarta.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <QueryProvider>
-            <LanguageProviderComponent>
-              {children}
-              <Toaster position="top-right" />
-              <Analytics />
-            </LanguageProviderComponent>
-          </QueryProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+          <Analytics />
+        </Providers>
       </body>
     </html>
   )

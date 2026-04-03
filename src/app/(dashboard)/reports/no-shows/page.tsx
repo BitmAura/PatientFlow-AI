@@ -37,14 +37,14 @@ export default function NoShowsReportPage() {
       />
 
       <div className="space-y-4">
-        <NoShowRateChart data={data?.rate_over_time} isLoading={isLoading} />
+        <NoShowRateChart data={data?.rate_over_time ?? []} isLoading={isLoading} />
 
         <div className="grid gap-4 md:grid-cols-2">
-          <NoShowByDayChart data={data?.by_day} isLoading={isLoading} />
-          <NoShowByServiceChart data={data?.by_service} isLoading={isLoading} />
+          <NoShowByDayChart data={data?.rate_by_day ?? []} isLoading={isLoading} />
+          <NoShowByServiceChart data={data?.rate_by_service ?? []} isLoading={isLoading} />
         </div>
 
-        <TopNoShowPatients data={data?.top_patients} isLoading={isLoading} />
+        <TopNoShowPatients data={data?.top_patients ?? []} isLoading={isLoading} />
       </div>
     </PageContainer>
   )

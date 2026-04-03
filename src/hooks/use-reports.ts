@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { DateRange } from 'react-day-picker'
 import { format } from 'date-fns'
 
@@ -15,7 +15,8 @@ export function useReportOverview(dateRange: DateRange | undefined) {
       if (!res.ok) throw new Error('Failed to fetch overview')
       return res.json()
     },
-    enabled: !!dateRange?.from && !!dateRange?.to
+    enabled: !!dateRange?.from && !!dateRange?.to,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -27,7 +28,8 @@ export function useNoShowReport(dateRange: DateRange | undefined) {
       if (!res.ok) throw new Error('Failed to fetch no-show report')
       return res.json()
     },
-    enabled: !!dateRange?.from && !!dateRange?.to
+    enabled: !!dateRange?.from && !!dateRange?.to,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -39,7 +41,8 @@ export function useAppointmentReport(dateRange: DateRange | undefined) {
       if (!res.ok) throw new Error('Failed to fetch appointment report')
       return res.json()
     },
-    enabled: !!dateRange?.from && !!dateRange?.to
+    enabled: !!dateRange?.from && !!dateRange?.to,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -51,6 +54,7 @@ export function useRevenueReport(dateRange: DateRange | undefined) {
       if (!res.ok) throw new Error('Failed to fetch revenue report')
       return res.json()
     },
-    enabled: !!dateRange?.from && !!dateRange?.to
+    enabled: !!dateRange?.from && !!dateRange?.to,
+    placeholderData: keepPreviousData,
   })
 }

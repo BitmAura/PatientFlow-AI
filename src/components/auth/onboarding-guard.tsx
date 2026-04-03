@@ -11,16 +11,21 @@ import { createClient } from '@/lib/supabase/client'
 export function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [allowed, setAllowed] = useState<boolean | null>(null)
+  const [status, setStatus] = useState<'checking' | 'allowed' | 'redirecting'>('checking')
 
   useEffect(() => {
+    let cancelled = false
+
     const check = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+
+      if (cancelled) return
+
       if (!user) {
         const next = encodeURIComponent(pathname || '/dashboard')
+        setStatus('redirecting')
         router.replace(`/login?next=${next}`)
-        setAllowed(false)
         return
       }
 
@@ -32,32 +37,35 @@ export function OnboardingGuard({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('OnboardingGuard staff check failed:', error)
-        setAllowed(true)
+        setStatus('allowed')
         return
       }
       if (!staff) {
+        setStatus('redirecting')
         if (pathname !== '/onboarding') router.replace('/onboarding')
-        setAllowed(false)
       } else {
-        setAllowed(true)
+        setStatus('allowed')
       }
     }
-    check()
+
+    void check()
+
+    return () => {
+      cancelled = true
+    }
   }, [router, pathname])
 
-  if (allowed === null) {
+  if (status === 'checking') {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     )
   }
-  if (allowed === false) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
-    )
+
+  if (status === 'redirecting') {
+    return null
   }
+
   return <>{children}</>
 }

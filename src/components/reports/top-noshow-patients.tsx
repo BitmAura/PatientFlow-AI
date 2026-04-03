@@ -18,6 +18,7 @@ interface TopNoShowPatientsProps {
 
 export function TopNoShowPatients({ data, isLoading }: TopNoShowPatientsProps) {
   if (isLoading) return <div className="h-[300px] bg-gray-100 animate-pulse rounded-lg" />
+  const safeData = data ?? []
 
   return (
     <Card className="col-span-4">
@@ -37,7 +38,7 @@ export function TopNoShowPatients({ data, isLoading }: TopNoShowPatientsProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((item, i) => (
+            {safeData.map((item, i) => (
               <TableRow key={i}>
                 <TableCell className="font-medium">
                   <div>{item.patient.name}</div>
@@ -60,7 +61,7 @@ export function TopNoShowPatients({ data, isLoading }: TopNoShowPatientsProps) {
                 </TableCell>
               </TableRow>
             ))}
-            {data.length === 0 && (
+            {safeData.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                   No habitual no-show patients found.

@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { OfflineIndicator } from '@/components/shared/offline-indicator'
 import { UpdatePrompt } from '@/components/shared/update-prompt'
+import { LanguageProviderComponent } from '@/hooks/use-language'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -21,12 +22,14 @@ export function Providers({ children }: ProvidersProps) {
         enableSystem={false}
         disableTransitionOnChange
       >
-        <TooltipProvider>
-          {children}
-          <Toaster />
-          <OfflineIndicator />
-          <UpdatePrompt />
-        </TooltipProvider>
+        <LanguageProviderComponent>
+          <TooltipProvider>
+            {children}
+            <Toaster position="top-right" />
+            <OfflineIndicator />
+            <UpdatePrompt />
+          </TooltipProvider>
+        </LanguageProviderComponent>
       </ThemeProvider>
     </QueryClientProvider>
   )

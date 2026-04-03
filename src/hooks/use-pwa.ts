@@ -66,31 +66,66 @@ export function useOnlineStatus() {
 export function useServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = React.useState(false)
   const [registration, setRegistration] = React.useState<ServiceWorkerRegistration | null>(null)
+  const isRefreshing = React.useRef(false)
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(reg => {
-        setRegistration(reg)
-        // Check for updates
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setUpdateAvailable(true)
-              }
-            })
-          }
-        })
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      return
+    }
+
+    let regRef: ServiceWorkerRegistration | null = null
+
+    const handleControllerChange = () => {
+      if (isRefreshing.current) return
+      isRefreshing.current = true
+      window.location.reload()
+    }
+
+    const handleUpdateFound = () => {
+      const newWorker = regRef?.installing
+      if (!newWorker) return
+
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          setUpdateAvailable(true)
+        }
       })
+    }
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+
+    const setupServiceWorker = async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js')
+        regRef = reg
+        setRegistration(reg)
+
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          setUpdateAvailable(true)
+        }
+
+        reg.addEventListener('updatefound', handleUpdateFound)
+        void reg.update()
+      } catch (error) {
+        console.error('[PWA] Service worker registration failed:', error)
+      }
+    }
+
+    void setupServiceWorker()
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+      regRef?.removeEventListener('updatefound', handleUpdateFound)
     }
   }, [])
 
   const update = () => {
     if (registration && registration.waiting) {
       registration.waiting.postMessage({ type: 'SKIP_WAITING' })
-      window.location.reload()
+      return
     }
+
+    void registration?.update()
   }
 
   return { updateAvailable, update }

@@ -134,24 +134,28 @@ export function UnifiedHeader({
 
           {/* Zone 3 — Login + Marketing CTA + mobile menu */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link
-              href="/login"
-              className="hidden md:inline-flex items-center text-sm font-medium text-slate-600 hover:text-emerald-700 transition-colors dark:text-slate-300 dark:hover:text-emerald-400 px-2"
-              onClick={() => trackCta('Login', 'header_desktop', '/login')}
-            >
-              Login
-            </Link>
+            {!isApp && (
+              <Link
+                href="/login"
+                className="hidden md:inline-flex items-center text-sm font-medium text-slate-600 hover:text-emerald-700 transition-colors dark:text-slate-300 dark:hover:text-emerald-400 px-2"
+                onClick={() => trackCta('Login', 'header_desktop', '/login')}
+              >
+                Login
+              </Link>
+            )}
             <LanguageSwitcher />
-            <Link
-              href={config.ctaHref}
-              className="hidden md:block"
-              onClick={() => trackCta(config.ctaText, 'header_desktop', config.ctaHref)}
-            >
-              <TwentyOneButton className="h-10 px-3 lg:px-4" type="button">
-                <Phone className="mr-2 h-4 w-4" />
-                {config.ctaText}
-              </TwentyOneButton>
-            </Link>
+            {!isApp && (
+              <Link
+                href={config.ctaHref}
+                className="hidden md:block"
+                onClick={() => trackCta(config.ctaText, 'header_desktop', config.ctaHref)}
+              >
+                <TwentyOneButton className="h-10 px-3 lg:px-4" type="button">
+                  <Phone className="mr-2 h-4 w-4" />
+                  {config.ctaText}
+                </TwentyOneButton>
+              </Link>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -186,40 +190,46 @@ export function UnifiedHeader({
                 </Link>
               ))}
               
-              <Link href={config.ctaHref} className="w-full" onClick={() => trackCta(config.ctaText, 'header_mobile_menu', config.ctaHref)}>
-                <TwentyOneButton className="mt-2 w-full" type="button">
-                  <Phone className="w-4 h-4 mr-2" />
-                  {config.ctaText}
-                </TwentyOneButton>
-              </Link>
-              <Link
-                href="/login"
-                className="flex items-center justify-center w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
-                onClick={() => { setIsMenuOpen(false); trackCta('Login', 'header_mobile_menu', '/login') }}
-              >
-                Login to Dashboard
-              </Link>
+              {!isApp && (
+                <>
+                  <Link href={config.ctaHref} className="w-full" onClick={() => trackCta(config.ctaText, 'header_mobile_menu', config.ctaHref)}>
+                    <TwentyOneButton className="mt-2 w-full" type="button">
+                      <Phone className="w-4 h-4 mr-2" />
+                      {config.ctaText}
+                    </TwentyOneButton>
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+                    onClick={() => { setIsMenuOpen(false); trackCta('Login', 'header_mobile_menu', '/login') }}
+                  >
+                    Login to Dashboard
+                  </Link>
+                </>
+              )}
             </nav>
           </div>
         )}
       </div>
 
-      <div className="border-t border-emerald-100 bg-white px-4 py-2 dark:border-emerald-900/50 dark:bg-slate-950/95 md:hidden">
-        <div className="mx-auto flex w-full max-w-7xl gap-2">
-          <Link href={config.ctaHref} className="flex-1" onClick={() => trackCta('Book Demo', 'header_mobile_sticky', config.ctaHref)}>
-            <TwentyOneButton className="w-full" type="button">
-              Book Demo
-            </TwentyOneButton>
-          </Link>
-          {whatsappHref && (
-            <a href={whatsappHref} className="flex-1" target="_blank" rel="noreferrer" onClick={() => trackCta('WhatsApp', 'header_mobile_sticky', whatsappHref)}>
-              <TwentyOneButton tone="secondary" className="w-full" type="button">
-                WhatsApp
+      {!isApp && (
+        <div className="border-t border-emerald-100 bg-white px-4 py-2 dark:border-emerald-900/50 dark:bg-slate-950/95 md:hidden">
+          <div className="mx-auto flex w-full max-w-7xl gap-2">
+            <Link href={config.ctaHref} className="flex-1" onClick={() => trackCta('Book Demo', 'header_mobile_sticky', config.ctaHref)}>
+              <TwentyOneButton className="w-full" type="button">
+                Book Demo
               </TwentyOneButton>
-            </a>
-          )}
+            </Link>
+            {whatsappHref && (
+              <a href={whatsappHref} className="flex-1" target="_blank" rel="noreferrer" onClick={() => trackCta('WhatsApp', 'header_mobile_sticky', whatsappHref)}>
+                <TwentyOneButton tone="secondary" className="w-full" type="button">
+                  WhatsApp
+                </TwentyOneButton>
+              </a>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </header>
   )
 }

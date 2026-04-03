@@ -3,24 +3,19 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, X } from 'lucide-react'
+import { useServiceWorker } from '@/hooks/use-pwa'
 
 export function UpdatePrompt() {
+  const { updateAvailable, update } = useServiceWorker()
   const [showPrompt, setShowPrompt] = React.useState(false)
-  const [wb, setWb] = React.useState<any>(null)
 
   React.useEffect(() => {
-    // Basic service worker registration check
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      // Logic would typically involve Workbox window or manual registration handling
-      // For now, we simulate this if a new version is detected
-    }
-  }, [])
+    if (updateAvailable) setShowPrompt(true)
+  }, [updateAvailable])
 
   const handleUpdate = () => {
-    if (wb) {
-      wb.messageSkipWaiting()
-    }
-    window.location.reload()
+    update()
+    setShowPrompt(false)
   }
 
   if (!showPrompt) return null
