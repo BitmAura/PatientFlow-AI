@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
+import { sendEmail } from '@/lib/email'
 
 interface DemoBookingPayload {
   name?: string
@@ -32,40 +33,59 @@ export async function POST(request: Request) {
     }
 
     const clinicId = process.env.DEMO_BOOKING_CLINIC_ID
-    if (!clinicId) {
-      return NextResponse.json(
-        { error: 'Demo booking is temporarily unavailable. Please try again later.' },
-        { status: 503 }
-      )
+    let waResult = { success: false }
+
+    if (clinicId) {
+      // Full path: save lead + send WhatsApp confirmation
+      const supabase = createAdminClient() as any
+      const { data: lead } = await supabase
+        .from('leads')
+        .insert({
+          clinic_id: clinicId,
+          full_name: name,
+          phone,
+          source: 'website',
+          status: 'new',
+          interest: 'demo_booking',
+          notes: `Clinic: ${clinicName}; Monthly Appts: ${monthlyAppointments}`,
+          followup_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (lead) {
+        const autoMessage = `Hi ${name}, thanks for requesting a PatientFlow AI demo for ${clinicName}. Our team will WhatsApp you shortly to confirm your slot!`
+        waResult = await sendWhatsAppMessage(clinicId, phone, autoMessage, {
+          type: 'demo_booking',
+          leadId: lead.id,
+        })
+      }
     }
 
-    const supabase = createAdminClient() as any
-    const { data: lead, error: leadError } = await supabase
-      .from('leads')
-      .insert({
-        clinic_id: clinicId,
-        full_name: name,
-        phone,
-        source: 'website',
-        status: 'new',
-        interest: 'demo_booking',
-        notes: `Clinic Name: ${clinicName}; Monthly Appointments: ${monthlyAppointments}`,
-        followup_count: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select('id')
-      .single()
-
-    if (leadError || !lead) {
-      return NextResponse.json({ error: 'Could not save your request. Please try again.' }, { status: 500 })
+    // Always notify the founder via email so no lead is ever lost
+    const founderEmail = process.env.DEMO_NOTIFY_EMAIL || process.env.EMAIL_FROM
+    if (founderEmail) {
+      await sendEmail({
+        to: founderEmail.replace(/.*<(.+)>/, '$1').trim() || founderEmail,
+        subject: `New demo request — ${clinicName} (${monthlyAppointments} appts/mo)`,
+        html: `
+          <h2>New Demo Request</h2>
+          <table style="border-collapse:collapse;width:100%">
+            <tr><td style="padding:8px;font-weight:bold">Name</td><td style="padding:8px">${name}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold">Clinic</td><td style="padding:8px">${clinicName}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold">Phone (WhatsApp)</td><td style="padding:8px">${rawPhone}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold">Monthly Appointments</td><td style="padding:8px">${monthlyAppointments}</td></tr>
+          </table>
+          <p style="margin-top:16px">
+            <a href="https://wa.me/${phone}" style="background:#25D366;color:white;padding:10px 20px;border-radius:6px;text-decoration:none">
+              WhatsApp ${name} now
+            </a>
+          </p>
+        `,
+      }).catch(() => { /* non-critical */ })
     }
-
-    const autoMessage = `Hi ${name}, thanks for booking a PatientFlow AI demo for ${clinicName}. Our team will confirm your slot shortly on WhatsApp. We will also send reminders 24 hours and 1 hour before the demo.`
-    const waResult = await sendWhatsAppMessage(clinicId, phone, autoMessage, {
-      type: 'demo_booking',
-      leadId: lead.id,
-    })
 
     const calendarUrl = process.env.NEXT_PUBLIC_DEMO_CALENDAR_URL || null
 

@@ -20,13 +20,6 @@ export function DemoBookingForm({ isConfigured }: DemoBookingFormProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-
-    if (!isConfigured) {
-      setState('error')
-      setError('Demo booking is temporarily unavailable. Please contact support.')
-      return
-    }
-
     setState('loading')
     setError('')
 
@@ -117,17 +110,11 @@ export function DemoBookingForm({ isConfigured }: DemoBookingFormProps) {
         <TwentyOneButton
           type="submit"
           className="w-full"
-          disabled={state === 'loading' || !isConfigured}
+          disabled={state === 'loading'}
         >
-          {state === 'loading' ? 'Submitting...' : 'Book Demo'}
+          {state === 'loading' ? 'Submitting…' : 'Book My Free Demo'}
         </TwentyOneButton>
       </form>
-
-      {!isConfigured && (
-        <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          Demo booking is temporarily unavailable. Please contact us at support@auradigitalservices.me.
-        </div>
-      )}
 
       {state === 'error' && (
         <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>

@@ -44,7 +44,7 @@ export function AuthRightPanel() {
   const t = TESTIMONIALS[active]
 
   return (
-    <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-slate-950 flex-col justify-between px-14 py-12">
+    <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-slate-950 flex-col justify-start gap-8 px-14 py-12">
       {/* Subtle gradient overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#0f4c3a44_0%,_transparent_60%),radial-gradient(ellipse_at_bottom_right,_#1e3a8a33_0%,_transparent_60%)]" />
 
@@ -68,7 +68,7 @@ export function AuthRightPanel() {
         </p>
 
         {/* Stats */}
-        <div className="mt-10 grid grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-3 gap-4">
           {STATS.map((s) => (
             <div key={s.label} className="rounded-xl border border-white/8 bg-white/4 p-4">
               <p className="text-2xl font-bold text-white">{s.value}</p>
@@ -76,6 +76,27 @@ export function AuthRightPanel() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Feature checklist — fills the gap */}
+      <div className="relative z-10 rounded-2xl border border-white/8 bg-white/4 p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">What you get on day one</p>
+        <ul className="space-y-2.5">
+          {[
+            'WhatsApp reminders sent automatically — 24h & 3h before',
+            'Online booking page live in under 10 minutes',
+            'No-show recovery messages sent within 1 hour',
+            'Patient recall engine for bringing back lost patients',
+            'Full dashboard: appointments, analytics, reports',
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
+              <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Testimonial */}
@@ -102,6 +123,7 @@ export function AuthRightPanel() {
             {TESTIMONIALS.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setActive(i)}
                 className={cn(
                   'h-1.5 rounded-full transition-all duration-300',
