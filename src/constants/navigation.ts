@@ -15,6 +15,7 @@ import {
   Building,
   Magnet,
   RefreshCcw,
+  KeyRound,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -122,6 +123,7 @@ export const SETTINGS_NAV: NavItem[] = [
       { title: 'WhatsApp', href: '/settings/whatsapp', icon: MessageSquare },
       { title: 'Reminders', href: '/settings/reminders', icon: Bell },
       { title: 'Billing', href: '/settings/billing', icon: CreditCard },
+      { title: 'API Keys', href: '/settings/api-keys', icon: KeyRound },
     ],
   },
 ]

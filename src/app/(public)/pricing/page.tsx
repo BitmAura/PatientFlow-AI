@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useTrackCta } from '@/hooks/use-track-cta'
-import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock } from 'lucide-react'
+import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock, Code2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
@@ -13,18 +13,17 @@ export default function PricingPage() {
       name: PRICING_PLANS.starter.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise),
       period: '/month',
-      description: 'For doctors and small clinics',
+      description: 'For solo doctors and small clinics',
       planId: 'starter',
       features: [
         'Up to 500 appointments/month',
         'Up to 3 doctors',
-        'WhatsApp + SMS + Email reminders',
+        'WhatsApp, SMS & email reminders',
         'Online booking page',
-        'Razorpay deposits integration',
         'Waiting list automation',
         'Patient recall system',
-        'Detailed analytics dashboard',
-        'Email & chat support'
+        'DISHA-compliant data handling',
+        'Email & chat support',
       ],
       popular: true
     },
@@ -32,20 +31,16 @@ export default function PricingPage() {
       name: PRICING_PLANS.growth.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.growth.monthlyPricePaise),
       period: '/month',
-      description: 'For scaling clinics and multi-doctor practices',
+      description: 'For growing practices and multi-doctor clinics',
       planId: 'growth',
       features: [
         'Up to 2,000 appointments/month',
         'Up to 10 doctors & staff',
+        'Up to 2 clinic locations',
         'Campaign automation workflows',
-        'Advanced recall system',
-        'Advanced automation workflows',
-        'Custom integrations (EMR, billing)',
-        'Priority feature requests',
-        'Dedicated account manager',
-        '24/7 phone & WhatsApp support',
-        'DISHA compliance tools',
-        'Custom reports & analytics'
+        'Advanced recall engine',
+        'Conversion & no-show analytics',
+        'Priority onboarding support',
       ],
       popular: false
     },
@@ -56,12 +51,13 @@ export default function PricingPage() {
       description: 'For multi-location clinics and hospital groups',
       planId: 'pro',
       features: [
-        'Unlimited appointments',
-        'Unlimited doctors and staff',
-        'Multi-location management',
-        'Advanced automation and API access',
-        'Custom integrations and reporting',
-        'Priority support and SLA options'
+        'Unlimited appointments & doctors',
+        'Unlimited clinic locations',
+        'REST API access (connect your EMR)',
+        'Webhook integrations',
+        'Enterprise analytics & reporting',
+        'Dedicated account manager',
+        'Priority support & SLA options',
       ],
       popular: false
     }
@@ -206,15 +202,25 @@ export default function PricingPage() {
               description="Track no-show rates, revenue recovery, and patient engagement"
               icon={BarChart3}
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Users}
               title="Patient Portal"
               description="Self-service booking and appointment management for patients"
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Clock}
               title="Recall System"
               description="Automated follow-ups for patients due for checkups"
+            />
+            <FeatureCard
+              icon={Shield}
+              title="DISHA Compliant"
+              description="Patient consent tracking, data export and erasure rights built-in for Indian healthcare regulations"
+            />
+            <FeatureCard
+              icon={Code2}
+              title="API Access (Pro)"
+              description="REST API to connect your EMR, billing software, or custom tools via secure API keys"
             />
           </div>
         </div>
