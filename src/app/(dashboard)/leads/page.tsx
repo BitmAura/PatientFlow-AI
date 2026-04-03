@@ -160,9 +160,17 @@ export default async function LeadsPage() {
               required
               name="leadName"
               placeholder="Lead name"
+              aria-label="Lead name"
+              title="Lead name"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
             />
-            <select name="source" required className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+            <select 
+              name="source" 
+              required 
+              aria-label="Source"
+              title="Source"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            >
               <option value="">Select source</option>
               {sourceOptions.map((source) => (
                 <option key={source} value={source}>
@@ -170,7 +178,13 @@ export default async function LeadsPage() {
                 </option>
               ))}
             </select>
-            <select name="status" defaultValue="new" className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+            <select 
+              name="status" 
+              defaultValue="new" 
+              aria-label="Status"
+              title="Status"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -180,6 +194,8 @@ export default async function LeadsPage() {
             <input
               name="followupAt"
               type="datetime-local"
+              aria-label="Follow-up date and time"
+              title="Follow-up date and time"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
             />
             <button
@@ -192,6 +208,8 @@ export default async function LeadsPage() {
           <textarea
             name="notes"
             placeholder="Notes (context, objections, next step)"
+            aria-label="Notes"
+            title="Notes"
             className="mt-3 min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
         </form>
@@ -220,6 +238,8 @@ export default async function LeadsPage() {
                   <select
                     name="status"
                     defaultValue={lead.status}
+                    aria-label="Update Status"
+                    title="Update Status"
                     className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                   >
                     {statusOptions.map((option) => (
@@ -231,6 +251,8 @@ export default async function LeadsPage() {
                   <input
                     name="followupAt"
                     type="datetime-local"
+                    aria-label="Update Follow-up date and time"
+                    title="Update Follow-up date and time"
                     defaultValue={
                       lead.next_followup_at
                         ? new Date(lead.next_followup_at).toISOString().slice(0, 16)
@@ -250,6 +272,8 @@ export default async function LeadsPage() {
                 name="notes"
                 defaultValue={lead.notes || ''}
                 placeholder="Add notes"
+                aria-label="Update Notes"
+                title="Update Notes"
                 className="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
               />
             </form>

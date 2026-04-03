@@ -10,6 +10,7 @@ import { SidebarItem } from './sidebar-item'
 import { MAIN_NAV, COMMUNICATION_NAV, INSIGHTS_NAV, SETTINGS_NAV } from '@/constants/navigation'
 import { ChevronLeft, ChevronRight, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 
 interface SidebarProps {
   className?: string
@@ -119,12 +120,10 @@ export function Sidebar({ className }: SidebarProps) {
                 <span>Appointments</span>
                 <span>{subscription.usage.appointments} / {subscription.usage.limit}</span>
               </div>
-              <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-500" 
-                  style={{ width: `${Math.min((subscription.usage.appointments / subscription.usage.limit) * 100, 100)}%` }} 
-                />
-              </div>
+              <Progress 
+                value={(subscription.usage.appointments / subscription.usage.limit) * 100} 
+                className="h-1.5"
+              />
               <Button size="sm" variant="outline" className="w-full text-xs h-7">
                 Upgrade Plan
               </Button>
