@@ -8,8 +8,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -22,7 +23,7 @@ export async function DELETE(
   const { error } = await admin
     .from('clinic_api_keys')
     .update({ is_active: false, revoked_at: new Date().toISOString() })
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('clinic_id', staff.clinic_id) // ownership check
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
