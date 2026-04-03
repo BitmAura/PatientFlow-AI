@@ -129,24 +129,25 @@ export default function LandingPage() {
   const localBusinessSchema = jsonLd
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(localBusinessSchema),
         }}
       />
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] pt-16 pb-14 md:pt-24 md:pb-20">
-        <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-cyan-950 pt-16 pb-14 md:pt-24 md:pb-20">
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 right-1/4 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl" />
         <div className="container mx-auto px-4">
           <div className="relative mx-auto max-w-5xl text-center">
-            <div className="mb-6 inline-flex items-center rounded-full border border-emerald-300 bg-white/80 px-4 py-1.5 text-sm font-medium text-emerald-800 shadow-sm backdrop-blur">
+            <div className="mb-6 inline-flex items-center rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200 shadow-sm backdrop-blur">
               Built in India, for Indian healthcare teams
             </div>
-            <h1 className="text-balance text-[clamp(2rem,6vw,4.2rem)] font-bold tracking-tight text-slate-900">
+            <h1 className="text-balance text-[clamp(2rem,6vw,4.2rem)] font-bold tracking-tight text-white">
               Turn Your Dental Clinic&apos;s WhatsApp Into an Automated Booking Machine
             </h1>
-            <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-relaxed text-slate-600 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-relaxed text-slate-200 sm:text-lg">
               Recover ₹40,000+/month from missed appointments. Built for Indian dental practices.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -178,11 +179,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="pb-12">
+      <section className="pb-12 bg-slate-900/50">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Early Access Program</h2>
-            <p className="mt-2 text-sm text-slate-700 sm:text-base">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-cyan-400/30 bg-gradient-to-br from-cyan-950/40 to-teal-950/40 p-6 text-center shadow-lg backdrop-blur">
+            <h2 className="text-2xl font-bold tracking-tight text-white">Early Access Program</h2>
+            <p className="mt-2 text-sm text-slate-200 sm:text-base">
               Join 50 clinics in our pilot program. Limited spots: 15 remaining. Free for the first 60 days in exchange for feedback.
             </p>
             <div className="mt-5 inline-block">
@@ -196,13 +197,13 @@ export default function LandingPage() {
 
       <RoiCalculator />
 
-      <section className="py-14 md:py-20">
+      <section className="py-14 md:py-20 bg-slate-900">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Why Dental Clinics Lose High-Intent Patients
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+            <p className="mt-4 text-base leading-relaxed text-slate-300 sm:text-lg">
               Most dental teams are not short on inquiries. They are short on instant, consistent follow-up.
             </p>
           </div>
@@ -214,21 +215,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-14 md:py-20">
+      <section className="bg-gradient-to-b from-slate-800 to-slate-900 py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div className="flex-1">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 The Conversion Engine for Dental WhatsApp Inquiries
               </h2>
-              <p className="mt-4 text-base leading-relaxed text-slate-600 sm:text-lg">
+              <p className="mt-4 text-base leading-relaxed text-slate-300 sm:text-lg">
                 PatientFlow AI runs a complete WhatsApp workflow from inquiry to confirmed dental consultation, with cleanings recall automation built in.
               </p>
               <div className="mt-6 space-y-3">
                 {solutionPoints.map((point) => (
-                  <div key={point} className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
-                    <p className="text-sm font-medium text-slate-700 sm:text-base">{point}</p>
+                  <div key={point} className="flex items-start gap-3 rounded-lg bg-slate-700/50 border border-slate-600/50 p-3 backdrop-blur">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-cyan-400" />
+                    <p className="text-sm font-medium text-slate-200 sm:text-base">{point}</p>
                   </div>
                 ))}
               </div>
@@ -239,9 +240,9 @@ export default function LandingPage() {
                 </TrackedCtaLink>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/70">
-              <h3 className="text-lg font-semibold text-slate-900">Visual Demo: WhatsApp Flow</h3>
-              <p className="mt-1 text-sm text-slate-500">Example conversation from lead inquiry to confirmed dental consultation.</p>
+            <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/40 to-slate-800/40 p-6 shadow-2xl backdrop-blur">
+              <h3 className="text-lg font-semibold text-white">Visual Demo: WhatsApp Flow</h3>
+              <p className="mt-1 text-sm text-slate-400">Example conversation from lead inquiry to confirmed dental consultation.</p>
               <div className="mt-5 rounded-2xl bg-[#ece5dd] p-4">
                 <div className="rounded-xl bg-[#075e54] px-3 py-2 text-sm font-medium text-white">
                   PatientFlow AI Assistant
@@ -259,10 +260,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-14 md:py-20">
+      <section className="py-14 md:py-20 bg-slate-900">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-6 shadow-md sm:p-10">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">India-Market Trust Signals</h2>
+          <div className="mx-auto max-w-5xl rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-6 shadow-2xl backdrop-blur sm:p-10">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">India-Market Trust Signals</h2>
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <ResultCard value="Secure payments via Razorpay" description="All plans billed in INR with GST invoicing available." icon={Landmark} />
               <ResultCard value="GDPR-compliant handling" description="No patient data is shared with third parties." icon={ShieldCheck} />
@@ -275,13 +276,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="pricing" className="bg-slate-50 py-14 md:py-20">
+      <section id="pricing" className="bg-slate-800 py-14 md:py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Simple Pricing for Every Clinic Stage
             </h2>
-            <p className="mt-4 text-base text-slate-600 sm:text-lg">Choose Starter, Growth, or Pro based on inquiry volume and branches.</p>
+            <p className="mt-4 text-base text-slate-300 sm:text-lg">Choose Starter, Growth, or Pro based on inquiry volume and branches.</p>
           </div>
           <div className="mx-auto mt-10 grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
@@ -291,10 +292,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-slate-900 py-16 md:py-20">
+      <section className="bg-gradient-to-r from-slate-950 to-blue-950 py-16 md:py-20">
         <div className="container mx-auto px-4 text-center">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-slate-700 bg-slate-800 px-6 py-10 sm:px-10">
-            <div className="mx-auto mb-3 inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-cyan-500/40 bg-gradient-to-br from-cyan-950/50 to-slate-900/50 px-6 py-10 shadow-2xl backdrop-blur sm:px-10">
+            <div className="mx-auto mb-3 inline-flex items-center rounded-full border border-cyan-400/50 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
               Performance Promise
             </div>
             <h2 className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -314,7 +315,7 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
               </TrackedCtaLink>
               <Link href="/how-it-works">
-                <Button size="lg" variant="outline" className="h-12 w-full border-slate-500 bg-transparent px-7 text-base text-white hover:bg-slate-700 sm:w-auto">
+                <Button size="lg" variant="outline" className="h-12 w-full border-cyan-400/50 bg-transparent px-7 text-base text-white hover:bg-cyan-950/50 hover:border-cyan-400 sm:w-auto">
                   See How It Works
                 </Button>
               </Link>
@@ -328,20 +329,20 @@ export default function LandingPage() {
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white/95 p-4 text-center shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
+    <div className="rounded-xl border border-cyan-400/30 bg-slate-800/50 backdrop-blur p-4 text-center shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl hover:border-cyan-400/50">
+      <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-white">{value}</p>
     </div>
   )
 }
 
 function ProblemCard({ icon: Icon, text }: { icon: any; text: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
+    <div className="rounded-xl border border-cyan-500/30 bg-slate-800/50 backdrop-blur p-5 shadow-lg transition hover:-translate-y-1 hover:shadow-xl hover:border-cyan-400/50">
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-950/50 text-cyan-400 border border-cyan-500/30">
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-sm font-medium leading-relaxed text-slate-700">{text}</p>
+      <p className="text-sm font-medium leading-relaxed text-slate-200">{text}</p>
     </div>
   )
 }
@@ -369,12 +370,12 @@ function ResultCard({
   icon?: any
 }) {
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-white p-5 text-left shadow-sm">
-      <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+    <div className="rounded-2xl border border-cyan-500/30 bg-slate-800/50 backdrop-blur p-5 text-left shadow-lg transition hover:border-cyan-400/50 hover:shadow-xl">
+      <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-950/50 text-cyan-400 border border-cyan-500/30">
         <Icon className="h-4 w-4" />
       </div>
-      <h3 className="text-lg font-semibold text-slate-900">{value}</h3>
-      <p className="mt-1 text-sm text-slate-600">{description}</p>
+      <h3 className="text-lg font-semibold text-white">{value}</h3>
+      <p className="mt-1 text-sm text-slate-300">{description}</p>
     </div>
   )
 }
@@ -398,27 +399,27 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl ${
+      className={`rounded-2xl border p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl ${
         featured
-          ? 'border-emerald-400 bg-gradient-to-b from-white to-emerald-50/40 ring-2 ring-emerald-100'
-          : 'border-slate-200 bg-white'
+          ? 'border-cyan-400/50 bg-gradient-to-br from-cyan-950/50 to-slate-800/50 ring-2 ring-cyan-500/30 backdrop-blur'
+          : 'border-cyan-500/30 bg-slate-800/50 backdrop-blur'
       }`}
     >
       {featured && (
-        <div className="mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+        <div className="mb-3 inline-flex rounded-full bg-cyan-500/20 border border-cyan-400/50 px-3 py-1 text-xs font-semibold text-cyan-100">
           Most Popular
         </div>
       )}
-      <h3 className="text-xl font-semibold text-slate-900">{name}</h3>
-      <p className="mt-1 text-sm text-slate-600">{description}</p>
+      <h3 className="text-xl font-semibold text-white">{name}</h3>
+      <p className="mt-1 text-sm text-slate-300">{description}</p>
       <div className="mt-5 flex items-end gap-1">
-        <span className="text-3xl font-bold tracking-tight text-slate-900">{price}</span>
-        {subtitle && <span className="pb-1 text-sm text-slate-500">{subtitle}</span>}
+        <span className="text-3xl font-bold tracking-tight text-white">{price}</span>
+        {subtitle && <span className="pb-1 text-sm text-slate-400">{subtitle}</span>}
       </div>
       <ul className="mt-5 space-y-2">
         {features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
-            <CalendarCheck2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+          <li key={feature} className="flex items-start gap-2 text-sm text-slate-200">
+            <CalendarCheck2 className="mt-0.5 h-4 w-4 text-cyan-400" />
             <span>{feature}</span>
           </li>
         ))}
