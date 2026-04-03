@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /p/aura-digital-services/src/lib/services/*.ts)",
+      "Bash(ls /p/aura-digital-services/src/types/*.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(wc -l /p/aura-digital-services/supabase/migrations/*.sql)"
+    ]
+  }
+}

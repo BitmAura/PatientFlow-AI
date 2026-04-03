@@ -7,10 +7,12 @@ import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui-store'
 import { useClinicStore } from '@/stores/clinic-store'
 import { SidebarItem } from './sidebar-item'
+import { LocationSwitcher } from './location-switcher'
 import { MAIN_NAV, COMMUNICATION_NAV, INSIGHTS_NAV, SETTINGS_NAV } from '@/constants/navigation'
 import { ChevronLeft, ChevronRight, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
 
 interface SidebarProps {
   className?: string
@@ -19,6 +21,8 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const { sidebarCollapsed, toggleSidebarCollapse } = useUIStore()
   const { clinic, subscription } = useClinicStore()
+  const normalizedPlan = normalizePlanId(subscription.plan)
+  const planConfig = PRICING_PLANS[normalizedPlan]
 
   // On mobile/tablet, sidebar is always "expanded" visually when inside the sheet
   // But we use the store state for desktop behavior
@@ -82,20 +86,25 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       </div>
 
-      {/* Clinic Info */}
+      {/* Clinic Info + Location Switcher */}
       {(!sidebarCollapsed || className) && clinic && (
-        <div className="px-4 py-4 border-b shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+        <div className="px-3 py-3 border-b shrink-0 space-y-1.5">
+          <div className="flex items-center gap-3 px-1">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
               {clinic.name.charAt(0)}
             </div>
             <div className="flex-1 overflow-hidden">
-              <h3 className="font-medium truncate">{clinic.name}</h3>
+              <h3 className="font-medium truncate text-sm">{clinic.name}</h3>
               <p className="text-xs text-muted-foreground truncate">
                 {subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)} Plan
               </p>
             </div>
           </div>
+          <LocationSwitcher
+            clinicName={clinic.name}
+            planId={normalizedPlan}
+            maxLocations={planConfig.maxLocations}
+          />
         </div>
       )}
 
