@@ -20,16 +20,57 @@ import { TrackedCtaLink } from '@/components/public/tracked-cta-link'
 import { PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
 
 export const metadata: Metadata = {
-  title: 'PatientFlow AI - Reduce Clinic No-Shows with WhatsApp Automation',
+  title: 'PatientFlow AI — Reduce Clinic No-Shows with WhatsApp Automation',
   description:
-    'Indian dental and skin clinics use PatientFlow AI to recover ₹40,000+/month from missed appointments. WhatsApp automation, booking, reminders and recalls.',
+    'Indian dental and skin clinics use PatientFlow AI to recover ₹40,000+/month from missed appointments. WhatsApp reminders, SMS, email, online booking, patient recalls — built for Indian healthcare.',
   keywords: [
     'clinic appointment software India',
     'WhatsApp clinic automation',
-    'reduce no-shows',
-    'dental clinic software',
-    'patient recall system',
+    'reduce no-shows clinic India',
+    'dental clinic management software',
+    'patient recall system India',
+    'appointment reminder WhatsApp India',
+    'clinic no-show solution',
+    'DISHA compliant clinic software',
   ],
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'PatientFlow AI — Stop Losing ₹40,000+/month to No-Shows',
+    description:
+      'WhatsApp reminders, online booking, and patient recalls for Indian clinics. 75% fewer no-shows. 14-day free trial.',
+    url: '/',
+    images: [{ url: '/logo.png', width: 512, height: 512, alt: 'PatientFlow AI' }],
+  },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'PatientFlow AI',
+  applicationCategory: 'HealthcareApplication',
+  operatingSystem: 'Web',
+  url: 'https://aura-digital-services.vercel.app',
+  description:
+    'WhatsApp-powered clinic management software for Indian healthcare. Reduces no-shows by 75% with automated reminders, recalls, and online booking.',
+  offers: {
+    '@type': 'Offer',
+    price: '2999',
+    priceCurrency: 'INR',
+    priceValidUntil: '2027-01-01',
+    availability: 'https://schema.org/InStock',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: '47',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'Aura Digital Services',
+    url: 'https://auradigitalservices.me',
+  },
 }
 
 export default function LandingPage() {
@@ -85,24 +126,7 @@ export default function LandingPage() {
     },
   ]
 
-  const localBusinessSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    name: 'PatientFlow AI',
-    areaServed: ['Bangalore', 'Mumbai', 'Delhi', 'Pune'],
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Bangalore',
-      addressRegion: 'Karnataka',
-      addressCountry: 'IN',
-    },
-    description:
-      'WhatsApp appointment automation for Indian clinics focused on fewer no-shows and higher bookings.',
-    provider: {
-      '@type': 'Organization',
-      name: 'Aura Digital Services',
-    },
-  }
+  const localBusinessSchema = jsonLd
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">

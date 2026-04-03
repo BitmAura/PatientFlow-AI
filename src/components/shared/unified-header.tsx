@@ -131,8 +131,15 @@ export function UnifiedHeader({
             </ul>
           </nav>
 
-          {/* Zone 3 — Marketing CTA + mobile menu */}
+          {/* Zone 3 — Login + Marketing CTA + mobile menu */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link
+              href="/login"
+              className="hidden md:inline-flex items-center text-sm font-medium text-slate-600 hover:text-emerald-700 transition-colors dark:text-slate-300 dark:hover:text-emerald-400 px-2"
+              onClick={() => trackCta('Login', 'header_desktop', '/login')}
+            >
+              Login
+            </Link>
             <Link
               href={config.ctaHref}
               className="hidden md:block"
@@ -182,6 +189,13 @@ export function UnifiedHeader({
                   <Phone className="w-4 h-4 mr-2" />
                   {config.ctaText}
                 </TwentyOneButton>
+              </Link>
+              <Link
+                href="/login"
+                className="flex items-center justify-center w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors"
+                onClick={() => { setIsMenuOpen(false); trackCta('Login', 'header_mobile_menu', '/login') }}
+              >
+                Login to Dashboard
               </Link>
             </nav>
           </div>
