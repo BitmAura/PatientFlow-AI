@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Menu, X, Phone, ChevronRight, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
+import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import { useTrackCta } from '@/hooks/use-track-cta'
 import { cn } from '@/lib/utils/cn'
 
@@ -140,6 +141,7 @@ export function UnifiedHeader({
             >
               Login
             </Link>
+            <LanguageSwitcher />
             <Link
               href={config.ctaHref}
               className="hidden md:block"

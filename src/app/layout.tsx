@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import QueryProvider from '@/components/providers/query-provider'
+import { LanguageProviderComponent } from '@/hooks/use-language'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils/cn'
 
@@ -89,9 +90,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
-            <Toaster position="top-right" />
-            <Analytics />
+            <LanguageProviderComponent>
+              {children}
+              <Toaster position="top-right" />
+              <Analytics />
+            </LanguageProviderComponent>
           </QueryProvider>
         </ThemeProvider>
       </body>

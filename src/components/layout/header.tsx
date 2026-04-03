@@ -6,6 +6,7 @@ import { Bell, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserMenu } from './user-menu'
+import { LanguageSwitcher } from './language-switcher'
 import { useWhatsApp } from '@/hooks/use-whatsapp'
 import { cn } from '@/lib/utils/cn'
 import { useRouter } from 'next/navigation'
@@ -70,6 +71,9 @@ export function Header() {
 
         {/* Notification bell */}
         <NotificationBell />
+
+        {/* Language switcher */}
+        <LanguageSwitcher />
 
         {/* User avatar menu */}
         <UserMenu />
