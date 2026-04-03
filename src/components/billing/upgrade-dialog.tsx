@@ -46,9 +46,9 @@ export function UpgradeDialog({ open, onOpenChange, plan, onConfirm }: UpgradeDi
         </DialogHeader>
         
         <div className="py-6">
-           <div className="flex justify-between items-center mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-             <span className="font-medium text-blue-900">Total Due Today</span>
-             <span className="text-xl font-bold text-blue-900">{formatCurrency(plan.price)}</span>
+           <div className="flex justify-between items-center mb-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
+             <span className="font-medium text-slate-900 dark:text-slate-100">Total Due Today</span>
+             <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{formatCurrency(plan.price)}</span>
            </div>
            
            <p className="text-sm text-gray-500 mb-4">
@@ -67,7 +67,7 @@ export function UpgradeDialog({ open, onOpenChange, plan, onConfirm }: UpgradeDi
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleUpgrade} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleUpgrade} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
             Pay & Upgrade
           </Button>

@@ -33,7 +33,7 @@ export function MobileHeader() {
         </Sheet>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm shadow-primary/20">
             PF
           </div>
           <span className="font-semibold text-lg">PatientFlow AI</span>

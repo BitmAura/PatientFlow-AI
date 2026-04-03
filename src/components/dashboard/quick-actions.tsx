@@ -39,7 +39,7 @@ export function QuickActions() {
         {/* Follow-ups Due */}
         <div className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-accent/50 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Bell className="h-4 w-4" />
             </div>
             <div>
@@ -47,7 +47,7 @@ export function QuickActions() {
               <p className="text-xs text-muted-foreground">Due for today</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="text-blue-600">
+          <Button variant="ghost" size="sm" className="text-primary">
             View
           </Button>
         </div>
@@ -55,7 +55,7 @@ export function QuickActions() {
         {/* Waiting List */}
         <div className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-accent/50 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               <Users className="h-4 w-4" />
             </div>
             <div>
@@ -63,7 +63,7 @@ export function QuickActions() {
               <p className="text-xs text-muted-foreground">Patients in queue</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="text-purple-600">
+          <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-300">
             Manage
           </Button>
         </div>

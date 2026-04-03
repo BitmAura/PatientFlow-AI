@@ -47,7 +47,7 @@ export function StatsCards() {
       description: `${stats.uncontacted_leads_count} waiting follow-up`,
       icon: Users,
       trend: 0,
-      color: 'text-blue-500',
+      color: 'text-primary',
       sparkline: 'M0 10 L 10 10 L 20 5 L 30 8 L 40 2 L 50 5',
     },
     {
@@ -56,7 +56,7 @@ export function StatsCards() {
       description: `From ${stats.total_leads_count} total leads`,
       icon: CalendarCheck,
       trend: 12,
-      color: 'text-green-500',
+      color: 'text-emerald-600',
       sparkline: 'M0 10 L 10 8 L 20 6 L 30 4 L 40 5 L 50 1',
     },
     {
@@ -74,7 +74,7 @@ export function StatsCards() {
       description: `${stats.booked_leads_count} booked patient outcomes`,
       icon: IndianRupee,
       trend: 8,
-      color: 'text-purple-500',
+      color: 'text-slate-600',
       sparkline: 'M0 10 L 10 9 L 20 7 L 30 6 L 40 3 L 50 0',
     },
   ]

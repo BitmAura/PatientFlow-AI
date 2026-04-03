@@ -37,7 +37,7 @@ export function MobileBottomNav() {
   return (
     <div 
       className={cn(
-        "md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40 transition-transform duration-300 pb-safe",
+        "md:hidden fixed bottom-0 left-0 right-0 border-t border-border/70 bg-background/95 backdrop-blur-md z-40 transition-transform duration-300 pb-safe",
         isVisible ? "translate-y-0" : "translate-y-full"
       )}
     >
@@ -52,7 +52,7 @@ export function MobileBottomNav() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center w-full h-full space-y-1",
-                isActive ? "text-blue-600" : "text-gray-500 hover:text-gray-900"
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className={cn("w-6 h-6", isActive && "fill-current")} />

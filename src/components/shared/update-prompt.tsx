@@ -27,10 +27,10 @@ export function UpdatePrompt() {
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-5">
-      <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-lg max-w-sm">
+      <div className="max-w-sm rounded-2xl border border-border/70 bg-card p-4 shadow-xl shadow-slate-900/10">
         <div className="flex items-start gap-3">
-          <div className="bg-blue-100 p-2 rounded-full">
-            <RefreshCw className="w-4 h-4 text-blue-600" />
+          <div className="rounded-full bg-primary/10 p-2 text-primary">
+            <RefreshCw className="h-4 w-4" />
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-semibold mb-1">Update Available</h4>

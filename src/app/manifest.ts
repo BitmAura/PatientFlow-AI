@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Increase Patient Bookings. Reduce No-Shows. Automatically.',
     start_url: '/dashboard',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#1e3a8a',
+    background_color: '#f8fafc',
+    theme_color: '#0f766e',
     icons: [
       {
         src: '/icon',

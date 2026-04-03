@@ -49,10 +49,10 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
           const isPopular = plan.popular
           
           return (
-            <Card key={plan.id} className={`relative flex flex-col ${isPopular ? 'border-blue-500 shadow-lg scale-105 z-10' : ''}`}>
+            <Card key={plan.id} className={`relative flex flex-col ${isPopular ? 'border-primary shadow-lg scale-105 z-10' : ''}`}>
               {isPopular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-blue-500 hover:bg-blue-600">Most Popular</Badge>
+                  <Badge className="bg-primary hover:bg-primary/90">Most Popular</Badge>
                 </div>
               )}
               
@@ -68,7 +68,7 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
                 <ul className="space-y-3">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm">
-                      <Check className="w-4 h-4 mr-2 text-green-500 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 mr-2 text-primary shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">{feature}</span>
                     </li>
                   ))}
