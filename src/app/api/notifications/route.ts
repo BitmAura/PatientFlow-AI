@@ -38,13 +38,15 @@ export async function GET(request: Request) {
   const { data: notifications, error } = await query
 
   if (error) {
-    return new NextResponse('Failed to fetch notifications', { status: 500 })
+    // Table may not be migrated yet — return empty rather than crashing the header bell
+    return NextResponse.json({ notifications: [], unreadCount: 0 })
   }
 
-  const unreadCount = await getUnreadCount(clinicId)
+  let unreadCount = 0
+  try { unreadCount = await getUnreadCount(clinicId) } catch { /* table missing */ }
 
   return NextResponse.json({
-    notifications,
-    unreadCount
+    notifications: notifications ?? [],
+    unreadCount,
   })
 }

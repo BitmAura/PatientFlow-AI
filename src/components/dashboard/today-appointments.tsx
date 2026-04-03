@@ -25,13 +25,33 @@ import {
 
 export function TodayAppointments() {
   const router = useRouter()
-  const { data: appointments, isLoading } = useAppointments({
+  const { data: appointments, isLoading, isError } = useAppointments({
     date: new Date(),
   })
   const updateStatus = useUpdateAppointmentStatus()
 
   if (isLoading) {
-    return <Skeleton className="h-[400px] w-full rounded-xl" />
+    return (
+      <GlassCard className="col-span-1 lg:col-span-4">
+        <CardHeader><CardTitle>Today&apos;s Schedule</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
+        </CardContent>
+      </GlassCard>
+    )
+  }
+
+  if (isError) {
+    return (
+      <GlassCard className="col-span-1 lg:col-span-4">
+        <CardHeader><CardTitle>Today&apos;s Schedule</CardTitle></CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground py-8 text-center">
+            Could not load appointments. Please refresh the page.
+          </p>
+        </CardContent>
+      </GlassCard>
+    )
   }
 
   const todayAppointments = appointments || []

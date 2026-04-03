@@ -7,13 +7,16 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const { data: clinic } = await supabase
-    .from('clinics')
-    .select('id')
+  // Clinics are linked via the staff table, not clinics.user_id
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('clinic_id')
     .eq('user_id', user.id)
     .single()
 
-  if (!clinic) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+
+  const clinic = { id: staff.clinic_id as string }
 
   const usage = await getCurrentUsage(clinic.id)
 

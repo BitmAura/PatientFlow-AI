@@ -25,13 +25,16 @@ export async function GET(req: NextRequest) {
         ),
         services:doctor_services(service_id)
       `)
-      .eq('clinic_id', (staff as any).clinic_id)
-      .eq('staff.status', 'active');
+      .eq('clinic_id', (staff as any).clinic_id);
+      // Note: do NOT filter on staff.status via .eq() — PostgREST doesn't support
+      // filtering on joined tables that way. Filter in JS below instead.
 
     if (error) throw error;
-    
-    // Filter out doctors where staff is null (soft deleted or inconsistent)
-    const activeDoctors = (doctors as any[]).filter(d => d.staff);
+
+    // Filter out doctors with no active staff record (soft deleted / unlinked)
+    const activeDoctors = (doctors as any[]).filter(
+      d => d.staff && (!d.staff.status || d.staff.status === 'active')
+    );
 
     return successResponse(activeDoctors);
   } catch (error: any) {

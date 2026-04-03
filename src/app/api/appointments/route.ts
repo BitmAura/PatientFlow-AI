@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     .from('appointments')
     .select(`
       *,
-      patients(name, phone, email),
+      patients(full_name, phone, email),
       services(name, duration, price),
       doctors(name)
     `)
