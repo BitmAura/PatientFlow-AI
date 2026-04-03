@@ -15,7 +15,6 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
 import { getGreeting } from '@/lib/utils/format-date'
-import { motion } from 'framer-motion'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { PageHeader } from '@/components/dashboard/PageStructure'
 import Link from 'next/link'
@@ -24,33 +23,10 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const userName = user?.user_metadata?.full_name || 'Doctor'
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  }
-
   return (
     <PageContainer>
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="space-y-6"
-      >
-        <motion.div
-          variants={item}
-          className="mb-2"
-        >
+      <div className="space-y-6">
+        <div className="mb-2">
           <PageHeader
             breadcrumb={<Breadcrumbs />}
             title={getGreeting(userName)}
@@ -76,52 +52,46 @@ export default function DashboardPage() {
               </>
             )}
           />
-        </motion.div>
+        </div>
 
         {/* Alerts */}
-        <motion.div variants={item}>
+        <div>
           <PlanUpgradePrompt />
-        </motion.div>
+        </div>
 
-        <motion.div variants={item}>
+        <div>
           <WhatsappStatusCard />
-        </motion.div>
+        </div>
 
         {/* Revenue Impact */}
-        <motion.div variants={item}>
+        <div>
           <RevenueImpactPanel />
-        </motion.div>
+        </div>
 
-        <motion.div variants={item}>
+        <div>
           <ConversionFunnel />
-        </motion.div>
+        </div>
 
         {/* Stats Row */}
-        <motion.div variants={item}>
+        <div>
           <StatsCards />
-        </motion.div>
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
           {/* Left Column (Timeline) - 4 cols wide */}
-          <motion.div
-            variants={item}
-            className="col-span-1 space-y-6 lg:col-span-4"
-          >
+          <div className="col-span-1 space-y-6 lg:col-span-4">
             <TodayAppointments />
             <RecentActivity />
-          </motion.div>
+          </div>
 
           {/* Right Column (Insights/Quick Actions) - 3 cols wide */}
-          <motion.div
-            variants={item}
-            className="col-span-1 space-y-6 lg:col-span-3"
-          >
+          <div className="col-span-1 space-y-6 lg:col-span-3">
             <QuickActions />
             <UpcomingAppointments />
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </PageContainer>
   )
 }

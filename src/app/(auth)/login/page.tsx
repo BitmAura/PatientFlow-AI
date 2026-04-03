@@ -4,26 +4,20 @@ import { LoginForm } from '@/components/auth/login-form'
 import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
-import { motion } from 'framer-motion'
 
 export default function LoginPage() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="mx-auto w-full max-w-lg"
-    >
+    <div className="mx-auto w-full max-w-lg">
       <GlassCard className="p-8 md:p-10">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             New to PatientFlow AI for clinics?{' '}
             <Link
               href="/signup"
-              className="font-medium text-primary transition-colors hover:text-primary/90 dark:text-blue-400 dark:hover:text-blue-300"
+              className="font-medium text-primary transition-colors hover:text-primary/90"
             >
               Create an account
             </Link>
@@ -33,7 +27,7 @@ export default function LoginPage() {
         <div className="space-y-6">
           <Link
             href="/demo"
-            className="block rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+            className="block rounded-lg border border-primary/10 bg-primary/5 px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
           >
             Continue as Guest (Live Demo)
           </Link>
@@ -45,7 +39,7 @@ export default function LoginPage() {
               <span className="w-full border-t border-gray-200 dark:border-gray-800" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground dark:bg-black">
+              <span className="bg-card px-2 text-muted-foreground">
                 Or continue with
               </span>
             </div>
@@ -54,6 +48,6 @@ export default function LoginPage() {
           <SocialAuthButtons />
         </div>
       </GlassCard>
-    </motion.div>
+    </div>
   )
 }

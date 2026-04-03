@@ -16,15 +16,15 @@ export function DashboardShell({
   return (
     <div
       className={cn(
-        'relative min-h-[calc(100vh-6rem)] rounded-3xl border border-border/70 bg-gradient-to-br from-white via-slate-50/80 to-teal-50/50 p-1 shadow-inner dark:from-slate-950 dark:via-slate-900 dark:to-slate-950',
+        'relative min-h-[calc(100vh-6rem)] rounded-2xl border border-border/70 bg-card p-1 shadow-sm dark:bg-card',
         className
       )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[1.4rem] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(13,148,136,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(13,148,136,0.18),transparent)]"
+        className="pointer-events-none absolute inset-0 rounded-[1.25rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0))] dark:bg-none"
       />
-      <div className="relative rounded-[1.25rem] bg-transparent">{children}</div>
+      <div className="relative rounded-[1.1rem] bg-transparent">{children}</div>
     </div>
   )
 }

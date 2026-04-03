@@ -1,9 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils/cn'
-import { motion, HTMLMotionProps } from 'framer-motion'
+import type { HTMLAttributes } from 'react'
 
-interface GlassCardProps extends HTMLMotionProps<'div'> {
+interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
   className?: string
   hoverEffect?: boolean
@@ -16,23 +16,16 @@ export function GlassCard({
   ...props
 }: GlassCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+    <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 shadow-sm backdrop-blur-md',
-        'dark:border-white/10 dark:bg-black/40',
+        'relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm',
         hoverEffect &&
-          'transition-all duration-300 hover:-translate-y-1 hover:bg-white/80 hover:shadow-lg dark:hover:bg-black/50',
+          'transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
         className
       )}
       {...props}
     >
       <div className="relative z-10">{children}</div>
-      {/* Subtle Gradient Glow */}
-      <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-accent/5 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
-    </motion.div>
+    </div>
   )
 }

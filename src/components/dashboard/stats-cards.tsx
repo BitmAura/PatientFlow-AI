@@ -14,7 +14,6 @@ import {
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TwentyOneCard } from '@/components/ui/twentyone-card'
-import { motion } from 'framer-motion'
 
 export function StatsCards() {
   const { data: stats, isLoading } = useStats()
@@ -79,30 +78,10 @@ export function StatsCards() {
     },
   ]
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
-
-  const itemAnim = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  }
-
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-    >
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {items.map((item, index) => (
-        <motion.div key={item.title} variants={itemAnim}>
+        <div key={item.title}>
           <TwentyOneCard className="group relative h-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 bg-transparent pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -161,8 +140,8 @@ export function StatsCards() {
             </CardContent>
 
           </TwentyOneCard>
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   )
 }
