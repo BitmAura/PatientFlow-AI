@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { useTrackCta } from '@/hooks/use-track-cta'
-import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock, Code2 } from 'lucide-react'
+import { Check, Phone, MessageCircle, Calendar, Shield, Zap, Users, BarChart3, Clock, Code2, Sparkles, ArrowRight, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FREE_TRIAL_DAYS, PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
+import { cn } from '@/lib/utils/cn'
 
 export default function PricingPage() {
   const trackCta = useTrackCta()
@@ -12,298 +13,231 @@ export default function PricingPage() {
     {
       name: PRICING_PLANS.starter.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise),
-      period: '/month',
-      description: 'For solo doctors and small clinics',
+      period: '/mo',
+      description: 'For solo doctors and boutique clinics',
       planId: 'starter',
       features: [
-        'Up to 500 appointments/month',
+        'Up to 500 appointments/mo',
         'Up to 3 doctors',
-        'WhatsApp, SMS & email reminders',
-        'Online booking page',
-        'Waiting list automation',
-        'Patient recall system',
-        'DISHA-compliant data handling',
-        'Email & chat support',
+        'WhatsApp & AI Reminders',
+        'Waitlist AI (Auto-Fill)',
+        'Price List AI Lookup',
+        'Patient Recall Engine',
+        'DISHA Data Sovereignty',
       ],
       popular: true
     },
     {
       name: PRICING_PLANS.growth.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.growth.monthlyPricePaise),
-      period: '/month',
-      description: 'For growing practices and multi-doctor clinics',
+      period: '/mo',
+      description: 'For growing multi-doctor practices',
       planId: 'growth',
       features: [
-        'Up to 2,000 appointments/month',
+        'Up to 2,000 appointments/mo',
         'Up to 10 doctors & staff',
-        'Up to 2 clinic locations',
-        'Campaign automation workflows',
-        'Advanced recall engine',
-        'Conversion & no-show analytics',
-        'Priority onboarding support',
+        'Multi-location (Up to 2)',
+        'Advanced Recall Automations',
+        'Staff Performance Audits',
+        'Conversion ROI Analytics',
+        'Priority Technical Support',
       ],
       popular: false
     },
     {
       name: PRICING_PLANS.pro.name,
       price: formatPriceInrFromPaise(PRICING_PLANS.pro.monthlyPricePaise),
-      period: '/month',
-      description: 'For multi-location clinics and hospital groups',
+      period: '/mo',
+      description: 'For hospital groups and scale',
       planId: 'pro',
       features: [
-        'Unlimited appointments & doctors',
-        'Unlimited clinic locations',
-        'REST API access (connect your EMR)',
-        'Webhook integrations',
-        'Enterprise analytics & reporting',
-        'Dedicated account manager',
-        'Priority support & SLA options',
+        'Unlimited Flow & Doctors',
+        'Unlimited Locations',
+        'REST API & EMR Sync',
+        'Custom Webhook Logic',
+        'Enterprise ROI Reporting',
+        'Dedicated Success Manager',
+        'Priority 24/7 SLA',
       ],
       popular: false
     }
   ]
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
-        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
-        <div className="container mx-auto px-4 text-center max-w-4xl">
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-6xl">
-            Simple, Transparent <span className="text-green-600">Pricing</span>
-          </h1>
-          <p className="mb-8 text-xl text-slate-600">
-            Choose the perfect plan for your practice. Reduce no-shows with consistent WhatsApp reminders and recover lost revenue.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600">
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-600" />
-              <span>{FREE_TRIAL_DAYS}-day free trial</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-600" />
-              <span>No credit card required</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-green-600" />
-              <span>Cancel anytime</span>
-            </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
+      {/* 🚀 Aura Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 py-20 lg:py-32 dark:from-emerald-950/10 dark:via-slate-950 dark:to-slate-900">
+        <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-100/50 blur-[120px] dark:bg-emerald-900/10" />
+        <div className="container mx-auto px-4 text-center max-w-4xl relative">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/50 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm backdrop-blur-xl">
+            <Shield className="h-3 w-3" />
+            Transparent Clinical Value
           </div>
-          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-            <PricingSignal value="50%" label="Conservative no-show reduction" />
-            <PricingSignal value="< 10s" label="Lead response benchmark" />
-            <PricingSignal value={`${FREE_TRIAL_DAYS} days`} label="Risk-free evaluation" />
+          <h1 className="mb-6 text-5xl font-black tracking-tight text-slate-900 md:text-7xl dark:text-white leading-tight">
+            Plans Built for <br /><span className="text-emerald-500">Pure Revenue</span>
+          </h1>
+          <p className="text-lg text-slate-500 md:text-xl dark:text-slate-400 max-w-2xl mx-auto">
+            Scale your practice with confidence. No hidden fees, no per-message surcharges, just high-performance patient flow.
+          </p>
+          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
+             <PricingSignal value="14 Days" label="Full Access Trial" />
+             <PricingSignal value="Zero" label="Setup Fees" />
+             <PricingSignal value="Infinite" label="Patient Trust" />
           </div>
         </div>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {/* 🧬 Pricing Grid */}
+      <section className="py-24">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid lg:grid-cols-3 gap-8">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl border p-8 transition-all hover:-translate-y-1 hover:shadow-xl ${
-                  plan.popular
-                    ? 'border-green-500 bg-gradient-to-b from-white to-green-50/50 shadow-xl shadow-green-500/10 ring-2 ring-green-100'
-                    : 'border-slate-200 bg-white shadow-sm'
-                }`}
+                className={cn(
+                  "relative group rounded-[40px] border p-10 transition-all hover:-translate-y-2",
+                  plan.popular 
+                    ? "bg-white border-emerald-100 shadow-2xl shadow-emerald-500/10 ring-1 ring-emerald-50 dark:bg-slate-900 dark:border-emerald-800/30" 
+                    : "bg-white/50 border-slate-100 shadow-lg dark:bg-slate-900/40 dark:border-slate-800"
+                )}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-green-600 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-                      Most Popular
-                    </div>
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-500/20">
+                    <Sparkles className="h-3 w-3" />
+                    Growth Pick
                   </div>
                 )}
                 
-                <div className="text-center mb-8">
-                  <h3 className="mb-2 text-2xl font-bold text-slate-900">{plan.name}</h3>
-                  <p className="mb-4 text-slate-600">{plan.description}</p>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-slate-900">{plan.price}</span>
-                    <span className="text-slate-600">{plan.period}</span>
+                <div className="mb-10">
+                  <h3 className="mb-2 text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{plan.name}</h3>
+                  <p className="mb-8 text-sm font-bold text-slate-400">{plan.description}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">{plan.price}</span>
+                    <span className="text-lg font-bold text-slate-400">{plan.period}</span>
                   </div>
-                  <p className="text-sm text-green-600 font-medium mt-2">First {FREE_TRIAL_DAYS} days free</p>
                 </div>
 
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-4 mb-12">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                      <span className="text-sm text-slate-700">{feature}</span>
+                      <div className="mt-1 h-5 w-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center dark:bg-emerald-900/20">
+                        <Check className="w-3 h-3" />
+                      </div>
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <Link href={`/signup?plan=${plan.planId}`} onClick={() => trackCta('Start Free Trial', `pricing_plan_${plan.planId}`, `/signup?plan=${plan.planId}`)}>
+                <Link href="/enroll" onClick={() => trackCta('Start Free Trial', `pricing_plan_${plan.planId}`, '/enroll')}>
                   <Button 
-                    className={`w-full ${
+                    className={cn(
+                      "w-full h-16 rounded-2xl text-base font-black transition-all active:scale-[0.98]",
                       plan.popular
-                        ? 'bg-green-600 text-white shadow-md shadow-green-600/20 hover:bg-green-500'
-                        : 'bg-slate-900 text-white hover:bg-slate-800'
-                    }`}
-                    size="lg"
+                        ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600"
+                        : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                    )}
                   >
-                    Start Free Trial
+                    Start 14-Day Free Trial
                   </Button>
                 </Link>
               </div>
             ))}
           </div>
 
-          {/* Annual Discount Banner */}
-          <div className="mt-12 text-center">
-            <div className="inline-block rounded-full border border-green-200 bg-green-100 px-6 py-3">
-              <p className="font-medium text-green-800">
-                💰 Save 20% with annual billing • Contact us for volume discounts
-              </p>
-            </div>
+          <div className="mt-16 text-center">
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-50 bg-emerald-50/30 px-6 py-3 text-sm font-black uppercase tracking-widest text-emerald-800 dark:text-emerald-400 dark:bg-emerald-900/10">
+               💰 Save 20% on Annual Billing • Dedicated Onboarding Support Available
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Features Comparison */}
-      <section className="bg-slate-50 py-20">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
-            Everything You Need to Reduce No-Shows
+      {/* 📊 Feature Cards */}
+      <section className="bg-white py-24 dark:bg-slate-900/40">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="mb-16 text-center text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            Absolute Clinical Infrastructure
           </h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard 
-              icon={MessageCircle}
-              title="WhatsApp Automation"
-              description="Automated reminders, confirmations, and follow-ups via WhatsApp Business API"
+              icon={Zap}
+              title="Waitlist AI Recovery"
+              description="Proprietary slot-filling engine that recovers high-ticket cancellations automatically."
             />
             <FeatureCard 
-              icon={Calendar}
-              title="Smart Scheduling"
-              description="Intelligent booking system that fills gaps and optimizes your schedule"
+              icon={Search}
+              title="Price List AI"
+              description="Instant WhatsApp procedure lookups matching your clinical pricing."
             />
             <FeatureCard 
               icon={Shield}
-              title="Razorpay Deposits"
-              description="Secure your revenue with advance deposits via Razorpay integration"
+              title="Razorpay Integration"
+              description="Collect deposits for high-value appointments to eliminate late cancellations."
             />
             <FeatureCard 
-              icon={Phone}
-              title="Multi-channel Reminders"
-              description="SMS, email, and WhatsApp integration for maximum patient reach"
-            />
-            <FeatureCard 
-              icon={Zap}
-              title="Instant Recovery"
-              description="Automatically rebook cancelled slots from waiting list"
-            />
-            <FeatureCard 
-              title="Detailed Analytics"
-              description="Track no-show rates, revenue recovery, and patient engagement"
               icon={BarChart3}
+              title="ROI Analytics"
+              description="Track exact INR recovered from automated no-show follow-ups."
             />
             <FeatureCard
               icon={Users}
-              title="Patient Portal"
-              description="Self-service booking and appointment management for patients"
+              title="Patient Flow Control"
+              description="Real-time monitoring of patient confirms vs arrivals across branches."
             />
-            <FeatureCard
-              icon={Clock}
-              title="Recall System"
-              description="Automated follow-ups for patients due for checkups"
-            />
-            <FeatureCard
-              icon={Shield}
-              title="DISHA Compliant"
-              description="Patient consent tracking, data export and erasure rights built-in for Indian healthcare regulations"
-            />
-            <FeatureCard
+             <FeatureCard
               icon={Code2}
-              title="API Access (Pro)"
-              description="REST API to connect your EMR, billing software, or custom tools via secure API keys"
+              title="EMR Integration (Pro)"
+              description="Deep REST API access to sync with your existing clinical software."
             />
           </div>
         </div>
       </section>
 
-      {/* Early Access */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="mb-4 text-3xl font-bold text-slate-900">
-              Early Access Program for Indian Clinics
-            </h2>
-            <p className="text-slate-600">
-              We are onboarding pilot clinics in limited batches so implementation remains hands-on.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">50</div>
-              <p className="text-slate-600">Pilot clinics target cohort</p>
-            </div>
-            <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">15</div>
-              <p className="text-slate-600">Spots remaining in current batch</p>
-            </div>
-            <div className="p-6">
-              <div className="text-4xl font-bold text-green-600 mb-2">60 days</div>
-              <p className="text-slate-600">Free pilot period for selected clinics</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="bg-slate-50 py-20">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
-            Frequently Asked Questions
+      {/* ❓ FAQ */}
+      <section className="py-24">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="mb-16 text-center text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            Common Questions
           </h2>
           
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-6">
             <FAQItem 
-              question="Is the trial really free?"
-              answer={`Yes! No credit card required. Get full access to all features for ${FREE_TRIAL_DAYS} days.`}
+              question="Is the 14-day trial really free?"
+              answer={`Yes. 100% full access to all features on your chosen plan. No credit card required. We want you to see the ROI recovery first.`}
             />
             <FAQItem 
               question="What happens after the trial?"
-              answer="We'll send you a reminder before your trial ends. You can choose to upgrade to a paid plan or continue with limited free features."
-            />
-            <FAQItem 
-              question="Can I change plans later?"
-              answer="Absolutely! Upgrade or downgrade anytime. Changes take effect immediately."
+              answer="We'll send you a 'Morning Intelligence' summary of your trial performance. You can then choose to subscribe or your account will gracefully pause."
             />
             <FAQItem 
               question="Do you charge per message?"
-              answer="WhatsApp message costs are included in your plan up to your appointment limit. Additional messages are charged at ₹0.08 per message."
+              answer="No. Your WhatsApp automation costs are included in your monthly plan. We don't believe in taxing your communication."
             />
             <FAQItem 
-              question="Is my patient data secure?"
-              answer="Yes. We follow DISHA (India's Digital Information Security in Healthcare Act) guidelines and use bank-grade encryption."
+              question="Is my clinical data secure?"
+              answer="Absolutely. We are DISHA-compliant and use bank-grade encryption protocols to ensure patient sovereignty at all times."
             />
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 text-center">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="mb-6 text-3xl font-bold text-slate-900">
-            Ready to Eliminate No-Shows?
+      {/* 🏁 Final CTA */}
+      <section className="py-32 bg-slate-900 text-center relative overflow-hidden dark:bg-slate-950">
+        <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
+        <div className="container mx-auto px-4 relative">
+          <h2 className="mb-8 text-4xl font-black tracking-tight text-white sm:text-6xl">
+            Start Your Recovery Path.
           </h2>
-          <p className="mb-8 text-lg text-slate-600">
-            Start your free {FREE_TRIAL_DAYS}-day trial today. No credit card required.
+          <p className="mb-12 text-lg font-bold text-slate-400">
+            No credit card. No commitments. Pure patient flow growth.
           </p>
-          <Link href="/signup?plan=starter" onClick={() => trackCta('Start Your Free Trial', 'pricing_bottom_cta', '/signup?plan=starter')}>
-            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 h-12 text-lg shadow-lg shadow-green-600/20">
-              Start Your Free Trial
+          <Link href="/enroll">
+            <Button size="lg" className="h-16 rounded-2xl bg-emerald-500 px-12 text-lg font-black text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-[0.98]">
+              Begin Free Trial
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-          <p className="mt-4 text-sm text-slate-500">
-            No credit card required • {FREE_TRIAL_DAYS}-day free trial • Cancel anytime
-          </p>
         </div>
       </section>
 
@@ -313,13 +247,13 @@ export default function PricingPage() {
 
 function FeatureCard({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
-        <Icon className="h-6 w-6" />
+    <div className="rounded-[32px] border border-slate-50 bg-white p-8 shadow-xl shadow-emerald-500/5 transition hover:-translate-y-1 dark:bg-slate-900 dark:border-emerald-900/10">
+      <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-[20px] bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20">
+        <Icon className="h-7 w-7" />
       </div>
       <div>
-        <h3 className="mb-2 text-lg font-semibold text-slate-900">{title}</h3>
-        <p className="text-sm text-slate-600">{description}</p>
+        <h3 className="mb-3 text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{title}</h3>
+        <p className="text-sm font-bold text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
       </div>
     </div>
   )
@@ -327,18 +261,18 @@ function FeatureCard({ icon: Icon, title, description }: { icon: any; title: str
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="mb-3 text-lg font-semibold text-slate-900">{question}</h3>
-      <p className="text-slate-600">{answer}</p>
+    <div className="group rounded-[32px] border border-emerald-50 bg-white p-10 transition-all hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5 dark:bg-slate-900 dark:border-emerald-900/20">
+      <h3 className="mb-4 text-lg font-black text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">{question}</h3>
+      <p className="text-sm font-bold leading-relaxed text-slate-500 dark:text-slate-400">{answer}</p>
     </div>
   )
 }
 
 function PricingSignal({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur">
-      <p className="text-lg font-semibold text-slate-900">{value}</p>
-      <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{label}</p>
+    <div className="rounded-[24px] border border-emerald-50 bg-white/95 p-6 shadow-xl shadow-emerald-500/5 backdrop-blur-xl dark:bg-slate-900 dark:border-emerald-900/20">
+      <p className="text-xl font-black text-slate-900 dark:text-white">{value}</p>
+      <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-emerald-500">{label}</p>
     </div>
   )
 }

@@ -1,3 +1,5 @@
+'use client'
+
 import { 
   MessageSquare, 
   Clock, 
@@ -7,86 +9,102 @@ import {
   CheckCircle2, 
   Calendar, 
   Users, 
-  BarChart3 
+  BarChart3,
+  Target,
+  Search,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { cn } from '@/lib/utils/cn'
 
 export default function FeaturesPage() {
   const features = [
     {
+      icon: Zap,
+      title: "Waitlist AI Recovery",
+      description: "Our proprietary AI automatically scans for cancellations and fills empty slots with matched high-ticket leads (Tier-1) within minutes.",
+      isNew: true
+    },
+    {
+      icon: Search,
+      title: "Price List AI",
+      description: "Allow patients to query procedure pricing via WhatsApp instantly. Our AI matches their query to your clinical treatment list.",
+      isNew: true
+    },
+    {
       icon: MessageSquare,
       title: "WhatsApp Automation",
-      description: "Send automated reminders, confirmations, and follow-ups directly to your patients' favorite app. Reduce manual calls and texts."
+      description: "Send automated reminders, confirmations, and follow-ups directly to your patients' favorite app. Reduce manual calls by 85%."
     },
     {
       icon: Clock,
       title: "Smart Scheduling",
-      description: "Clinic booking flows with doctor/service availability and slot selection to reduce manual coordination."
+      description: "Advanced booking flows with real-time doctor availability and procedure-specific slot selection logic."
     },
     {
-      icon: Shield,
-      title: "Deposit Protection",
-      description: "Secure your revenue by collecting deposits or holding card details for high-value appointments. Reduce late cancellations."
+      icon: Target,
+      title: "Tier-1 Lead Scoring",
+      description: "Identify and prioritize high-value patients (Implants, Ortho, Aesthetics) to maximize clinic ROI automatically."
     },
     {
-      icon: Zap,
-      title: "Instant Recovery",
-      description: "Staff-assisted waitlist recovery tools to notify matched patients and convert open slots into confirmed appointments."
+      icon: BarChart3,
+      title: "Founder Intelligence",
+      description: "Get weekly 'Morning Intelligence' reports on recovered revenue, staff performance, and patient flow efficiency."
     },
     {
       icon: Smartphone,
-      title: "Mobile First Dashboard",
-      description: "Manage your practice from anywhere with our fully responsive mobile dashboard. Perfect for busy doctors on the go."
+      title: "Aura Mobile Dashboard",
+      description: "A clinical-minimalist dashboard optimized for mobile. Manage your entire practice flow from the palm of your hand."
     },
     {
       icon: CheckCircle2,
       title: "Review Booster",
-      description: "Post-visit follow-up messages can request feedback and reviews with clinic-controlled templates."
+      description: "Automatically request feedback and Google Reviews from happy patients after successful clinical outcomes."
     },
     {
-      icon: Calendar,
-      title: "Online Booking",
-      description: "Give patients a beautiful, branded booking page where they can schedule appointments 24/7 without calling."
-    },
-    {
-      icon: Users,
-      title: "Patient Management",
-      description: "Keep all patient records, history, and communication logs in one secure place. searchable and accessible."
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics & Reports",
-      description: "Track no-show rates, revenue, and growth with detailed reports. Make data-driven decisions for your practice."
+      icon: Shield,
+      title: "Data Sovereignty",
+      description: "Enterprise-grade encryption and DISHA-compliant data handling ensuring your clinical records remain secure."
     }
   ]
 
   return (
-    <div className="bg-white">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,_#dcfce7,_#f8fafc_45%,_#ffffff_75%)] py-20">
-        <div className="pointer-events-none absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-300/30 blur-3xl" />
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-6 text-4xl font-bold text-zinc-900 md:text-5xl">
-            Powerful Features for Modern Clinics
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
+      {/* 🚀 Aura Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 py-20 lg:py-32 dark:from-emerald-950/10 dark:via-slate-950 dark:to-slate-900">
+        <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-emerald-100/50 blur-[120px] dark:bg-emerald-900/10" />
+        <div className="container mx-auto px-4 text-center max-w-4xl relative">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/50 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm backdrop-blur-xl">
+            <Sparkles className="h-3 w-3" />
+            Clinical Excellence Toolkit
+          </div>
+          <h1 className="mb-6 text-5xl font-black tracking-tight text-slate-900 md:text-7xl dark:text-white leading-tight">
+            The <span className="text-emerald-500 text-glow-emerald">Aura Vision</span> <br />Feature Suite
           </h1>
-          <p className="mx-auto max-w-2xl text-xl text-zinc-600">
-            Everything you need to streamline operations, reduce no-shows, and grow your healthcare practice.
+          <p className="text-lg text-slate-500 md:text-xl dark:text-slate-400 max-w-2xl mx-auto">
+            Everything you need to automate your patient flow, recover leaked revenue, and provide a premium digital experience for your patients.
           </p>
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* 🧬 Features Grid */}
       <section className="py-24">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="rounded-2xl border border-zinc-200 bg-white p-8 transition-all hover:-translate-y-1 hover:shadow-lg">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
-                  <feature.icon className="h-6 w-6" />
+              <div key={index} className="group relative rounded-[32px] border border-emerald-50 bg-white p-10 shadow-xl shadow-emerald-500/5 transition-all hover:-translate-y-2 hover:shadow-2xl dark:bg-slate-900 dark:border-emerald-900/20">
+                {feature.isNew && (
+                  <div className="absolute top-6 right-6 rounded-full bg-emerald-500 px-3 py-1 text-[8px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-500/20">
+                    Aura AI
+                  </div>
+                )}
+                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-[20px] bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 transition-transform group-hover:scale-110">
+                  <feature.icon className="h-7 w-7" />
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-zinc-900">{feature.title}</h3>
-                <p className="leading-relaxed text-zinc-600">
+                <h3 className="mb-4 text-xl font-black text-slate-900 dark:text-white">{feature.title}</h3>
+                <p className="text-sm font-bold leading-relaxed text-slate-500 dark:text-slate-400">
                   {feature.description}
                 </p>
               </div>
@@ -95,15 +113,23 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-green-600">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-8">
-            Ready to transform your practice?
-          </h2>
-          <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-white text-green-600 hover:bg-zinc-100 border-0 shadow-xl" asChild>
-            <Link href="/signup">Start Free Trial</Link>
-          </Button>
+      {/* 🏁 CTA Section */}
+      <section className="py-32">
+        <div className="container mx-auto px-4">
+          <div className="relative mx-auto max-w-4xl rounded-[48px] border border-emerald-100 bg-white px-10 py-20 text-center shadow-3xl shadow-emerald-500/10 dark:border-emerald-900/20 dark:bg-slate-900">
+            <h2 className="mb-8 text-4xl font-black tracking-tight text-slate-900 sm:text-6xl dark:text-white">
+              Ready to <span className="text-emerald-500">Automate</span>?
+            </h2>
+            <p className="mb-12 text-lg font-bold text-slate-500 dark:text-slate-400">
+              Join the elite clinics using PatientFlow AI to achieve 100% operational efficiency.
+            </p>
+            <Link href="/enroll">
+              <Button size="lg" className="h-16 rounded-[20px] bg-emerald-500 px-12 text-lg font-black text-white shadow-xl shadow-emerald-500/30 hover:bg-emerald-600 active:scale-[0.98] transition-all">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

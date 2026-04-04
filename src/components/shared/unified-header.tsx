@@ -44,21 +44,29 @@ export function UnifiedHeader({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const defaultNavItems = [
+  const marketingNavItems = [
+    { label: 'How it Works', href: '/how-it-works' },
+    { label: 'Features', href: '/features' },
+    { label: 'Pricing', href: '/pricing' },
+  ]
+
+  const dashboardNavItems = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Appointments', href: '/appointments' },
     { label: 'Patients', href: '/patients' },
     { label: 'Reports', href: '/reports' },
   ]
 
-  const navItems = navigationItems.length > 0 ? navigationItems : defaultNavItems
+  const navItems = navigationItems.length > 0 
+    ? navigationItems 
+    : (variant === 'marketing' ? marketingNavItems : dashboardNavItems)
   
   const config = {
     logo: 'PatientFlow AI',
-    tagline: 'Reduce no-shows with WhatsApp automation for Indian clinics.',
-    primaryColor: 'green',
-    ctaText: 'Book Free Demo',
-    ctaHref: '/book-demo',
+    tagline: 'Clinical Revenue Engine for Modern Indian Practices.',
+    primaryColor: 'emerald',
+    ctaText: 'Start Free Trial',
+    ctaHref: '/enroll',
   }
 
   const whatsappSalesNumber = process.env.NEXT_PUBLIC_WHATSAPP_SALES_NUMBER
