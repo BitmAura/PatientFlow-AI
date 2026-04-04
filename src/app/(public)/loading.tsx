@@ -1,18 +1,24 @@
-import { Skeleton } from '@/components/ui/skeleton'
+'use client'
 
-export default function Loading() {
+import { Sparkles } from 'lucide-react'
+
+/**
+ * Public Loading State
+ * 🧬 Persona: Performance Specialist
+ * 🎨 Aura Vision Aesthetic
+ */
+export default function PublicLoading() {
   return (
-    <div className="mx-auto flex min-h-[60vh] w-full max-w-5xl flex-col gap-6 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="mt-3 h-4 w-full max-w-2xl" />
-        <Skeleton className="mt-2 h-4 w-4/5 max-w-xl" />
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="relative mb-4 flex items-center justify-center">
+        <div className="absolute h-16 w-16 animate-ping rounded-full bg-emerald-500/20" />
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-100 bg-white shadow-xl dark:border-emerald-900/20 dark:bg-slate-900">
+          <Sparkles className="h-6 w-6 text-emerald-500 animate-pulse" />
+        </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-40 rounded-2xl border border-border" />
-        ))}
-      </div>
+      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">
+        Aura Vision Activating...
+      </p>
     </div>
   )
 }
