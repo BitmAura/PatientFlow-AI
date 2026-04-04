@@ -26,17 +26,18 @@ export async function seedClinicOnboardingData(clinicId: string) {
     }).select().single()
 
     if (patient) {
-      // 2. Create Sample Leads with Revenue Data
+      // 2. Create Sample Leads with Revenue & Tier Data
       await supabase.from('leads').insert({
         clinic_id: clinicId,
         full_name: p.name,
         phone: p.phone,
         email: p.email,
-        status: p.name.includes('Mike') ? 'booked' : 'new',
-        estimated_value: 2500,
-        actual_revenue: p.name.includes('Mike') ? 2500 : 0,
+        status: p.name.includes('Mike') ? 'converted' : 'lost',
+        estimated_value: p.name.includes('Mike') ? 25000 : 5000,
+        actual_revenue: p.name.includes('Mike') ? 25000 : 0,
         source: 'whatsapp_recall',
-        treatment_type: 'Cleaning'
+        treatment_type: p.name.includes('John') ? 'Dental Implant' : 'Cleaning',
+        treatment_tier: p.name.includes('John') ? 'tier_1' : 'tier_3'
       })
 
       // 3. Create Overdue Recalls for the Dashboard
@@ -48,6 +49,24 @@ export async function seedClinicOnboardingData(clinicId: string) {
         attempt_count: 0
       })
     }
+  }
+
+  // 4. Seed Treatment Pricing for Price AI
+  const procedures = [
+    { name: 'Teeth Cleaning', category: 'cleaning', tier: 'tier_3', price: 150000 }, // 1500 INR
+    { name: 'Root Canal (RCT)', category: 'root_canal', tier: 'tier_2', price: 850000 }, // 8500 INR
+    { name: 'Full Ceramic Implant', category: 'implant', tier: 'tier_1', price: 3500000 }, // 35000 INR
+    { name: 'Invisalign / Ortho', category: 'ortho', tier: 'tier_1', price: 12000000 } // 1.2L INR
+  ]
+
+  for (const proc of procedures) {
+    await supabase.from('treatments').insert({
+      clinic_id: clinicId,
+      name: proc.name,
+      category: proc.category,
+      tier: proc.tier as any,
+      price_paise: proc.price
+    })
   }
 
   console.log(`✅ Seeded demo data for clinic: ${clinicId}`)

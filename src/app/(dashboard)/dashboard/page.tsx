@@ -19,10 +19,14 @@ import { getGreeting } from '@/lib/utils/format-date'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { PageHeader } from '@/components/dashboard/PageStructure'
 import Link from 'next/link'
+import { useMorningIntelligence } from '@/hooks/use-morning-intelligence'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const userName = user?.user_metadata?.full_name || 'Doctor'
+  const clinicId = user?.user_metadata?.clinicId || user?.user_metadata?.clinic_id
+  
+  const insights = useMorningIntelligence(clinicId)
 
   return (
     <PageContainer>
@@ -55,13 +59,13 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* ── MORNING INTELLIGENCE (NEW) ────────────────────────── */}
+        {/* ── MORNING INTELLIGENCE (ACTIVATED) ────────────────────────── */}
         <div>
            <MorningIntelligenceCard 
               userName={userName} 
-              recoveredRevenue={12500} 
-              newLeads={3} 
-              growth={12.5}
+              recoveredRevenue={insights.recoveredRevenue} 
+              newLeads={insights.newLeads} 
+              growth={insights.growth}
            />
         </div>
 
