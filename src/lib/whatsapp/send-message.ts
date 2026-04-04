@@ -49,20 +49,25 @@ export async function sendWhatsAppMessage(
 ): Promise<SendMessageResult> {
   const supabase = createClient() as any
 
+  const isPublicDemo = metadata?.type === 'public_demo'
+
   const canSendRateLimit = await checkRateLimit(clinicId)
   if (!canSendRateLimit) {
     return { success: false, error: 'Rate limit exceeded', status: 'skipped' }
   }
 
-  const { canClinicSendMessage } = await import('@/lib/billing/usage')
-  const canSendQuota = await canClinicSendMessage(clinicId)
-  if (!canSendQuota) {
-    return { success: false, error: 'Monthly quota exceeded (Profit Protection Activated)', status: 'skipped' }
-  }
+  // 🛡️ Bypass logic for Public Demo
+  if (!isPublicDemo) {
+    const { canClinicSendMessage } = await import('@/lib/billing/usage')
+    const canSendQuota = await canClinicSendMessage(clinicId)
+    if (!canSendQuota) {
+      return { success: false, error: 'Monthly quota exceeded (Profit Protection Activated)', status: 'skipped' }
+    }
 
-  const canSendByPlan = await clinicCanSend(clinicId)
-  if (!canSendByPlan) {
-    return { success: false, error: 'No active subscription or trial', status: 'skipped' }
+    const canSendByPlan = await clinicCanSend(clinicId)
+    if (!canSendByPlan) {
+      return { success: false, error: 'No active subscription or trial', status: 'skipped' }
+    }
   }
 
   const cleanPhone = phone.replace(/\D/g, '')
@@ -74,13 +79,16 @@ export async function sendWhatsAppMessage(
     .from('whatsapp_connections')
     .select('session_data, status')
     .eq('clinic_id', clinicId)
-    .single()
+    .maybeSingle()
 
   const sessionData = (connection?.session_data || {}) as Record<string, any>
   const allowedStatuses = ['connected', 'active']
-  if (!connection?.status || !allowedStatuses.includes(connection.status)) {
-    logError('WhatsApp blocked: not connected or active', null, { clinicId, status: connection?.status })
-    return { success: false, error: 'WhatsApp is not connected or active', status: 'failed' }
+  
+  if (!isPublicDemo) {
+    if (!connection?.status || !allowedStatuses.includes(connection.status)) {
+      logError('WhatsApp blocked: not connected or active', null, { clinicId, status: connection?.status })
+      return { success: false, error: 'WhatsApp is not connected or active', status: 'failed' }
+    }
   }
 
   const useGupshup =
@@ -108,12 +116,13 @@ async function sendViaGupshup(
   const sourceNumber =
     sessionData.phoneNumberId ||
     sessionData.verified_number ||
-    sessionData.phone_number
+    sessionData.phone_number ||
+    gupshupConfig.sourceNumber
 
   if (!apiKey || !sourceNumber) {
     return {
       success: false,
-      error: 'Gupshup credentials or doctor number not configured',
+      error: 'Gupshup credentials or source number not configured',
       status: 'failed',
     }
   }

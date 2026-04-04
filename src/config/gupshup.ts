@@ -10,6 +10,9 @@ export const gupshupConfig = {
   
   // Webhook Secret for verifying incoming callbacks
   webhookSecret: process.env.GUPSHUP_WEBHOOK_SECRET || '',
+
+  // System-wide fallback source number (e.g. Agency Master Number)
+  sourceNumber: process.env.GUPSHUP_SOURCE_NUMBER || '',
 };
 
 // Validation function to ensure critical config is present
