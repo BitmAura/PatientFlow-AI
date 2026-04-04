@@ -10,7 +10,7 @@ import { AppointmentsTrendChart } from '@/components/reports/appointments-trend-
 import { useReportOverview, useNoShowReport, useAppointmentReport } from '@/hooks/use-reports'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { ExportButton } from '@/components/shared/export-button'
 import { ExportReportDialog } from '@/components/reports/export-report-dialog'
@@ -118,6 +118,16 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="text-sm font-medium">Revenue & Deposits</CardTitle>
                 <CardDescription>Track collections and savings</CardDescription>
+              </CardHeader>
+            </PageCard>
+          </Link>
+          <Link href="/reports/staff-performance" className="block lg:col-span-1">
+            <PageCard className="cursor-pointer border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors">
+              <CardHeader>
+                <CardTitle className="text-sm font-black text-emerald-600 flex items-center gap-2">
+                  <Plus className="h-3 w-3" /> Staff Conversion
+                </CardTitle>
+                <CardDescription className="text-emerald-900/60 font-medium">Doctor-level revenue tracking</CardDescription>
               </CardHeader>
             </PageCard>
           </Link>

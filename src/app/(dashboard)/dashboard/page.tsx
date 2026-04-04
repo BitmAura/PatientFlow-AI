@@ -11,6 +11,7 @@ import { QuickActions } from '@/components/dashboard/quick-actions'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { PlanUpgradePrompt } from '@/components/dashboard/plan-upgrade-prompt'
 import { ConversionFunnel } from '@/components/dashboard/conversion-funnel'
+import { MorningIntelligenceCard } from '@/components/dashboard/morning-intelligence'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
@@ -52,6 +53,16 @@ export default function DashboardPage() {
               </>
             )}
           />
+        </div>
+
+        {/* ── MORNING INTELLIGENCE (NEW) ────────────────────────── */}
+        <div>
+           <MorningIntelligenceCard 
+              userName={userName} 
+              recoveredRevenue={12500} 
+              newLeads={3} 
+              growth={12.5}
+           />
         </div>
 
         {/* Alerts */}

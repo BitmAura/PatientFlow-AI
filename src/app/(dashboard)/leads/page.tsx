@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { PageContainer } from '@/components/layout/page-container'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { PageHeader, PageCard } from '@/components/dashboard/PageStructure'
+import { ExportROIButton } from '@/components/dashboard/ExportROIButton'
 
 export const metadata = {
   title: 'Leads | PatientFlow AI',
@@ -106,15 +107,18 @@ export default async function LeadsPage() {
   const clinicId = (staffData as any).clinic_id
   const { data: leads } = await supabase
     .from('leads')
-    .select('id, full_name, source, status, notes, next_followup_at, created_at, updated_at')
+    .select('*')
     .eq('clinic_id', clinicId)
     .order('updated_at', { ascending: false })
 
-  const pipelineCount = {
-    new: leads?.filter((lead: any) => lead.status === 'new').length || 0,
-    contacted: leads?.filter((lead: any) => lead.status === 'contacted').length || 0,
-    demo: leads?.filter((lead: any) => lead.status === 'responsive').length || 0,
-    closed: leads?.filter((lead: any) => lead.status === 'booked').length || 0,
+  const pipelineStats = {
+    new: leads?.filter((l: any) => l.status === 'new').length || 0,
+    contacted: leads?.filter((l: any) => l.status === 'contacted').length || 0,
+    demo: leads?.filter((l: any) => l.status === 'responsive').length || 0,
+    closed: leads?.filter((l: any) => l.status === 'booked').length || 0,
+    pipelineValue: leads?.reduce((acc: number, l: any) => acc + (Number(l.estimated_value) || 0), 0) || 0,
+    recoveredRevenue: leads?.filter((l: any) => l.status === 'booked')
+      .reduce((acc: number, l: any) => acc + (Number(l.actual_revenue) || Number(l.estimated_value) || 0), 0) || 0,
   }
 
   const sourceOptions = ['website', 'meta_ads', 'google_ads', 'referral', 'walk_in', 'other']
@@ -129,89 +133,130 @@ export default async function LeadsPage() {
     <PageContainer>
       <PageHeader
         breadcrumb={<Breadcrumbs />}
-        title="Sales CRM"
-        description="Track leads, capture notes, and schedule follow-ups to close deals faster."
+        title="Founder Dashboard"
+        description="Monitor your clinic's revenue pipeline and lead conversion efficiency."
+        actions={
+          <div className="flex gap-2">
+            <ExportROIButton 
+              clinicName="Aura Partner" 
+              leads={leads || []}
+              stats={{
+                recoveredRevenue: pipelineStats.recoveredRevenue,
+                pipelineValue: pipelineStats.pipelineValue,
+                conversionRate: leads?.length ? ((pipelineStats.closed / leads.length) * 100).toFixed(1) : '0',
+                totalLeads: leads?.length || 0
+              }}
+            />
+          </div>
+        }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <PageCard variant="default" padding>
-          <p className="text-xs uppercase text-muted-foreground">New</p>
-          <p className="text-2xl font-semibold">{pipelineCount.new}</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <PageCard variant="default" padding className="border-emerald-100 bg-emerald-50/50 dark:border-emerald-900/20 dark:bg-emerald-950/10">
+          <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Recovered Revenue</p>
+          <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300">
+            ₹{pipelineStats.recoveredRevenue.toLocaleString()}
+          </p>
+          <p className="mt-1 text-[10px] text-emerald-600/60 transition-opacity hover:opacity-100">Confirmed ROI from closed leads</p>
         </PageCard>
-        <PageCard variant="default" padding>
-          <p className="text-xs uppercase text-muted-foreground">Contacted</p>
-          <p className="text-2xl font-semibold">{pipelineCount.contacted}</p>
+        
+        <PageCard variant="default" padding className="border-slate-100 bg-slate-50/50 dark:border-slate-800/20 dark:bg-slate-900/10">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Pipeline Value</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            ₹{pipelineStats.pipelineValue.toLocaleString()}
+          </p>
+          <p className="mt-1 text-[10px] text-slate-500/60">Total potential revenue in CRM</p>
         </PageCard>
+
         <PageCard variant="default" padding>
-          <p className="text-xs uppercase text-muted-foreground">Demo</p>
-          <p className="text-2xl font-semibold">{pipelineCount.demo}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Active Leads</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            {pipelineStats.new + pipelineStats.contacted + pipelineStats.demo}
+          </p>
+          <p className="mt-1 text-[10px] text-slate-500/60">Across all pipeline stages</p>
         </PageCard>
+
         <PageCard variant="default" padding>
-          <p className="text-xs uppercase text-muted-foreground">Closed</p>
-          <p className="text-2xl font-semibold">{pipelineCount.closed}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Conversion Rate</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white">
+            {leads?.length ? ((pipelineStats.closed / leads.length) * 100).toFixed(1) : 0}%
+          </p>
+          <p className="mt-1 text-[10px] text-slate-500/60">ROI Efficiency (Closed/Total)</p>
         </PageCard>
       </div>
 
-      <PageCard variant="default" padding>
+      <PageCard variant="default" padding className="bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
         <form action={createLead}>
-          <h3 className="mb-4 text-lg font-semibold">Add Lead</h3>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
-            <input
-              required
-              name="leadName"
-              placeholder="Lead name"
-              aria-label="Lead name"
-              title="Lead name"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-            />
-            <select 
-              name="source" 
-              required 
-              aria-label="Source"
-              title="Source"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-            >
-              <option value="">Select source</option>
-              {sourceOptions.map((source) => (
-                <option key={source} value={source}>
-                  {source}
-                </option>
-              ))}
-            </select>
-            <select 
-              name="status" 
-              defaultValue="new" 
-              aria-label="Status"
-              title="Status"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <input
-              name="followupAt"
-              type="datetime-local"
-              aria-label="Follow-up date and time"
-              title="Follow-up date and time"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-            />
-            <button
-              type="submit"
-              className="rounded-md bg-black px-3 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-            >
-              Add lead
-            </button>
+          <h3 className="mb-6 text-xl font-bold tracking-tight text-slate-900 dark:text-white">Add New Lead</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lead Name</label>
+              <input
+                required
+                name="leadName"
+                placeholder="Ex: John Doe"
+                aria-label="Lead name"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Source</label>
+              <select 
+                name="source" 
+                required 
+                aria-label="Source"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950"
+              >
+                <option value="">Select source</option>
+                {sourceOptions.map((source) => (
+                  <option key={source} value={source}>
+                    {source.replace('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Status</label>
+              <select 
+                name="status" 
+                defaultValue="new" 
+                aria-label="Status"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Follow-up</label>
+              <input
+                name="followupAt"
+                type="datetime-local"
+                aria-label="Follow-up date"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 hover:shadow-emerald-700/40 active:scale-[0.98] dark:bg-emerald-500 dark:hover:bg-emerald-600"
+              >
+                Create Lead
+              </button>
+            </div>
           </div>
-          <textarea
-            name="notes"
-            placeholder="Notes (context, objections, next step)"
-            aria-label="Notes"
-            title="Notes"
-            className="mt-3 min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-          />
+          <div className="mt-4 space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lead Context & Notes</label>
+            <textarea
+              name="notes"
+              placeholder="Provide context like dental pain history, specific orthodontic interests, or objections mentioned..."
+              aria-label="Notes"
+              className="min-h-24 w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-800 dark:bg-slate-950"
+            />
+          </div>
         </form>
       </PageCard>
 

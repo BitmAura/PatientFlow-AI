@@ -160,26 +160,50 @@ async function safeSendRecall(recallId: string, clinicId: string, supabase: Supa
   await RecallService.logActivity(recallId, 'message_sent', 'Automated safe-send (Template)', supabase)
 }
 
+import { calculatePatientScore } from '@/lib/ai/lead-scoring'
+
 export async function processDailyRecalls(clinicId: string, supabase: SupabaseClient) {
   const db = supabase as any
   const MAX_BATCH_SIZE = 50
   await seedInactivePatientRecalls(clinicId, supabase)
 
-  const { data: recalls } = await db
+  // Fetch recalls order by priority score (Calculated in DB or here)
+  // For now we fetch a larger pool and score them in-memory
+  const { data: rawRecalls } = await db
     .from('patient_recalls')
-    .select('id')
+    .select('*, patients(*, appointments(status))')
     .eq('clinic_id', clinicId)
     .eq('status', 'overdue')
     .lt('attempt_count', 3)
-    .limit(MAX_BATCH_SIZE)
+    .limit(MAX_BATCH_SIZE * 2)
 
-  if (!recalls?.length) {
+  if (!rawRecalls?.length) {
     return { processed: 0, sent: 0, failed: 0 }
   }
 
+  // AI-Driven Prioritization (Financial weighting)
+  const scoredRecalls = rawRecalls.map((recall: any) => {
+    const appointments = recall.patients?.appointments || []
+    const history = {
+      total_appointments: appointments.length,
+      no_show_count: appointments.filter((a: any) => a.status === 'no_show').length,
+      completed_count: appointments.filter((a: any) => a.status === 'completed').length,
+    }
+    
+    // Pass the treatment_tier (fetched from the patient record if available)
+    const score = calculatePatientScore({
+      history,
+      treatment_category: recall.treatment_category,
+      treatment_tier: recall.patients?.treatment_tier || 'tier_3',
+      last_visit_date: recall.last_visit_date,
+    })
+    return { ...recall, ai_score: score }
+  }).sort((a: any, b: any) => b.ai_score - a.ai_score)
+    .slice(0, MAX_BATCH_SIZE)
+
   let sent = 0
   let failed = 0
-  for (const recall of recalls) {
+  for (const recall of scoredRecalls) {
     try {
       await safeSendRecall(recall.id, clinicId, supabase)
       sent++
@@ -189,5 +213,5 @@ export async function processDailyRecalls(clinicId: string, supabase: SupabaseCl
       failed++
     }
   }
-  return { processed: recalls.length, sent, failed }
+  return { processed: scoredRecalls.length, sent, failed }
 }

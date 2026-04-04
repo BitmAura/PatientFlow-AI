@@ -1,223 +1,159 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import Link from 'next/link'
-import {
-  demoChats,
-  demoClinic,
-  demoLeads,
-  demoStats,
-  type DemoLead,
-} from '@/lib/demo/demo-data'
+import React, { useState } from 'react'
+import { PageContainer } from '@/components/layout/page-container'
+import { PageCard } from '@/components/dashboard/PageStructure'
+import { cn } from '@/lib/utils/cn'
 
-const stageStyle: Record<DemoLead['stage'], string> = {
-  New: 'bg-blue-100 text-blue-700',
-  Contacted: 'bg-amber-100 text-amber-700',
-  Interested: 'bg-violet-100 text-violet-700',
-  Booked: 'bg-emerald-100 text-emerald-700',
-}
-
+/**
+ * WhatsApp Live Demo Page
+ * 🎭 Persona: Frontend Developer & Founder/CEO
+ * 💎 Glassmorphism + Emerald Medical Theme
+ */
 export default function DemoPage() {
-  const [selectedLeadId, setSelectedLeadId] = useState(demoLeads[0]?.id ?? '')
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'whatsapp'>(
-    'dashboard'
-  )
+  const [phone, setPhone] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const selectedLead = useMemo(
-    () => demoLeads.find(lead => lead.id === selectedLeadId) ?? demoLeads[0],
-    [selectedLeadId]
-  )
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
 
-  const messages = selectedLead ? demoChats[selectedLead.id] ?? [] : []
+    try {
+      const response = await fetch('/api/whatsapp/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to send demo')
+
+      setSuccess(true)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 md:px-8">
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-          <p className="font-semibold">Demo Mode: Read-only</p>
-          <p>
-            You are exploring a live simulation of PatientFlow AI. Actions are
-            intentionally disabled.
-          </p>
-        </div>
+    <PageContainer className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
+      <div className="relative mx-auto max-w-4xl px-4 py-12">
+        {/* Decorative elements for premium feel */}
+        <div className="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
 
-        <header className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-medium text-zinc-500">Demo Clinic</p>
-            <h1 className="text-2xl font-bold">{demoClinic.name}</h1>
-            <p className="text-sm text-zinc-600">
-              {demoClinic.speciality} | {demoClinic.location} | Owner:{' '}
-              {demoClinic.doctor}
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/login"
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100"
-            >
-              Exit Demo
-            </Link>
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white opacity-60"
-            >
-              Upgrade to Real Account
-            </button>
-          </div>
-        </header>
-
-        <div className="flex flex-wrap gap-2">
-          {(['dashboard', 'leads', 'whatsapp'] as const).map(tab => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                activeTab === tab
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100'
-              }`}
-            >
-              {tab === 'dashboard'
-                ? 'Dashboard'
-                : tab === 'leads'
-                  ? 'Leads'
-                  : 'WhatsApp'}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === 'dashboard' && (
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {demoStats.map(stat => (
-              <article
-                key={stat.label}
-                className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
-              >
-                <p className="text-sm text-zinc-500">{stat.label}</p>
-                <p className="mt-2 text-3xl font-bold">{stat.value}</p>
-                <p className="mt-3 text-xs font-medium text-emerald-600">
-                  {stat.trend}
-                </p>
-              </article>
-            ))}
-          </section>
-        )}
-
-        {activeTab === 'leads' && (
-          <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Preloaded Leads</h2>
-              <button
-                type="button"
-                disabled
-                className="cursor-not-allowed rounded-lg border border-zinc-300 px-3 py-2 text-sm opacity-60"
-              >
-                Add Lead
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[680px] text-left">
-                <thead>
-                  <tr className="border-b border-zinc-200 text-sm text-zinc-500">
-                    <th className="px-3 py-3">Name</th>
-                    <th className="px-3 py-3">Phone</th>
-                    <th className="px-3 py-3">Source</th>
-                    <th className="px-3 py-3">Stage</th>
-                    <th className="px-3 py-3">Last Contact</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {demoLeads.map(lead => (
-                    <tr key={lead.id} className="border-b border-zinc-100 text-sm">
-                      <td className="px-3 py-3 font-medium">{lead.name}</td>
-                      <td className="px-3 py-3">{lead.phone}</td>
-                      <td className="px-3 py-3">{lead.source}</td>
-                      <td className="px-3 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${stageStyle[lead.stage]}`}
-                        >
-                          {lead.stage}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-zinc-600">{lead.lastContact}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
-
-        {activeTab === 'whatsapp' && (
-          <section className="grid gap-4 lg:grid-cols-[300px_1fr]">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
-              <h2 className="mb-3 px-2 text-base font-semibold">Chats</h2>
-              <div className="space-y-1">
-                {demoLeads.map(lead => (
-                  <button
-                    key={lead.id}
-                    type="button"
-                    onClick={() => setSelectedLeadId(lead.id)}
-                    className={`w-full rounded-lg px-3 py-2 text-left ${
-                      selectedLead?.id === lead.id
-                        ? 'bg-zinc-900 text-white'
-                        : 'hover:bg-zinc-100'
-                    }`}
-                  >
-                    <p className="font-medium">{lead.name}</p>
-                    <p
-                      className={`text-xs ${
-                        selectedLead?.id === lead.id
-                          ? 'text-zinc-200'
-                          : 'text-zinc-500'
-                      }`}
-                    >
-                      {lead.phone}
-                    </p>
-                  </button>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+          {/* Content Section */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <span className="inline-block rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                Aura Vision Protocol
+              </span>
+              <h1 className="text-4xl font-black tracking-tight text-slate-900 lg:text-6xl dark:text-white">
+                Experience the <span className="text-emerald-600 dark:text-emerald-400">Future</span> of Clinic Automation.
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Text your phone number below. Our AI will instantly send you a sample **Patient Recall** message, just like your patients would receive.
+              </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold">
-                WhatsApp Thread: {selectedLead?.name}
-              </h3>
-              <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto rounded-xl bg-zinc-50 p-4">
-                {messages.map(message => (
-                  <div
-                    key={message.id}
-                    className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
-                      message.from === 'clinic'
-                        ? 'self-end bg-emerald-100 text-emerald-900'
-                        : 'self-start bg-white'
-                    }`}
-                  >
-                    <p>{message.text}</p>
-                    <p className="mt-1 text-[11px] text-zinc-500">{message.timestamp}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex gap-2">
-                <input
-                  disabled
-                  placeholder="Demo mode is read-only"
-                  className="w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-sm text-zinc-500"
-                />
+            <PageCard variant="default" className="border-emerald-100 bg-white/60 p-8 backdrop-blur-xl dark:border-emerald-900/20 dark:bg-slate-900/60">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">WhatsApp Number</label>
+                  <input
+                    required
+                    type="tel"
+                    placeholder="Ex: +91 99887 76655"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={cn(
+                      "w-full rounded-xl border border-slate-200 bg-white/50 px-5 py-4 text-lg transition-all",
+                      "focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none",
+                      "dark:border-slate-800 dark:bg-slate-950/50 dark:text-white"
+                    )}
+                  />
+                </div>
+                
                 <button
-                  type="button"
-                  disabled
-                  className="cursor-not-allowed rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white opacity-50"
+                  disabled={loading || success}
+                  type="submit"
+                  className={cn(
+                    "w-full rounded-xl px-6 py-4 text-lg font-black tracking-wide text-white transition-all active:scale-[0.98]",
+                    success 
+                      ? "bg-emerald-500 shadow-emerald-500/20" 
+                      : "bg-emerald-600 shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 hover:shadow-emerald-700/40",
+                    loading && "animate-pulse cursor-not-allowed opacity-70"
+                  )}
                 >
-                  Send
+                  {loading ? 'Sending AI Demo...' : success ? '✨ Message Sent!' : 'Get Live Demo Now'}
                 </button>
-              </div>
-            </div>
-          </section>
-        )}
+              </form>
+
+              {error && <p className="mt-4 text-center text-sm font-bold text-red-500">{error}</p>}
+              {success && (
+                <p className="mt-4 text-center text-sm font-medium text-emerald-600">
+                  Check your phone! You just recovered ₹2,500 in potential revenue.
+                </p>
+              )}
+            </PageCard>
+          </div>
+
+          {/* Phone Simulation Section */}
+          <div className="relative mx-auto h-[700px] w-[340px] perspective-1000 lg:mx-0">
+             <div className="absolute inset-0 rotate-y-[-10deg] rounded-[3rem] border-8 border-slate-900 bg-slate-900 shadow-2xl transition-transform hover:rotate-y-0">
+                {/* Screen Content Wrapper */}
+                <div className="h-full w-full overflow-hidden rounded-[2.5rem] bg-[#075e54]">
+                   {/* WhatsApp Header */}
+                   <div className="flex h-16 items-center bg-[#075e54]/90 px-6 pt-4 text-white">
+                      <div className="h-10 w-10 rounded-full bg-slate-200/20" />
+                      <div className="ml-3">
+                         <p className="text-xs font-bold leading-none">Kumars Dentistry (Aura AI)</p>
+                         <p className="text-[10px] opacity-70">Online</p>
+                      </div>
+                   </div>
+
+                   {/* Chat Bubble Area */}
+                   <div className="h-full bg-[#e5ddd5] p-4 text-[11px] leading-relaxed dark:bg-slate-800">
+                      <div className="mx-auto my-2 w-fit rounded-lg bg-emerald-100 px-3 py-1 text-center text-[9px] font-bold text-emerald-800/60 uppercase tracking-tighter">
+                         Today
+                      </div>
+                      
+                      <div className="mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                         <div className="max-w-[85%] rounded-lg bg-white p-3 shadow-sm dark:bg-slate-700">
+                            <p className="font-bold text-emerald-600">PatientFlow AI Demo</p>
+                            <p className="mt-1 text-slate-800 dark:text-slate-100">
+                               Hi Future Clinic Partner! 👋 This is how your patients will receive their recall reminders. Polished, professional, and automated.
+                            </p>
+                            <p className="mt-1 text-[9px] text-right text-slate-400">10:41 AM</p>
+                         </div>
+                      </div>
+
+                      {success && (
+                         <div className="mt-4 animate-in zoom-in-50 duration-500">
+                            <div className="max-w-[85%] rounded-lg bg-white p-3 shadow-sm border-l-4 border-emerald-500 dark:bg-slate-700">
+                               <p className="font-bold text-emerald-600">Appointment Reminder</p>
+                               <p className="mt-1 text-slate-800 dark:text-slate-100">
+                                  Hi Future Clinic Partner! It's been 6 months since your last cleaning. Would you like to schedule your microscopic dental checkup?
+                               </p>
+                               <div className="mt-2 rounded bg-emerald-50 p-1.5 text-center font-bold text-emerald-600 text-[10px]">
+                                  Reply 'BOOK' to schedule
+                               </div>
+                               <p className="mt-1 text-[9px] text-right text-slate-400">Just Now</p>
+                            </div>
+                         </div>
+                      )}
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </PageContainer>
   )
 }

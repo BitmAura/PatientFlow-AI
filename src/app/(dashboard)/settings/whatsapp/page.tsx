@@ -125,6 +125,15 @@ export default function WhatsAppSettingsPage() {
             </Card>
           )}
 
+          {/* ── BOT PERSONALITY TUNER (NEW) ────────────────────────── */}
+          {isConnected && !isLoading && (
+            <BotPersonalityTuner 
+              clinicId={data?.clinicId || ''} 
+              defaultPersonality={data?.bot_personality || 'professional'}
+              clinicName={data?.name || 'Kumars Dentistry'}
+            />
+          )}
+
           {/* ── SEND TEST MESSAGE (only when connected) ─────────────── */}
           {isConnected && !isLoading && (
             <Card>
@@ -377,5 +386,123 @@ function StatusRow({
         {value}
       </span>
     </div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Bot Personality Tuner Component
+   🚀 Persona: Founder/CEO & Frontend Developer
+   💎 Glassmorphism + Live Preview
+───────────────────────────────────────────────────────────────── */
+import { getBotPersonalityTone, BotPersonality } from '@/lib/ai/bot-personality'
+
+function BotPersonalityTuner({ 
+  clinicId, 
+  defaultPersonality,
+  clinicName 
+}: { 
+  clinicId?: string, 
+  defaultPersonality: BotPersonality,
+  clinicName: string 
+}) {
+  const [personality, setPersonality] = React.useState<BotPersonality>(defaultPersonality)
+  const [botName, setBotName] = React.useState('Aura AI')
+  const [loading, setLoading] = React.useState(false)
+  const { toast } = useToast()
+
+  const handleUpdate = async (p: BotPersonality) => {
+    setLoading(true)
+    setPersonality(p)
+    try {
+      const resp = await fetch('/api/whatsapp/personality', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ personality: p, botName })
+      })
+      if (!resp.ok) throw new Error('Failed to update personality')
+      toast({ title: 'AI Voice Updated', description: `Your bot is now in '${p}' mode.` })
+    } catch {
+      toast({ title: 'Update failed', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const tone = getBotPersonalityTone(personality, botName)
+  const sampleContent = "It has been 6 months since your last cleaning. Regular microscopic checkups are essential for preventing underlying issues."
+
+  return (
+    <Card className="border-emerald-100 bg-white/50 backdrop-blur-sm dark:border-emerald-900/20 dark:bg-slate-900/50">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Wifi className="h-4 w-4 text-emerald-600" />
+          AI Assistant Voice & Tone
+        </CardTitle>
+        <CardDescription>
+          Choose how your AI assistant introduces itself to your patients.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Personality Selector */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {(['professional', 'friendly', 'direct'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => handleUpdate(p)}
+              disabled={loading}
+              className={cn(
+                "flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
+                personality === p
+                  ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500/20 dark:bg-emerald-950/20"
+                  : "border-slate-200 bg-white hover:border-emerald-300 dark:border-slate-800 dark:bg-slate-950"
+              )}
+            >
+              <span className="text-sm font-bold capitalize text-slate-900 dark:text-white">{p}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Assistant Name */}
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-widest text-slate-500">Assistant Name</Label>
+          <Input 
+            value={botName}
+            onChange={(e) => setBotName(e.target.value)}
+            onBlur={() => handleUpdate(personality)}
+            placeholder="Ex: Aura AI, Doctor Bot"
+            className="h-10 border-slate-200 dark:border-slate-800"
+          />
+        </div>
+
+        {/* Live Preview (Medical Phone Simulation) */}
+        <div className="space-y-3">
+          <Label className="text-xs uppercase tracking-widest font-bold text-emerald-600">Live Preview (Patient View)</Label>
+          <div className="rounded-2xl bg-[#e5ddd5] p-5 shadow-inner dark:bg-slate-950/50 min-h-48 border border-slate-200 dark:border-slate-800">
+             <div className="mx-auto my-2 w-fit rounded-lg bg-emerald-100 px-3 py-1 text-[9px] font-bold text-emerald-800/60 uppercase">Today</div>
+             
+             <div className="mt-4 max-w-[90%] animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-800 ring-1 ring-black/5">
+                   <p className="text-[12px] leading-relaxed text-slate-800 dark:text-slate-100 italic opacity-60 mb-2">
+                     {tone.prefix} {clinicName}...
+                   </p>
+                   <p className="text-[13px] font-medium text-slate-900 dark:text-white">
+                     {sampleContent}
+                   </p>
+                   <p className="mt-3 text-[12px] text-slate-800 dark:text-slate-100 italic opacity-60">
+                     {tone.suffix}
+                   </p>
+                   <div className="mt-2 flex justify-end">
+                      <span className="text-[10px] text-slate-400">10:41 AM</span>
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground text-center">
+           💡 Tip: Use <strong className="text-emerald-600">Friendly</strong> mode to increase recall booking rates by up to 22%.
+        </p>
+      </CardContent>
+    </Card>
   )
 }

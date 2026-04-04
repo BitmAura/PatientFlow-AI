@@ -81,6 +81,33 @@ export default function RootLayout({
         <Providers>
           {children}
           <Analytics />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "How does PatientFlow AI reduce clinic no-shows?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "By using automated WhatsApp reminders and patient journey automation, clinics can reduce missed appointments by up to 60% compared to manual phone calls."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Is PatientFlow AI compliant with Indian medical regulations?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes, PatientFlow AI is designed for DISHA compliance (Digital Information Security in Healthcare Act) to ensure patient data privacy and secure communication for Indian clinics."
+                    }
+                  }
+                ]
+              })
+            }}
+          />
         </Providers>
       </body>
     </html>

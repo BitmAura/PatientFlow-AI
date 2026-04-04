@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { BotPersonality } from '@/lib/ai/bot-personality'
 
 export type WhatsAppStatus = {
   status: 'disconnected' | 'connecting' | 'connected' | 'expired' | 'active'
@@ -7,6 +8,9 @@ export type WhatsAppStatus = {
   lastActivity?: string | null
   phoneNumberId?: string | null
   provider?: string | null
+  clinicId?: string | null
+  bot_personality?: BotPersonality | null
+  name?: string | null
 }
 
 function normalizeWhatsAppStatus(payload: any): WhatsAppStatus {

@@ -49,9 +49,15 @@ export async function sendWhatsAppMessage(
 ): Promise<SendMessageResult> {
   const supabase = createClient() as any
 
-  const canSend = await checkRateLimit(clinicId)
-  if (!canSend) {
+  const canSendRateLimit = await checkRateLimit(clinicId)
+  if (!canSendRateLimit) {
     return { success: false, error: 'Rate limit exceeded', status: 'skipped' }
+  }
+
+  const { canClinicSendMessage } = await import('@/lib/billing/usage')
+  const canSendQuota = await canClinicSendMessage(clinicId)
+  if (!canSendQuota) {
+    return { success: false, error: 'Monthly quota exceeded (Profit Protection Activated)', status: 'skipped' }
   }
 
   const canSendByPlan = await clinicCanSend(clinicId)

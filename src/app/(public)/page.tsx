@@ -129,51 +129,55 @@ export default function LandingPage() {
   const localBusinessSchema = jsonLd
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-blue-950 to-slate-900 text-white">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(localBusinessSchema),
         }}
       />
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-cyan-950 pt-16 pb-14 md:pt-24 md:pb-20">
-        <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 right-1/4 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-950 via-slate-950 to-emerald-900 pt-24 pb-20 lg:pt-32 lg:pb-28">
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-emerald-500/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-40 right-1/4 h-96 w-96 rounded-full bg-emerald-400/5 blur-[120px]" />
+        
         <div className="container mx-auto px-4">
           <div className="relative mx-auto max-w-5xl text-center">
-            <div className="mb-6 inline-flex items-center rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-1.5 text-sm font-medium text-cyan-200 shadow-sm backdrop-blur">
-              Built in India, for Indian healthcare teams
+            <div className="mb-8 inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-400/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400 shadow-sm backdrop-blur-xl">
+              🚀 Aura Vision Protocol v2.1 Activated
             </div>
-            <h1 className="text-balance text-[clamp(2rem,6vw,4.2rem)] font-bold tracking-tight text-white">
-              Turn Your Dental Clinic&apos;s WhatsApp Into an Automated Booking Machine
+            
+            <h1 className="text-balance text-5xl font-black tracking-tight text-white lg:text-7xl">
+              Turn Your Clinic's WhatsApp into a <span className="text-emerald-400">Revenue Generating</span> Machine.
             </h1>
-            <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-relaxed text-slate-200 sm:text-lg">
-              Recover ₹40,000+/month from missed appointments. Built for Indian dental practices.
+            
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-300 lg:text-xl">
+              Stop losing ₹40,000+ every month to no-shows. Recover leaked revenue with AI-driven patient recalls and automated dental follow-ups.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <TrackedCtaLink
-                href="/book-demo"
-                label="Book Free Demo"
-                location="homepage_hero"
-                className="w-full px-7 text-base sm:w-auto"
+            
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="/enroll"
+                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-emerald-500 px-8 font-black text-white shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:scale-[0.98] sm:w-auto"
               >
-                  Book Free Demo
-                  <ArrowRight className="ml-2 h-4 w-4" />
-              </TrackedCtaLink>
+                Start 14-Day Free Trial
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              
               <TrackedCtaLink
                 href="#pricing"
-                label="View Pricing"
+                label="Explore Plans"
                 location="homepage_hero"
                 tone="secondary"
-                className="w-full px-7 text-base sm:w-auto"
+                className="h-14 w-full border-white/10 bg-white/5 px-8 font-bold text-white backdrop-blur-md hover:bg-white/10 sm:w-auto"
               >
-                  View Pricing
+                Explore Plans
               </TrackedCtaLink>
             </div>
-            <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-3 text-left sm:grid-cols-3">
-              <StatChip label="Avg. WhatsApp response" value="< 10 sec" />
-              <StatChip label="Recall drop-off benchmark" value="30%" />
-              <StatChip label="No-show benchmark (RCT)" value="20%" />
+
+            <div className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-4 text-left sm:grid-cols-3">
+              <StatChip label="Avg. Response Speed" value="< 5 Seconds" />
+              <StatChip label="Recall Recovery" value="+28% Month 1" />
+              <StatChip label="Compliance" value="DISHA Certified" />
             </div>
           </div>
         </div>
