@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, Phone, ChevronRight, ExternalLink } from 'lucide-react'
+import { Menu, X, Phone, ChevronRight, ExternalLink, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import { useTrackCta } from '@/hooks/use-track-cta'
+import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils/cn'
 
 interface UnifiedHeaderProps {
@@ -74,6 +75,7 @@ export function UnifiedHeader({
     ? `https://wa.me/${whatsappSalesNumber.replace(/\D/g, '')}`
     : null
 
+  const { signOut } = useAuth()
   const isApp = variant === 'app'
 
   return (
@@ -164,6 +166,19 @@ export function UnifiedHeader({
                 </TwentyOneButton>
               </Link>
             )}
+
+            {isApp && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => signOut()}
+                className="hidden md:inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+              >
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               size="sm"
@@ -214,6 +229,19 @@ export function UnifiedHeader({
                     Login to Dashboard
                   </Link>
                 </>
+              )}
+
+              {isApp && (
+                <button
+                  onClick={() => { setIsMenuOpen(false); signOut() }}
+                  className="flex items-center justify-between rounded-lg px-3 py-3 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <LogOut className="h-5 w-5" />
+                    <span className="font-bold">Sign Out</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-50" />
+                </button>
               )}
             </nav>
           </div>
