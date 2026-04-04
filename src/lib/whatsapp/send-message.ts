@@ -93,7 +93,8 @@ export async function sendWhatsAppMessage(
 
   const useGupshup =
     sessionData.provider === 'gupshup' ||
-    (sessionData.appId && (sessionData.apiKey || gupshupConfig.appToken))
+    (sessionData.appId && (sessionData.apiKey || gupshupConfig.appToken)) ||
+    (isPublicDemo && gupshupConfig.appId && gupshupConfig.appToken)
 
   if (useGupshup) {
     return sendViaGupshup(supabase, clinicId, cleanPhone, content, metadata, sessionData)
