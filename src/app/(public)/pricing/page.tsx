@@ -128,7 +128,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link href="/enroll" onClick={() => trackCta('Start Free Trial', `pricing_plan_${plan.planId}`, '/enroll')}>
+                <Link href={`/signup?plan=${plan.planId}`} onClick={() => trackCta('Start Free Trial', `pricing_plan_${plan.planId}`, `/signup?plan=${plan.planId}`)}>
                   <Button 
                     className={cn(
                       "w-full h-16 rounded-2xl text-base font-black transition-all active:scale-[0.98]",
@@ -232,7 +232,7 @@ export default function PricingPage() {
           <p className="mb-12 text-lg font-bold text-slate-400">
             No credit card. No commitments. Pure patient flow growth.
           </p>
-          <Link href="/enroll">
+          <Link href="/signup">
             <Button size="lg" className="h-16 rounded-2xl bg-emerald-500 px-12 text-lg font-black text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-[0.98]">
               Begin Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />

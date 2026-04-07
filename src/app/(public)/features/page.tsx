@@ -123,7 +123,7 @@ export default function FeaturesPage() {
             <p className="mb-12 text-lg font-bold text-slate-500 dark:text-slate-400">
               Join the elite clinics using PatientFlow AI to achieve 100% operational efficiency.
             </p>
-            <Link href="/enroll">
+            <Link href="/signup">
               <Button size="lg" className="h-16 rounded-[20px] bg-emerald-500 px-12 text-lg font-black text-white shadow-xl shadow-emerald-500/30 hover:bg-emerald-600 active:scale-[0.98] transition-all">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />

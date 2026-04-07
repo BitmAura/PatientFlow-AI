@@ -108,7 +108,7 @@ export function RoiCalculator() {
                 Bar shows your current no-show pressure. Lowering this directly recovers booked revenue.
               </p>
 
-              <Link href="/book-demo" className="mt-6 block" onClick={() => trackCta('Get This ROI for Your Clinic', 'roi_calculator', '/book-demo')}>
+              <Link href="/login?next=/dashboard/billing" className="mt-6 block" onClick={() => trackCta('Get This ROI for Your Clinic', 'roi_calculator', '/login?next=/dashboard/billing')}>
                 <TwentyOneButton className="w-full">Get This ROI for Your Clinic</TwentyOneButton>
               </Link>
             </div>

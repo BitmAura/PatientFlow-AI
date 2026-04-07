@@ -67,7 +67,7 @@ export function UnifiedHeader({
     tagline: 'Clinical Revenue Engine for Modern Indian Practices.',
     primaryColor: 'emerald',
     ctaText: 'Start Free Trial',
-    ctaHref: '/enroll',
+    ctaHref: '/signup',
   }
 
   const whatsappSalesNumber = process.env.NEXT_PUBLIC_WHATSAPP_SALES_NUMBER
@@ -251,9 +251,9 @@ export function UnifiedHeader({
       {!isApp && (
         <div className="border-t border-emerald-100 bg-white px-4 py-2 dark:border-emerald-900/50 dark:bg-slate-950/95 md:hidden">
           <div className="mx-auto flex w-full max-w-7xl gap-2">
-            <Link href={config.ctaHref} className="flex-1" onClick={() => trackCta('Book Demo', 'header_mobile_sticky', config.ctaHref)}>
+            <Link href="/login?next=/dashboard/billing" className="flex-1" onClick={() => trackCta('Subscribe now', 'header_mobile_sticky', '/login?next=/dashboard/billing')}>
               <TwentyOneButton className="w-full" type="button">
-                Book Demo
+                Subscribe now
               </TwentyOneButton>
             </Link>
             {whatsappHref && (

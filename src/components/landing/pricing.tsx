@@ -22,7 +22,7 @@ export function Pricing() {
         'Dental consultation links + reminders',
         'Basic analytics dashboard',
       ],
-      cta: 'Book Free Demo',
+      cta: 'Subscribe now',
       featured: false,
     },
     {
@@ -36,7 +36,7 @@ export function Pricing() {
         'Recall + no-show prevention flows',
         'Conversion and staff performance tracking',
       ],
-      cta: 'Book Free Demo',
+      cta: 'Subscribe now',
       featured: true,
     },
     {
@@ -50,7 +50,7 @@ export function Pricing() {
         'Priority onboarding and support',
         'Custom integrations and reporting',
       ],
-      cta: 'Book Free Demo',
+      cta: 'Subscribe now',
       featured: false,
     },
   ]
@@ -128,7 +128,7 @@ function PricingCard({
       </ul>
       <div className="mt-auto">
         <TrackedCtaLink
-          href="/book-demo"
+          href="/login?next=/dashboard/billing"
           label={cta}
           location={`homepage_pricing_${name.toLowerCase()}`}
           tone={featured ? 'primary' : 'secondary'}

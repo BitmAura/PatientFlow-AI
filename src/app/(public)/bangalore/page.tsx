@@ -25,8 +25,8 @@ export default function BangalorePage() {
             <li>Confirm high-value procedures faster over WhatsApp</li>
           </ul>
         </div>
-        <Link href="/book-demo" className="mt-8 inline-block">
-          <TwentyOneButton>Book Demo for Bangalore Clinic</TwentyOneButton>
+        <Link href="/login?next=/dashboard/billing" className="mt-8 inline-block">
+          <TwentyOneButton>Subscribe now</TwentyOneButton>
         </Link>
       </div>
     </div>

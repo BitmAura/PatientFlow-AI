@@ -34,7 +34,7 @@ export function Hero() {
           
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/enroll"
+              href="/signup"
               className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-2xl bg-emerald-500 px-8 font-black text-white shadow-xl shadow-emerald-500/20 transition-all hover:bg-emerald-600 active:scale-[0.98] sm:w-auto"
             >
               Start 14-Day Free Trial

@@ -128,7 +128,7 @@ export default function HowItWorksPage() {
                 Performance Activation
             </div>
             <h2 className="mb-8 text-3xl font-black text-slate-900 sm:text-5xl dark:text-white">Ready for 100% Patient Flow?</h2>
-            <Link href="/enroll">
+            <Link href="/signup">
               <Button size="lg" className="h-16 rounded-2xl bg-emerald-500 px-10 text-lg font-black text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 transition-all active:scale-[0.98]">
                 Start 14-Day Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />

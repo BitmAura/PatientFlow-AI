@@ -107,17 +107,17 @@ export default function LandingPage() {
             
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <TrackedCtaLink
-                href="/book-demo"
-                label="Book Free Demo"
+                href="/login?next=/dashboard/billing"
+                label="Subscribe now"
                 location="homepage_bottom_cta"
                 className="h-16 w-full px-10 text-base font-black sm:w-auto"
               >
-                  Book Free Demo
+                  Subscribe now
                   <ArrowRight className="ml-2 h-5 w-5" />
               </TrackedCtaLink>
               
               <TrackedCtaLink
-                href="/enroll"
+                href="/signup"
                 label="Start Free Trial"
                 location="homepage_bottom_cta_secondary"
                 tone="secondary"

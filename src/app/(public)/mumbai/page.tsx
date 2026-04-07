@@ -25,8 +25,8 @@ export default function MumbaiPage() {
             <li>Clear ROI tracking with INR-based reporting</li>
           </ul>
         </div>
-        <Link href="/book-demo" className="mt-8 inline-block">
-          <TwentyOneButton>Book Demo for Mumbai Clinic</TwentyOneButton>
+        <Link href="/login?next=/dashboard/billing" className="mt-8 inline-block">
+          <TwentyOneButton>Subscribe now</TwentyOneButton>
         </Link>
       </div>
     </div>

@@ -78,7 +78,7 @@ export default function IntegrationsPage() {
                   {item.description}
                 </p>
                 <Button variant="outline" className="w-full justify-between group" asChild>
-                  <Link href="/book-demo">
+                  <Link href="/login?next=/dashboard/billing">
                     Connect
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
@@ -99,7 +99,7 @@ export default function IntegrationsPage() {
             We are constantly adding new integrations. Contact our support team to request a specific integration for your clinic.
           </p>
           <Button size="lg" variant="secondary" className="h-14 rounded-full px-8" asChild>
-            <Link href="/book-demo">Request Integration</Link>
+            <Link href="/login?next=/dashboard/billing">Request Integration</Link>
           </Button>
         </div>
       </section>

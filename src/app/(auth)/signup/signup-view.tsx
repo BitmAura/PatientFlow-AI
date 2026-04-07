@@ -45,7 +45,7 @@ export function SignupView() {
           <p className="mt-2 text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link
-              href="/login"
+              href={`/login${searchParams?.get('next') ? `?next=${encodeURIComponent(searchParams.get('next') || '')}` : ''}`}
               className="font-medium text-primary transition-colors hover:text-primary/90"
             >
               Log in

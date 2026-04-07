@@ -36,8 +36,8 @@ export function WhatsAppFlow() {
               ))}
             </div>
             <div className="mt-10">
-              <TrackedCtaLink href="/book-demo" label="Book Free Demo" location="homepage_solution" className="h-14 px-8 text-base font-black">
-                  Book Free Demo
+              <TrackedCtaLink href="/login?next=/dashboard/billing" label="Subscribe now" location="homepage_solution" className="h-14 px-8 text-base font-black">
+                  Subscribe now
                   <ArrowRight className="ml-2 h-5 w-5" />
               </TrackedCtaLink>
             </div>

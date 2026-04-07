@@ -4,8 +4,11 @@ import { LoginForm } from '@/components/auth/login-form'
 import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
+import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
+  const nextParam = searchParams?.get('next') || ''
   return (
     <div className="mx-auto w-full max-w-lg">
       <GlassCard className="p-8 md:p-10">
@@ -16,7 +19,7 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             New to PatientFlow AI for clinics?{' '}
             <Link
-              href="/signup"
+              href={`/signup${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`}
               className="font-medium text-primary transition-colors hover:text-primary/90"
             >
               Create an account
