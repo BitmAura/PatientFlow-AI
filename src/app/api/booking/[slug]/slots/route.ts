@@ -2,7 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { generateTimeSlots } from '@/lib/utils/generate-time-slots'
 import { startOfDay, endOfDay, getDay } from 'date-fns'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 
 const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -11,7 +11,7 @@ export async function GET(
   context: any
 ) {
   const ip = getClientIp(request)
-  const limiter = checkRateLimit(`booking-slots:${ip}`, 180, 60_000)
+  const limiter = await checkRateLimitAsync(`booking-slots:${ip}`, 180, 60_000)
   if (!limiter.allowed) {
     return NextResponse.json(
       { error: 'Too many requests. Please retry shortly.' },

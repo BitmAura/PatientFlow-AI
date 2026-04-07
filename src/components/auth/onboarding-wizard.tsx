@@ -4,16 +4,28 @@ import * as React from 'react'
 import { ClinicDetailsStep } from './onboarding-steps/clinic-details-step'
 import { AddressStep } from './onboarding-steps/address-step'
 import { WhatsAppStep } from './onboarding-steps/whatsapp-step'
+import { FirstDoctorStep } from './onboarding-steps/first-doctor-step'
+import { FirstServiceStep } from './onboarding-steps/first-service-step'
 import { CompleteStep } from './onboarding-steps/complete-step'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils/cn'
-import { CheckCircle2, Building2, MapPin, MessageCircle, Sparkles } from 'lucide-react'
+import {
+  CheckCircle2,
+  Building2,
+  MapPin,
+  MessageCircle,
+  UserRound,
+  Stethoscope,
+  Sparkles,
+} from 'lucide-react'
 
 const STEPS = [
-  { id: 'details',   title: 'Clinic Details',   icon: Building2,    description: 'Basic info about your clinic' },
-  { id: 'address',   title: 'Address',           icon: MapPin,       description: 'Location & contact details' },
-  { id: 'whatsapp',  title: 'Connect WhatsApp',  icon: MessageCircle, description: 'Activate automated reminders' },
-  { id: 'complete',  title: 'All Done!',         icon: Sparkles,     description: 'You\'re ready to go' },
+  { id: 'details',   title: 'Clinic',       icon: Building2,     description: 'Basic info about your clinic' },
+  { id: 'address',   title: 'Location',     icon: MapPin,        description: 'Address & contact details' },
+  { id: 'whatsapp',  title: 'WhatsApp',     icon: MessageCircle, description: 'Activate automated reminders' },
+  { id: 'doctor',    title: 'First Doctor', icon: UserRound,     description: 'Add your first doctor' },
+  { id: 'service',   title: 'First Service',icon: Stethoscope,   description: 'Add a service to book' },
+  { id: 'complete',  title: 'All Done!',    icon: Sparkles,      description: 'You\'re ready to go' },
 ]
 
 export function OnboardingWizard() {
@@ -29,6 +41,10 @@ export function OnboardingWizard() {
 
   const handleBack = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0))
+  }
+
+  const handleSkip = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1))
   }
 
   return (
@@ -95,7 +111,9 @@ export function OnboardingWizard() {
         {/* Step label + progress bar */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{STEPS[currentStep].title}</span>
-          <span className="text-xs">{STEPS[currentStep].description}</span>
+          <span className="text-xs">
+            Step {currentStep + 1} of {STEPS.length} &mdash; {STEPS[currentStep].description}
+          </span>
         </div>
         <Progress value={progress} className="h-1.5" />
       </div>
@@ -103,30 +121,32 @@ export function OnboardingWizard() {
       {/* Step Content */}
       <div className="rounded-2xl border bg-card p-6 shadow-sm">
         {currentStep === 0 && (
-          <ClinicDetailsStep
-            onNext={handleNext}
-            defaultValues={formData}
-          />
+          <ClinicDetailsStep onNext={handleNext} defaultValues={formData} />
         )}
         {currentStep === 1 && (
-          <AddressStep
-            onBack={handleBack}
-            onNext={handleNext}
-            defaultValues={formData}
-          />
+          <AddressStep onBack={handleBack} onNext={handleNext} defaultValues={formData} />
         )}
         {currentStep === 2 && (
-          <WhatsAppStep
+          <WhatsAppStep onBack={handleBack} onNext={handleNext} defaultValues={formData} />
+        )}
+        {currentStep === 3 && (
+          <FirstDoctorStep
             onBack={handleBack}
             onNext={handleNext}
+            onSkip={handleSkip}
             defaultValues={formData}
           />
         )}
-        {currentStep === 3 && (
-          <CompleteStep
+        {currentStep === 4 && (
+          <FirstServiceStep
             onBack={handleBack}
-            formData={formData}
+            onNext={handleNext}
+            onSkip={handleSkip}
+            defaultValues={formData}
           />
+        )}
+        {currentStep === 5 && (
+          <CompleteStep onBack={handleBack} formData={formData} />
         )}
       </div>
     </div>

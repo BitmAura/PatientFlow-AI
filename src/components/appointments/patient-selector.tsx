@@ -24,7 +24,7 @@ import { useClinicStore } from '@/stores/clinic-store'
 
 interface PatientSelectorProps {
   value?: string
-  onSelect: (patientId: string) => void
+  onSelect: (patientId: string, patient: any) => void
   onCreateNew?: () => void
 }
 
@@ -105,7 +105,8 @@ export function PatientSelector({ value, onSelect, onCreateNew }: PatientSelecto
                   key={patient.id}
                   value={patient.id}
                   onSelect={(currentValue) => {
-                    onSelect(currentValue)
+                    const found = (patients as any[])?.find((p: any) => p.id === currentValue)
+                    onSelect(currentValue, found)
                     setOpen(false)
                   }}
                 >

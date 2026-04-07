@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   // 3. Process Each Clinic
   for (const clinic of safeClinics) {
     try {
-      const result = await processDailyRecalls(clinic.id, supabase as any)
+      const result = await processDailyRecalls(clinic.id, supabase as any, clinic.name)
       results.push({ clinic: clinic.name, ...result })
     } catch (e) {
       console.error(`Error processing clinic ${clinic.name}:`, e);

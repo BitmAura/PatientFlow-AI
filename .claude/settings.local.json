@@ -15,7 +15,11 @@
       "Bash(xargs wc:*)",
       "Bash(npm install:*)",
       "Bash(node -e \"require\\('resend'\\)\")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(grep -A 50 \"CREATE TABLE.*staff\" /p/aura-digital-services/supabase/migrations/*.sql)",
+      "Bash(grep -r \"CREATE TABLE\" /p/aura-digital-services/supabase/migrations/*.sql)",
+      "Bash(ls -lt /p/aura-digital-services/supabase/migrations/*.sql)",
+      "Bash(ls /p/aura-digital-services/supabase/migrations/*.sql)"
     ]
   }
 }

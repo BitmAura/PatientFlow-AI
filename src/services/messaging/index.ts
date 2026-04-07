@@ -22,6 +22,8 @@ function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {}
 }
 
+import { parseWhatsAppSession, getApiKeyFromSession, getPhoneNumberIdFromSession } from '@/lib/whatsapp/session'
+
 function getProvider(provider: MessagingProviderType): MessagingProvider {
   return providers[provider]
 }
@@ -40,16 +42,17 @@ async function getClinicConfig(clinicId: string): Promise<ClinicMessagingConfig>
       (providerConfig.provider === 'meta' || providerConfig.provider === 'meta_cloud'
         ? 'meta'
         : 'gupshup') as MessagingProviderType
+    const parsed = parseWhatsAppSession(cfgCredentials)
     return {
       clinicId,
       provider,
       phoneNumber: String(providerConfig.phone_number || ''),
-      appId: String(cfgCredentials.appId || process.env.GUPSHUP_APP_ID || ''),
-      apiKey: String(cfgCredentials.apiKey || process.env.GUPSHUP_API_KEY || process.env.GUPSHUP_APP_TOKEN || ''),
-      phoneNumberId: String(cfgCredentials.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || ''),
-      accessToken: String(cfgCredentials.accessToken || process.env.WHATSAPP_API_KEY || ''),
-      verifyToken: String(cfgCredentials.verifyToken || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || ''),
-      webhookSecret: String(cfgCredentials.webhookSecret || process.env.GUPSHUP_WEBHOOK_SECRET || ''),
+      appId: String(parsed?.appId || cfgCredentials.appId || process.env.GUPSHUP_APP_ID || ''),
+      apiKey: String(getApiKeyFromSession(parsed) || cfgCredentials.apiKey || process.env.GUPSHUP_API_KEY || process.env.GUPSHUP_APP_TOKEN || ''),
+      phoneNumberId: String(getPhoneNumberIdFromSession(parsed) || cfgCredentials.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || ''),
+      accessToken: String(parsed?.access_token || cfgCredentials.accessToken || process.env.WHATSAPP_API_KEY || ''),
+      verifyToken: String(parsed?.verify_token || cfgCredentials.verifyToken || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || ''),
+      webhookSecret: String(parsed?.webhook_secret || cfgCredentials.webhookSecret || process.env.GUPSHUP_WEBHOOK_SECRET || ''),
       rawSessionData: cfgCredentials,
     }
   }
@@ -61,6 +64,7 @@ async function getClinicConfig(clinicId: string): Promise<ClinicMessagingConfig>
     .maybeSingle()
 
   const raw = asRecord(connection?.session_data)
+  const parsed = parseWhatsAppSession(raw)
   const provider =
     (raw.provider === 'gupshup'
       ? 'gupshup'
@@ -71,13 +75,13 @@ async function getClinicConfig(clinicId: string): Promise<ClinicMessagingConfig>
   return {
     clinicId,
     provider,
-    phoneNumber: String(raw.phone_number || raw.verified_number || ''),
-    appId: String(raw.appId || process.env.GUPSHUP_APP_ID || ''),
-    apiKey: String(raw.apiKey || process.env.GUPSHUP_API_KEY || process.env.GUPSHUP_APP_TOKEN || ''),
-    phoneNumberId: String(raw.phone_number_id || raw.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || ''),
-    accessToken: String(raw.access_token || process.env.WHATSAPP_API_KEY || ''),
-    verifyToken: String(raw.verify_token || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || ''),
-    webhookSecret: String(raw.webhook_secret || process.env.GUPSHUP_WEBHOOK_SECRET || ''),
+    phoneNumber: String(parsed?.phone_number || raw.verified_number || ''),
+    appId: String(parsed?.appId || raw.appId || process.env.GUPSHUP_APP_ID || ''),
+    apiKey: String(getApiKeyFromSession(parsed) || raw.appKey || process.env.GUPSHUP_API_KEY || process.env.GUPSHUP_APP_TOKEN || ''),
+    phoneNumberId: String(getPhoneNumberIdFromSession(parsed) || raw.phone_number_id || raw.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || ''),
+    accessToken: String(parsed?.access_token || raw.access_token || process.env.WHATSAPP_API_KEY || ''),
+    verifyToken: String(parsed?.verify_token || raw.verify_token || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || ''),
+    webhookSecret: String(parsed?.webhook_secret || raw.webhook_secret || process.env.GUPSHUP_WEBHOOK_SECRET || ''),
     rawSessionData: raw,
   }
 }

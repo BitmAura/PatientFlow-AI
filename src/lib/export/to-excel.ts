@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 function normalizeRows(data: any): Array<Record<string, any>> {
   if (Array.isArray(data)) {
@@ -33,33 +33,46 @@ function normalizeRows(data: any): Array<Record<string, any>> {
 
 export async function exportToExcel(data: any[], filename: string): Promise<Blob> {
   const rows = normalizeRows(data)
-  const workbook = XLSX.utils.book_new()
-  const sheet = XLSX.utils.json_to_sheet(rows)
-  XLSX.utils.book_append_sheet(workbook, sheet, 'Export')
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Export')
 
-  const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-  return new Blob([xlsxBuffer], {
+  if (rows.length > 0) {
+    const keys = Object.keys(rows[0])
+    worksheet.columns = keys.map((k) => ({ header: k, key: k }))
+    rows.forEach((r) => worksheet.addRow(r))
+  } else {
+    worksheet.addRow({ value: '' })
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  return new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   })
 }
 
 export async function generateReportExcel(reportType: string, data: any, dateRange: any): Promise<Blob> {
   const rows = normalizeRows(data)
-  const workbook = XLSX.utils.book_new()
+  const workbook = new ExcelJS.Workbook()
 
-  const summarySheet = XLSX.utils.aoa_to_sheet([
+  const summarySheet = workbook.addWorksheet('Summary')
+  summarySheet.addRows([
     ['Report Type', reportType],
     ['From', dateRange?.from ? new Date(dateRange.from).toISOString() : '-'],
     ['To', dateRange?.to ? new Date(dateRange.to).toISOString() : '-'],
     ['Generated At', new Date().toISOString()],
   ])
-  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
 
-  const dataSheet = XLSX.utils.json_to_sheet(rows)
-  XLSX.utils.book_append_sheet(workbook, dataSheet, 'Data')
+  const dataSheet = workbook.addWorksheet('Data')
+  if (rows.length > 0) {
+    const keys = Object.keys(rows[0])
+    dataSheet.columns = keys.map((k) => ({ header: k, key: k }))
+    rows.forEach((r) => dataSheet.addRow(r))
+  } else {
+    dataSheet.addRow({ value: '' })
+  }
 
-  const xlsxBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-  return new Blob([xlsxBuffer], {
+  const buffer = await workbook.xlsx.writeBuffer()
+  return new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   })
 }

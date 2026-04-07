@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import { verifyOTP, createPortalSession } from '@/lib/portal/session'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
   const { phone, otp } = await request.json()
   const ip = getClientIp(request)
 
-  const ipLimiter = checkRateLimit(`portal-verify-otp:ip:${ip}`, 30, 60_000)
+  const ipLimiter = await checkRateLimitAsync(`portal-verify-otp:ip:${ip}`, 30, 60_000)
   if (!ipLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many verification attempts. Please try again later.' },
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
-  const phoneLimiter = checkRateLimit(`portal-verify-otp:phone:${phone}`, 10, 10 * 60_000)
+  const phoneLimiter = await checkRateLimitAsync(`portal-verify-otp:phone:${phone}`, 10, 10 * 60_000)
   if (!phoneLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many OTP verification attempts for this number.' },

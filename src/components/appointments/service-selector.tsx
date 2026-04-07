@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 interface ServiceSelectorProps {
   value?: string
-  onSelect: (serviceId: string) => void
+  onSelect: (serviceId: string, service: any) => void
 }
 
 export function ServiceSelector({ value, onSelect }: ServiceSelectorProps) {
@@ -47,7 +47,7 @@ export function ServiceSelector({ value, onSelect }: ServiceSelectorProps) {
             "cursor-pointer transition-all hover:border-primary",
             value === service.id ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
           )}
-          onClick={() => onSelect(service.id)}
+          onClick={() => onSelect(service.id, service)}
         >
           <CardContent className="p-4 flex justify-between items-center">
             <div>

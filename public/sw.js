@@ -35,19 +35,43 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
-
-  // API requests: Stale-while-revalidate
+  // API requests: Only apply caching to safe GET requests.
+  // Avoid caching POST/PUT/DELETE to prevent storing sensitive data or
+  // causing inconsistent state. For non-GET requests, use network-first
+  // and fall back to the offline page on failure.
   if (url.pathname.startsWith('/api/')) {
+    if (request.method !== 'GET') {
+      event.respondWith(
+        fetch(request).catch(() => caches.match('/offline'))
+      )
+      return
+    }
+
+    // For GET requests, use stale-while-revalidate but only cache
+    // successful responses. Protect against caching non-OK responses.
     event.respondWith(
       caches.open(DYNAMIC_CACHE).then((cache) => {
         return cache.match(request).then((cachedResponse) => {
-          const fetchPromise = fetch(request).then((networkResponse) => {
-            cache.put(request, networkResponse.clone())
-            return networkResponse
-          })
+          const fetchPromise = fetch(request)
+            .then((networkResponse) => {
+              try {
+                if (networkResponse && networkResponse.ok) {
+                  // Only cache successful GET responses
+                  cache.put(request, networkResponse.clone())
+                }
+              } catch (err) {
+                // Ignore cache put errors (e.g. non-cacheable requests)
+              }
+              return networkResponse
+            })
+            .catch(() => {
+              // Network failed; prefer cachedResponse if available
+              return cachedResponse || Promise.reject('network-error')
+            })
+
           return cachedResponse || fetchPromise
         })
-      })
+      }).catch(() => fetch(request))
     )
     return
   }

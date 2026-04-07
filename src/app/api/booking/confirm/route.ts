@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase/server'
 import { confirmBookingSchema } from '@/lib/validations/booking'
 import { getPaymentDetails, verifyPaymentSignature, isPaymentSuccessful } from '@/services/payment'
 import { z } from 'zod'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
 
@@ -35,7 +35,7 @@ const confirmBookingWithPaymentSchema = confirmBookingSchema.extend({
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
-    const limiter = checkRateLimit(`booking-confirm:${ip}`, 6, 60_000)
+    const limiter = await checkRateLimitAsync(`booking-confirm:${ip}`, 6, 60_000)
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: 'Too many booking confirmation attempts. Please retry shortly.' },

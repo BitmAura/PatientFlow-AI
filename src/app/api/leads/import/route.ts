@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 
 export async function POST(request: Request) {
@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const supabase = createClient()
   const ip = getClientIp(request)
 
-  const ipLimiter = checkRateLimit(`leads-import:ip:${ip}`, 10, 60_000)
+  const ipLimiter = await checkRateLimitAsync(`leads-import:ip:${ip}`, 10, 60_000)
   if (!ipLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many import attempts. Please retry shortly.' },
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const userLimiter = checkRateLimit(`leads-import:user:${user.id}`, 5, 10 * 60_000)
+  const userLimiter = await checkRateLimitAsync(`leads-import:user:${user.id}`, 5, 10 * 60_000)
   if (!userLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many imports by this account. Please wait and retry.' },

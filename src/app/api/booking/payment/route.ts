@@ -16,7 +16,7 @@
 import { NextResponse } from 'next/server'
 import { createPaymentOrder } from '@/services/payment'
 import { z } from 'zod'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 
 const createPaymentOrderSchema = z.object({
@@ -31,7 +31,7 @@ const createPaymentOrderSchema = z.object({
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
-    const limiter = checkRateLimit(`booking-payment:${ip}`, 10, 60_000)
+    const limiter = await checkRateLimitAsync(`booking-payment:${ip}`, 10, 60_000)
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: 'Too many payment attempts. Please retry shortly.' },

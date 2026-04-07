@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic'
 
 type ClinicDetails = { name: string; description?: string; phone: string; email: string; website?: string }
 type Address = { addressLine1: string; addressLine2?: string; city: string; state: string; postalCode: string; country: string }
+type DoctorData = { doctorName: string; doctorPhone: string; doctorEmail?: string; qualification?: string }
+type ServiceData = { serviceName: string; servicePrice: string; serviceDuration: string }
 
 /**
  * POST /api/onboarding/complete
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: { clinic?: ClinicDetails; address?: Address }
+  let body: { clinic?: ClinicDetails; address?: Address; doctor?: DoctorData; service?: ServiceData }
   try {
     body = await req.json()
   } catch {
@@ -33,6 +35,8 @@ export async function POST(req: NextRequest) {
 
   const clinicPayload = body.clinic
   const addressPayload = body.address
+  const doctorPayload = body.doctor
+  const servicePayload = body.service
 
   if (!clinicPayload?.name || !clinicPayload?.phone || !clinicPayload?.email) {
     return NextResponse.json(
@@ -116,6 +120,50 @@ export async function POST(req: NextRequest) {
   if (staffError) {
     console.error('Onboarding: staff insert failed', staffError)
     return NextResponse.json({ error: 'Failed to link you to the clinic' }, { status: 500 })
+  }
+
+  // 4. Seed demo patients so new users see a non-empty dashboard
+  const demoPatients = [
+    { full_name: 'Priya Sharma (Demo)', phone: '9000000001', email: 'priya.demo@example.com', lifecycle_stage: 'active', whatsapp_opt_in: true },
+    { full_name: 'Rahul Verma (Demo)',  phone: '9000000002', email: 'rahul.demo@example.com', lifecycle_stage: 'inactive', whatsapp_opt_in: true },
+    { full_name: 'Anita Patel (Demo)',  phone: '9000000003', email: 'anita.demo@example.com', lifecycle_stage: 'new', whatsapp_opt_in: false },
+  ]
+  for (const p of demoPatients) {
+    await admin.from('patients').insert({
+      clinic_id: clinic.id,
+      ...p,
+      tags: ['demo'],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as any).select('id').single()
+  }
+
+  // 5. Create first doctor (optional — from wizard step)
+  if (doctorPayload?.doctorName && doctorPayload?.doctorPhone) {
+    await admin
+      .from('doctors')
+      .insert({
+        clinic_id: clinic.id,
+        name: doctorPayload.doctorName,
+        phone: `+91${doctorPayload.doctorPhone}`,
+        email: doctorPayload.doctorEmail || null,
+        qualification: doctorPayload.qualification || null,
+        is_active: true,
+      } as any)
+  }
+
+  // 6. Create first service (optional)
+  if (servicePayload?.serviceName && servicePayload?.servicePrice) {
+    await admin
+      .from('services')
+      .insert({
+        clinic_id: clinic.id,
+        name: servicePayload.serviceName,
+        price: parseFloat(servicePayload.servicePrice),
+        duration: parseInt(servicePayload.serviceDuration || '30', 10),
+        is_active: true,
+        display_order: 1,
+      } as any)
   }
 
   return NextResponse.json({ success: true, clinicId: clinic.id })

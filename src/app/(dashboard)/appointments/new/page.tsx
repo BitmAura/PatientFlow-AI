@@ -32,7 +32,9 @@ export default function CreateAppointmentPage() {
   
   // Form State
   const [patientId, setPatientId] = React.useState<string>()
+  const [selectedPatient, setSelectedPatient] = React.useState<any>(null)
   const [serviceId, setServiceId] = React.useState<string>()
+  const [selectedService, setSelectedService] = React.useState<any>(null)
   const [doctorId, setDoctorId] = React.useState<string>()
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [time, setTime] = React.useState<string>()
@@ -127,10 +129,13 @@ export default function CreateAppointmentPage() {
             {currentStep === 0 && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Select Patient</h2>
-                <PatientSelector 
-                  value={patientId} 
-                  onSelect={setPatientId}
-                  onCreateNew={() => router.push('/patients/new')} // Or open modal
+                <PatientSelector
+                  value={patientId}
+                  onSelect={(id, patient) => {
+                    setPatientId(id)
+                    setSelectedPatient(patient)
+                  }}
+                  onCreateNew={() => router.push('/patients/new')}
                 />
               </div>
             )}
@@ -138,11 +143,12 @@ export default function CreateAppointmentPage() {
             {currentStep === 1 && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Select Service</h2>
-                <ServiceSelector 
+                <ServiceSelector
                   value={serviceId}
-                  onSelect={(id) => {
+                  onSelect={(id, service) => {
                     setServiceId(id)
-                    setDoctorId(undefined) // Reset doctor when service changes
+                    setSelectedService(service)
+                    setDoctorId(undefined)
                   }}
                 />
               </div>
@@ -194,35 +200,41 @@ export default function CreateAppointmentPage() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold">Review & Confirm</h2>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground block">Date & Time</span>
+
+                <div className="rounded-lg border bg-muted/30 p-4 space-y-3 text-sm">
+                  <div className="flex items-start gap-3">
+                    <span className="text-muted-foreground w-24 shrink-0">Patient</span>
+                    <div>
+                      <span className="font-medium">{selectedPatient?.full_name || '—'}</span>
+                      {selectedPatient?.phone && (
+                        <span className="block text-xs text-muted-foreground">{selectedPatient.phone}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-muted-foreground w-24 shrink-0">Service</span>
+                    <div>
+                      <span className="font-medium">{selectedService?.name || '—'}</span>
+                      {selectedService && (
+                        <span className="block text-xs text-muted-foreground">
+                          {selectedService.duration} min &bull; ₹{selectedService.price?.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-muted-foreground w-24 shrink-0">Date & Time</span>
                     <span className="font-medium">
-                      {date && format(date, 'MMMM d, yyyy')} at {time}
+                      {date && format(date, 'EEEE, MMMM d, yyyy')} at {time}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground block">Service</span>
-                    <span className="font-medium">Selected Service</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block">Patient</span>
-                    <span className="font-medium">Selected Patient</span>
-                  </div>
-                  {doctorId && (
-                      <div>
-                        <span className="text-muted-foreground block">Doctor</span>
-                        <span className="font-medium">Specific Doctor Selected</span>
-                      </div>
-                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes (Optional)</Label>
-                  <Textarea 
-                    id="notes" 
-                    placeholder="Add any internal notes..." 
+                  <Textarea
+                    id="notes"
+                    placeholder="Add any internal notes..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                   />

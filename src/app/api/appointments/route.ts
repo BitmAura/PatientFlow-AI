@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createAppointmentSchema, appointmentFiltersSchema } from '@/lib/validations/appointment'
-import { addMinutes, parse } from 'date-fns'
+import { addMinutes, format } from 'date-fns'
 import { writeAuditLog } from '@/lib/audit/log'
+import { sendWhatsAppMessage } from '@/lib/whatsapp/send-message'
+import { sendEmail, isEmailConfigured } from '@/lib/email'
+import { bookingConfirmationTemplate } from '@/lib/email/templates'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -110,6 +113,54 @@ export async function POST(request: Request) {
     },
     request,
   })
+
+  // ── Send booking confirmation via WhatsApp + email (fire-and-forget) ──
+  try {
+    const { data: fullAppt } = await (supabase as any)
+      .from('appointments')
+      .select('start_time, patients(full_name, phone, email), services(name, price, duration), clinics(name, phone)')
+      .eq('id', data.id)
+      .single()
+
+    if (fullAppt) {
+      const patient = Array.isArray(fullAppt.patients) ? fullAppt.patients[0] : fullAppt.patients
+      const service = Array.isArray(fullAppt.services) ? fullAppt.services[0] : fullAppt.services
+      const clinic = Array.isArray(fullAppt.clinics) ? fullAppt.clinics[0] : fullAppt.clinics
+      const phone = patient?.phone
+      const firstName = (patient?.full_name || 'there').split(' ')[0]
+      const clinicName = clinic?.name || 'the clinic'
+      const apptDate = format(new Date(fullAppt.start_time), 'EEEE, d MMMM')
+      const apptTime = format(new Date(fullAppt.start_time), 'h:mm a')
+
+      if (phone) {
+        const waMsg = `Hi ${firstName}! Your appointment at ${clinicName} is confirmed ✅\n\n📅 ${apptDate}\n⏰ ${apptTime}${service ? `\n💊 ${service.name}` : ''}\n\nWe'll send you a reminder before your visit. See you soon!`
+        sendWhatsAppMessage(
+          (staff as any).clinic_id,
+          phone,
+          waMsg,
+          { type: 'booking_confirmation', appointmentId: data.id, patientId: data.patient_id }
+        ).catch((e: any) => console.error('Booking confirmation WhatsApp failed:', e))
+      }
+
+      const patientEmail = patient?.email
+      if (patientEmail && isEmailConfigured()) {
+        const emailData = {
+          patientName: patient?.full_name || firstName,
+          clinicName,
+          appointmentDate: apptDate,
+          appointmentTime: apptTime,
+          serviceName: service?.name,
+          clinicPhone: clinic?.phone,
+          bookingRef: data.id.slice(0, 8).toUpperCase(),
+        }
+        const { subject, html } = bookingConfirmationTemplate(emailData)
+        sendEmail({ to: patientEmail, subject, html })
+          .catch((e: any) => console.error('Booking confirmation email failed:', e))
+      }
+    }
+  } catch (e) {
+    console.error('Failed to send booking confirmation:', e)
+  }
 
   return NextResponse.json(data, { status: 201 })
 }

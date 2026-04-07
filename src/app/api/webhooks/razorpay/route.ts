@@ -12,7 +12,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 
 // Types for Razorpay webhook payload
@@ -142,7 +142,7 @@ async function handleSubscriptionEvent(event: string, payload: Record<string, un
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
-    const limiter = checkRateLimit(`webhook-razorpay:${ip}`, 120, 60_000)
+    const limiter = await checkRateLimitAsync(`webhook-razorpay:${ip}`, 120, 60_000)
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: 'Too many webhook requests' },

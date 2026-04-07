@@ -1,17 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { processCampaignBatch } from '@/lib/campaigns/send-campaign'
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic'
+
+async function handler(request: NextRequest) {
   // Validate Vercel Cron Secret - REQUIRED, always enforce
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  
+
   if (!cronSecret) {
     console.error('CRON_SECRET not configured')
     return new NextResponse('Service misconfigured', { status: 500 })
   }
-  
+
   if (authHeader !== `Bearer ${cronSecret}`) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   let totalSent = 0
-  
+
   // Process each campaign
   for (const campaign of campaigns) {
     try {
@@ -42,6 +44,11 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     processed_campaigns: campaigns.length,
-    messages_sent: totalSent
+    messages_sent: totalSent,
   })
 }
+
+// Vercel Cron sends GET requests
+export const GET = handler
+// Allow manual POST triggers (e.g. from admin)
+export const POST = handler

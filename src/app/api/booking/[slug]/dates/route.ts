@@ -1,6 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { addDays, differenceInMinutes, endOfDay, format, getDay, parse, startOfDay } from 'date-fns'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { createClient } from '@/lib/supabase/server'
 
 const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -37,7 +37,7 @@ export async function GET(
   context: any
 ) {
   const ip = getClientIp(request)
-  const limiter = checkRateLimit(`booking-dates:${ip}`, 120, 60_000)
+  const limiter = await checkRateLimitAsync(`booking-dates:${ip}`, 120, 60_000)
   if (!limiter.allowed) {
     return NextResponse.json(
       { error: 'Too many requests. Please retry shortly.' },

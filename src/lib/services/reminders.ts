@@ -105,10 +105,10 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
 
   const { data: appointments } = await admin
     .from('appointments')
-    .select('id, clinic_id, patient_id, start_time, status, reminder_sent_24h, reminder_sent_2h, patients(full_name, phone, email)')
+    .select('id, clinic_id, patient_id, start_time, status, reminder_48h_sent, reminder_24h_sent, reminder_2h_sent, noshow_followup_sent, patients(full_name, phone, email)')
     .in('status', ['pending', 'confirmed', 'completed', 'no_show'])
     .gte('start_time', new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString())
-    .lte('start_time', new Date(Date.now() + 30 * 60 * 60 * 1000).toISOString())
+    .lte('start_time', new Date(Date.now() + 52 * 60 * 60 * 1000).toISOString())
 
   // Cache clinic info to avoid redundant DB calls
   const clinicCache = new Map<string, { name: string; phone?: string }>()
@@ -144,8 +144,39 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
       clinicPhone,
     }
 
+    /* ── 48h reminder ─────────────────────────────────────────── */
+    if (!appointment.reminder_48h_sent && hours <= 50 && hours >= 44) {
+      const { subject, html } = reminder24hTemplate({
+        ...emailData,
+        appointmentDate: `${appointmentDateStr} (in 2 days)`,
+      })
+      const result = await sendMultiChannel({
+        admin,
+        clinicId: appointment.clinic_id,
+        phone,
+        email: patientEmail,
+        whatsappText: `Hi ${firstName}, just a heads-up — your appointment at ${clinicName} is in 2 days on ${appointmentDateStr} at ${appointmentTimeStr}. Reply to reschedule if needed.`,
+        smsText: `Hi ${firstName}, appointment at ${clinicName} on ${appointmentDateStr} at ${appointmentTimeStr}. Call ${clinicPhone ?? ''} to reschedule.`,
+        emailSubject: subject,
+        emailHtml: html,
+        logType: 'appointment_reminder_48h',
+        appointmentId: appointment.id,
+        patientId: appointment.patient_id,
+      })
+
+      if (result.success) {
+        stats.sent++
+        stats.reminders24h++ // re-use counter
+        if (result.channels.includes('email')) stats.emailsSent++
+        if (result.channels.includes('sms')) stats.smsSent++
+        await admin.from('appointments').update({ reminder_48h_sent: true }).eq('id', appointment.id)
+      } else {
+        stats.failed++
+      }
+    }
+
     /* ── 24h reminder ─────────────────────────────────────────── */
-    if (!appointment.reminder_sent_24h && hours <= 26 && hours >= 20) {
+    if (!appointment.reminder_24h_sent && hours <= 26 && hours >= 20) {
       const { subject, html } = reminder24hTemplate(emailData)
       const result = await sendMultiChannel({
         admin,
@@ -166,14 +197,14 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         stats.reminders24h++
         if (result.channels.includes('email')) stats.emailsSent++
         if (result.channels.includes('sms')) stats.smsSent++
-        await admin.from('appointments').update({ reminder_sent_24h: true }).eq('id', appointment.id)
+        await admin.from('appointments').update({ reminder_24h_sent: true }).eq('id', appointment.id)
       } else {
         stats.failed++
       }
     }
 
     /* ── 3h reminder ──────────────────────────────────────────── */
-    if (!appointment.reminder_sent_2h && hours <= 4 && hours >= 1) {
+    if (!appointment.reminder_2h_sent && hours <= 4 && hours >= 1) {
       const { subject, html } = reminder3hTemplate(emailData)
       const result = await sendMultiChannel({
         admin,
@@ -194,14 +225,14 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         stats.reminders3h++
         if (result.channels.includes('email')) stats.emailsSent++
         if (result.channels.includes('sms')) stats.smsSent++
-        await admin.from('appointments').update({ reminder_sent_2h: true }).eq('id', appointment.id)
+        await admin.from('appointments').update({ reminder_2h_sent: true }).eq('id', appointment.id)
       } else {
         stats.failed++
       }
     }
 
-    /* ── No-show recovery ─────────────────────────────────────── */
-    if (appointment.status === 'no_show') {
+    /* ── No-show recovery (cron fallback — immediate send happens in status route) */
+    if (appointment.status === 'no_show' && !appointment.noshow_followup_sent) {
       const alreadySent = await wasMessageSent(admin, appointment.id, 'no_show_recovery')
       if (!alreadySent) {
         const { subject, html } = noShowRecoveryTemplate(emailData)
@@ -224,6 +255,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
           stats.noShowRecovery++
           if (result.channels.includes('email')) stats.emailsSent++
           if (result.channels.includes('sms')) stats.smsSent++
+          await admin.from('appointments').update({ noshow_followup_sent: true }).eq('id', appointment.id)
         } else {
           stats.failed++
         }
@@ -231,7 +263,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
     }
 
     /* ── Post-visit follow-up ─────────────────────────────────── */
-    if (appointment.status === 'completed' && hours <= -2 && hours >= -30) {
+    if (appointment.status === 'completed' && hours <= -1 && hours >= -30) {
       const alreadySent = await wasMessageSent(admin, appointment.id, 'post_visit_followup')
       if (!alreadySent) {
         const { subject, html } = postVisitTemplate(emailData)

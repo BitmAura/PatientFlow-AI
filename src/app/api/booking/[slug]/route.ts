@@ -1,13 +1,13 @@
 ﻿import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 
 export async function GET(
   request: Request,
   context: any
 ) {
   const ip = getClientIp(request)
-  const limiter = checkRateLimit(`booking-clinic:${ip}`, 120, 60_000)
+  const limiter = await checkRateLimitAsync(`booking-clinic:${ip}`, 120, 60_000)
   if (!limiter.allowed) {
     return NextResponse.json(
       { error: 'Too many requests. Please retry shortly.' },

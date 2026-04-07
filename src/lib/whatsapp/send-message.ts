@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from './rate-limiter'
 import { logError } from '@/lib/logger'
@@ -24,16 +23,17 @@ async function clinicCanSend(clinicId: string): Promise<boolean> {
     .limit(1)
     .maybeSingle()
   if (!owner?.user_id) return false
+  // Only check subscription status — Razorpay webhooks are responsible for
+  // transitioning status away from 'trialing'/'active' when payment fails.
+  // Don't double-gate on trial_end here to avoid blocking valid trial users.
   const { data: sub } = await admin
     .from('subscriptions')
-    .select('trial_end')
+    .select('id')
     .eq('user_id', owner.user_id)
     .in('status', ['trialing', 'active'])
     .limit(1)
     .maybeSingle()
-  if (!sub) return false
-  if (sub.trial_end && new Date(sub.trial_end) <= new Date()) return false
-  return true
+  return Boolean(sub)
 }
 
 /**
@@ -47,7 +47,9 @@ export async function sendWhatsAppMessage(
   content: string | WhatsAppTemplate,
   metadata?: any
 ): Promise<SendMessageResult> {
-  const supabase = createClient() as any
+  // Always use admin client — this function is called from cron jobs (no user session)
+  // and from server actions. Admin bypasses RLS for reminder_logs writes.
+  const supabase = createAdminClient() as any
 
   const isPublicDemo = metadata?.type === 'public_demo'
 
@@ -83,7 +85,7 @@ export async function sendWhatsAppMessage(
 
   const sessionData = (connection?.session_data || {}) as Record<string, any>
   const allowedStatuses = ['connected', 'active']
-  
+
   if (!isPublicDemo) {
     if (!connection?.status || !allowedStatuses.includes(connection.status)) {
       logError('WhatsApp blocked: not connected or active', null, { clinicId, status: connection?.status })

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 import { exportToExcel } from '@/lib/export/to-excel'
 import { exportToCSV } from '@/lib/export/to-csv'
@@ -22,7 +22,7 @@ type ReportRow = {
 
 export async function POST(request: Request) {
   const ip = getClientIp(request)
-  const ipLimiter = checkRateLimit(`export-report:ip:${ip}`, 30, 60_000)
+  const ipLimiter = await checkRateLimitAsync(`export-report:ip:${ip}`, 30, 60_000)
   if (!ipLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many export attempts. Please retry shortly.' },
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  const userLimiter = checkRateLimit(`export-report:user:${user.id}`, 20, 60_000)
+  const userLimiter = await checkRateLimitAsync(`export-report:user:${user.id}`, 20, 60_000)
   if (!userLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many exports for this account. Please retry shortly.' },

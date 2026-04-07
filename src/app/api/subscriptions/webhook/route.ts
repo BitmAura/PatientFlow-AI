@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyWebhookSignature, parseWebhookEvent } from '@/lib/razorpay/subscriptions'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 
 /**
@@ -11,7 +11,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request)
-    const limiter = checkRateLimit(`subscriptions-webhook:${ip}`, 120, 60_000)
+    const limiter = await checkRateLimitAsync(`subscriptions-webhook:${ip}`, 120, 60_000)
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: 'Too many webhook requests' },

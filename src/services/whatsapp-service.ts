@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { GupshupProvider } from '@/lib/whatsapp/providers/gupshup-provider'
 import { WhatsAppProviderConfig } from '@/lib/whatsapp/provider-interface'
+import { parseWhatsAppSession, getApiKeyFromSession, getPhoneNumberIdFromSession } from '@/lib/whatsapp/session'
 
 interface SendMessageResult {
   success: boolean
@@ -148,16 +149,28 @@ export async function sendWhatsAppMessage(
     }
 
     // 5. Prepare Gupshup Config
-    // session_data should contain apiKey, appId, etc.
-    const config: WhatsAppProviderConfig = {
-      apiKey: (connection.session_data as any).apiKey,
-      appId: (connection.session_data as any).appId,
-      phoneNumberId: (connection.session_data as any).phoneNumberId,
-      appName: (connection.session_data as any).appName,
+    // session_data should contain apiKey, appId, etc. Validate shape before use.
+    const session = parseWhatsAppSession(connection.session_data)
+    const apiKey = getApiKeyFromSession(session)
+    const phoneNumberId = getPhoneNumberIdFromSession(session)
+    const appId = session?.appId || ''
+    const appName = session?.appName || ''
+
+    if (!apiKey || !phoneNumberId) {
+      console.warn(`[WhatsApp] Missing credentials in session_data for clinic ${clinicId}`)
+      return {
+        success: false,
+        status: 'skipped',
+        error: 'WhatsApp credentials missing',
+        skippedReason: 'whatsapp_inactive',
+      }
     }
 
-    if (!config.apiKey || !config.phoneNumberId) {
-      throw new Error('Missing Gupshup credentials in session_data')
+    const config: WhatsAppProviderConfig = {
+      apiKey,
+      appId,
+      phoneNumberId,
+      appName,
     }
 
     // 5. Call Gupshup send message API

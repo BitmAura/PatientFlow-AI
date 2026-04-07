@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateOTP, storeOTP } from '@/lib/portal/session'
-import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
+import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
 import { sendMessage } from '@/services/messaging'
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const { phone } = await request.json()
   const ip = getClientIp(request)
 
-  const ipLimiter = checkRateLimit(`portal-send-otp:ip:${ip}`, 20, 60_000)
+  const ipLimiter = await checkRateLimitAsync(`portal-send-otp:ip:${ip}`, 20, 60_000)
   if (!ipLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many OTP requests. Please try again later.' },
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 })
   }
 
-  const phoneLimiter = checkRateLimit(`portal-send-otp:phone:${phone}`, 5, 10 * 60_000)
+  const phoneLimiter = await checkRateLimitAsync(`portal-send-otp:phone:${phone}`, 5, 10 * 60_000)
   if (!phoneLimiter.allowed) {
     return NextResponse.json(
       { error: 'Too many OTP requests for this number. Please wait before retrying.' },

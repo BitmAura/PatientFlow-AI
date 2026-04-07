@@ -22,8 +22,14 @@ export function CompleteStep({ onBack, formData = {} }: CompleteStepProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clinic: formData.name !== undefined ? { name: formData.name, description: formData.description, phone: formData.phone, email: formData.email, website: formData.website } : undefined,
-          address: formData.addressLine1 !== undefined ? { addressLine1: formData.addressLine1, addressLine2: formData.addressLine2, city: formData.city, state: formData.state, postalCode: formData.postalCode, country: formData.country } : undefined,
+          clinic: formData.name !== undefined
+            ? { name: formData.name, description: formData.description, phone: formData.phone, email: formData.email, website: formData.website }
+            : undefined,
+          address: formData.addressLine1 !== undefined
+            ? { addressLine1: formData.addressLine1, addressLine2: formData.addressLine2, city: formData.city, state: formData.state, postalCode: formData.postalCode, country: formData.country }
+            : undefined,
+          doctor: formData.doctor || null,
+          service: formData.service || null,
         }),
       })
       const data = await res.json().catch(() => ({}))

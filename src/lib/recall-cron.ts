@@ -120,10 +120,10 @@ async function seedInactivePatientRecalls(clinicId: string, supabase: SupabaseCl
   }
 }
 
-async function safeSendRecall(recallId: string, clinicId: string, supabase: SupabaseClient) {
+async function safeSendRecall(recallId: string, clinicId: string, supabase: SupabaseClient, clinicName?: string) {
   const db = supabase as any
 
-  const { data: clinic } = await db.from('clinics').select('status, business_hours').eq('id', clinicId).single()
+  const { data: clinic } = await db.from('clinics').select('status, business_hours, name').eq('id', clinicId).single()
   if (!clinic || clinic.status !== 'active') {
     console.warn(`Clinic ${clinicId} is not active. Aborting send.`)
     return
@@ -139,30 +139,52 @@ async function safeSendRecall(recallId: string, clinicId: string, supabase: Supa
     return
   }
 
-  if ((recall.attempt_count ?? 0) >= 3) return
+  const currentAttempts = recall.attempt_count ?? 0
+  if (currentAttempts >= 3) return
 
   const firstName = recall.patients?.full_name?.split(' ')[0] || 'Patient'
+  const displayClinicName = clinicName || clinic?.name || 'our clinic'
+
+  // Build a plain-text recall message when no approved template is configured
+  const recallMessage = `Hi ${firstName}! We miss you at ${displayClinicName}. It's been a while since your last visit. Would you like to book your next appointment? Reply YES and we'll set it up for you 😊`
+
   const { success, error } = await sendWhatsAppMessage(
     clinicId,
     recall.patients?.phone,
-    {
-      name: 'recall_offer_v1',
-      language: { code: 'en' },
-      components: [{ type: 'body', parameters: [{ type: 'text', text: firstName }] }]
-    },
+    recallMessage,
     { type: 'recall_automated', patientId: recall.patient_id }
   )
 
+  const newAttemptCount = currentAttempts + 1
+
   if (!success) {
     await RecallService.logActivity(recallId, 'message_failed' as Database['public']['Enums']['recall_activity_type'], `Failed to send: ${error}`, supabase)
+    // Still increment attempt count so we don't retry indefinitely on a bad number
+    await (supabase as any)
+      .from('patient_recalls')
+      .update({ attempt_count: newAttemptCount, updated_at: new Date().toISOString() } as any)
+      .eq('id', recallId)
     return
   }
-  await RecallService.logActivity(recallId, 'message_sent', 'Automated safe-send (Template)', supabase)
+
+  // Increment attempt count. Mark completed if max attempts reached.
+  const newStatus = newAttemptCount >= 3 ? 'completed' : 'overdue'
+  await (supabase as any)
+    .from('patient_recalls')
+    .update({
+      attempt_count: newAttemptCount,
+      status: newStatus,
+      last_contacted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as any)
+    .eq('id', recallId)
+
+  await RecallService.logActivity(recallId, 'message_sent', `Attempt ${newAttemptCount}/3 — Automated recall sent`, supabase)
 }
 
 import { calculatePatientScore } from '@/lib/ai/lead-scoring'
 
-export async function processDailyRecalls(clinicId: string, supabase: SupabaseClient) {
+export async function processDailyRecalls(clinicId: string, supabase: SupabaseClient, clinicName?: string) {
   const db = supabase as any
   const MAX_BATCH_SIZE = 50
   await seedInactivePatientRecalls(clinicId, supabase)
@@ -205,7 +227,7 @@ export async function processDailyRecalls(clinicId: string, supabase: SupabaseCl
   let failed = 0
   for (const recall of scoredRecalls) {
     try {
-      await safeSendRecall(recall.id, clinicId, supabase)
+      await safeSendRecall(recall.id, clinicId, supabase, clinicName)
       sent++
       await new Promise((r) => setTimeout(r, 500))
     } catch (e) {
