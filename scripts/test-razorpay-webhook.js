@@ -1,5 +1,7 @@
-const fetch = require('node-fetch')
 const crypto = require('crypto')
+
+// Use global fetch when available (Node 18+). Avoid requiring node-fetch so tests work locally.
+const fetch = globalThis.fetch || (async (...args) => (await import('node-fetch')).default(...args))
 
 // Usage:
 // RAZORPAY_WEBHOOK_SECRET=your_secret TARGET_URL=https://.../api/webhook node scripts/test-razorpay-webhook.js
