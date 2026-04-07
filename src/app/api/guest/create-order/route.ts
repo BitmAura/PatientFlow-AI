@@ -60,7 +60,9 @@ export async function POST(request: Request) {
       },
     })
 
-    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || null
+    // Only expose the public (NEXT_PUBLIC_) Razorpay key to clients.
+    // Do NOT return server-side secrets (RAZORPAY_KEY_SECRET / RAZORPAY_KEY_ID).
+    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || null
 
     return NextResponse.json({ success: true, order, keyId, leadId })
   } catch (err) {

@@ -3,7 +3,6 @@ const DYNAMIC_CACHE = 'noshowkiller-dynamic-v1'
 
 const STATIC_ASSETS = [
   '/',
-  '/dashboard',
   '/manifest.webmanifest',
   '/favicon.ico',
   '/icon',
