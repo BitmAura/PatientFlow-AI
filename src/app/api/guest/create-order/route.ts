@@ -65,6 +65,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, order, keyId, leadId })
   } catch (err) {
     console.error('[guest/create-order] error', err)
+    // If caller requests debug, return the underlying error message (temporary)
+    try {
+      const debugHeader = request.headers.get('x-debug')
+      const url = new URL(request.url)
+      const debugParam = url.searchParams.get('debug')
+      if (debugHeader === '1' || debugParam === '1') {
+        return NextResponse.json({ error: 'Could not create order', detail: String(err) }, { status: 500 })
+      }
+    } catch (e) {
+      // ignore URL parsing errors
+    }
+
     return NextResponse.json({ error: 'Could not create order' }, { status: 500 })
   }
 }

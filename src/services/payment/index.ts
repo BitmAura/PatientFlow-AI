@@ -39,7 +39,6 @@ export async function createPaymentOrder(params: CreateOrderParams): Promise<Raz
       currency: 'INR',
       receipt: params.receipt,
       description: params.description || 'Booking Deposit - NoShowKiller',
-      customer_notify: params.customer_notify ?? 1,
       notes: params.notes || {},
     }
 
