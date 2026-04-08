@@ -14,30 +14,22 @@ import { ArrowLeft, Sparkles } from 'lucide-react'
  * 💎 Glassmorphism + Emerald Medical Theme
  */
 export default function DemoPage() {
-  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Local simulated demo: triggers the in-page phone preview without requiring
+  // the user to enter their WhatsApp number or rely on WhatsApp Business.
+  const startDemo = async () => {
     setLoading(true)
     setError(null)
     setSuccess(false)
-
     try {
-      const response = await fetch('/api/whatsapp/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
-      })
-
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Failed to send demo')
-
+      // Simulate activation delay
+      await new Promise((res) => setTimeout(res, 800))
       setSuccess(true)
     } catch (err: any) {
-      setError(err.message)
+      setError(err?.message || 'Failed to activate demo')
     } finally {
       setLoading(false)
     }
@@ -75,46 +67,41 @@ export default function DemoPage() {
                 </p>
               </div>
 
-              <PageCard variant="default" className="border-emerald-100 bg-white/60 p-8 backdrop-blur-xl dark:border-emerald-900/20 dark:bg-slate-900/60 shadow-2xl shadow-emerald-500/5">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">WhatsApp Number</label>
-                    <input
-                      required
-                      type="tel"
-                      placeholder="Ex: +91 99887 76655"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className={cn(
-                        "w-full rounded-xl border border-slate-200 bg-white/50 px-5 py-4 text-lg transition-all font-bold",
-                        "focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none shadow-sm",
-                        "dark:border-slate-800 dark:bg-slate-950/50 dark:text-white"
-                      )}
-                    />
-                  </div>
-                  
-                  <button
-                    disabled={loading || success}
-                    type="submit"
-                    className={cn(
-                      "w-full rounded-xl px-6 py-5 text-lg font-black tracking-wide text-white transition-all active:scale-[0.98]",
-                      success 
-                        ? "bg-emerald-500 shadow-emerald-500/20" 
-                        : "bg-emerald-600 shadow-xl shadow-emerald-600/30 hover:bg-emerald-700",
-                      loading && "animate-pulse cursor-not-allowed opacity-70"
-                    )}
-                  >
-                    {loading ? 'Activating AI Demo...' : success ? '✨ Message Sent!' : 'Get Live Demo Now'}
-                  </button>
-                </form>
+                <PageCard variant="default" className="border-emerald-100 bg-white/60 p-8 backdrop-blur-xl dark:border-emerald-900/20 dark:bg-slate-900/60 shadow-2xl shadow-emerald-500/5">
+                  <div className="space-y-4">
+                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                      Play an interactive in-page demo to see how PatientFlow AI crafts and sends patient reminders, recovery nudges and booking prompts —
+                      no WhatsApp number or third-party setup required. This is a simulated preview for evaluation purposes only.
+                    </p>
 
-                {error && <p className="mt-4 text-center text-sm font-black text-red-500 bg-red-50 py-2 rounded-lg">{error}</p>}
-                {success && (
-                  <p className="mt-4 text-center text-sm font-black text-emerald-600 uppercase tracking-tight">
-                    Check your phone! You just recovered revenue.
-                  </p>
-                )}
-              </PageCard>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={startDemo}
+                        disabled={loading || success}
+                        className={cn(
+                          "flex-1 rounded-xl px-6 py-4 text-lg font-black tracking-wide text-white transition-all active:scale-[0.98]",
+                          success
+                            ? "bg-emerald-500 shadow-emerald-500/20"
+                            : "bg-emerald-600 shadow-xl shadow-emerald-600/30 hover:bg-emerald-700",
+                          loading && "animate-pulse cursor-not-allowed opacity-70"
+                        )}
+                      >
+                        {loading ? 'Activating Demo...' : success ? '✨ Demo Ready' : 'Play Simulated Demo'}
+                      </button>
+
+                      <Link href="/signup" className="flex-0 hidden items-center rounded-xl px-6 py-4 text-lg font-black tracking-wide text-emerald-700 border border-emerald-200 hover:bg-emerald-50 md:inline-flex">
+                        Start Free Trial
+                      </Link>
+                    </div>
+
+                    {error && <p className="mt-4 text-center text-sm font-black text-red-500 bg-red-50 py-2 rounded-lg">{error}</p>}
+                    {success && (
+                      <p className="mt-4 text-center text-sm font-black text-emerald-600 uppercase tracking-tight">
+                        Demo activated — watch the in-page preview on the right.
+                      </p>
+                    )}
+                  </div>
+                </PageCard>
             </div>
 
             {/* Phone Simulation Section */}
