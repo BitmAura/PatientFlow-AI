@@ -1,64 +1,107 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { verifyNumber } from '@/services/messaging'
+import { getGupshupStatus } from '@/lib/gupshup/service'
+import { saveGupshupConfig } from '@/services/gupshup/config'
+import { logError } from '@/lib/logger'
 
-export async function POST(request: Request) {
-  const supabase = createClient() as any
-  const { data: { user } } = await supabase.auth.getUser()
+/**
+ * POST /api/whatsapp/connect
+ * 
+ * Manual setup: Connect existing WhatsApp/Gupshup credentials
+ * - Validates credentials against Gupshup API
+ * - Stores credentials in database
+ * - Updates config status to 'active'
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = createClient() as any
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return new NextResponse('Unauthorized', { status: 401 })
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
 
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('clinic_id')
-    .eq('user_id', user.id)
-    .single()
+    const { data: staff } = await supabase
+      .from('staff')
+      .select('clinic_id, role')
+      .eq('user_id', user.id)
+      .single()
 
-  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+    if (!staff || staff.role !== 'owner') {
+      return NextResponse.json(
+        { success: false, error: 'Only clinic owners can configure WhatsApp' },
+        { status: 403 }
+      )
+    }
 
-  const body = await request.json()
-  const phoneNumber = String(body?.phoneNumber || '').trim()
+    const clinicId = staff.clinic_id
+    const body = await request.json()
+    const { provider, app_id, api_key, phone_number_id } = body
 
-  if (!phoneNumber) {
-    return new NextResponse('Phone number is required', { status: 400 })
-  }
+    // Validate input
+    if (!provider || !api_key || !phone_number_id) {
+      return NextResponse.json(
+        { success: false, error: 'provider, api_key, and phone_number_id are required' },
+        { status: 400 }
+      )
+    }
 
-  const normalizedPhone = phoneNumber.replace(/\s+/g, '')
-  if (!normalizedPhone.startsWith('+')) {
-    return new NextResponse('Phone number must include country code', { status: 400 })
-  }
+    if (provider !== 'gupshup') {
+      return NextResponse.json(
+        { success: false, error: 'Only Gupshup provider is supported for manual setup' },
+        { status: 400 }
+      )
+    }
 
-  const hasMetaDefaults = Boolean(
-    process.env.WHATSAPP_API_KEY && process.env.WHATSAPP_PHONE_NUMBER_ID
-  )
-  if (!hasMetaDefaults) {
+    // Validate Gupshup credentials
+    console.log('[Connect] Validating Gupshup credentials...')
+
+    const status = await getGupshupStatus(api_key)
+    if (!status.healthy) {
+      return NextResponse.json(
+        { success: false, error: `Invalid Gupshup API key: ${status.message}` },
+        { status: 400 }
+      )
+    }
+
+    // Save to database
+    try {
+      await saveGupshupConfig(clinicId, {
+        app_id: app_id || 'manual-setup',
+        app_token: '',
+        api_key,
+        phone_number_id,
+        status: 'active',
+      })
+    } catch (e) {
+      console.error('[Connect] Failed to save config:', e)
+      return NextResponse.json(
+        { success: false, error: 'Failed to save credentials. Try again.' },
+        { status: 500 }
+      )
+    }
+
+    console.log('[Connect] ✅ Gupshup credentials verified and saved.')
+
     return NextResponse.json(
       {
-        error:
-          'Quick setup is unavailable. Configure WHATSAPP_API_KEY and WHATSAPP_PHONE_NUMBER_ID or use Advanced Setup.',
+        success: true,
+        message: 'WhatsApp is now connected to Gupshup!',
+        phone_number_id,
       },
-      { status: 400 }
+      { status: 200 }
     )
-  }
 
-  const result = await verifyNumber({
-    clinicId: staff.clinic_id,
-    phoneNumber: normalizedPhone,
-    provider: 'meta',
-  })
+  } catch (error: any) {
+    console.error('[Connect] Error:', error)
+    await logError('WhatsApp connect failed', error, { endpoint: '/api/whatsapp/connect' })
 
-  if (!result.success) {
     return NextResponse.json(
-      { error: result.error || 'Failed to start WhatsApp setup' },
-      { status: 502 }
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
     )
   }
-
-  return NextResponse.json({
-    connected: true,
-    status: 'connected',
-    setupMode: 'auto',
-    phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || null,
-    provider: 'meta',
-  })
 }

@@ -89,6 +89,59 @@ export function GupshupSetupWizard({ clinicId, onComplete }: GupshupSetupWizardP
     }
   }
 
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      toast({
+        title: 'Invalid OTP',
+        description: 'OTP must be 6 digits',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await fetch('/api/whatsapp/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          phone_number: phoneNumber,
+          otp 
+        }),
+      })
+
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'OTP verification failed')
+      }
+
+      toast({
+        title: 'WhatsApp Ready!',
+        description: 'Your WhatsApp number is verified and active',
+      })
+
+      onComplete?.({
+        appId: process.env.NEXT_PUBLIC_GUPSHUP_APP_ID || '',
+        apiKey: process.env.NEXT_PUBLIC_GUPSHUP_API_KEY || '',
+        phoneNumberId: data.phone_number_id,
+      })
+
+      // Reset form
+      setStep('auto')
+      setPhoneNumber('')
+      setOtp('')
+    } catch (error) {
+      toast({
+        title: 'OTP verification failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleManualSetupSubmit = async () => {
     if (!appId || !apiKey || !phoneNumberId) {
       toast({
@@ -103,27 +156,37 @@ export function GupshupSetupWizard({ clinicId, onComplete }: GupshupSetupWizardP
     try {
       const res = await fetch('/api/whatsapp/connect', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           provider: 'gupshup',
-          appId,
-          apiKey,
-          phoneNumberId,
+          app_id: appId,
+          api_key: apiKey,
+          phone_number_id: phoneNumberId,
         }),
       })
-      
-      if (!res.ok) throw new Error('Connection failed')
-      
+
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Connection failed')
+      }
+
       toast({
-        title: 'WhatsApp connected!',
-        description: 'Gupshup integration is ready',
+        title: 'WhatsApp Connected!',
+        description: 'Gupshup is configured and ready to use',
       })
-      
+
       onComplete?.({
         appId,
         apiKey,
         phoneNumberId,
       })
+
+      // Reset form
+      setStep('manual')
+      setAppId('')
+      setApiKey('')
+      setPhoneNumberId('')
     } catch (error) {
       toast({
         title: 'Connection failed',
@@ -243,7 +306,7 @@ export function GupshupSetupWizard({ clinicId, onComplete }: GupshupSetupWizardP
                         Back
                       </Button>
                       <Button
-                        onClick={handleManualSetupSubmit}
+                        onClick={handleVerifyOTP}
                         disabled={loading || otp.length !== 6}
                         size="lg"
                         className="flex-1"
