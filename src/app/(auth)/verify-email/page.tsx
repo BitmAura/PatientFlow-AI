@@ -4,6 +4,14 @@ import { Mail } from 'lucide-react'
 export default function VerifyEmailPage() {
   return (
     <div className="space-y-6 text-center">
+      <div className="flex justify-center">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+        >
+          ← Back to home
+        </Link>
+      </div>
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
         <Mail className="h-7 w-7" aria-hidden />
       </div>

@@ -37,6 +37,14 @@ export function SignupView() {
 
   return (
     <div className="mx-auto w-full max-w-lg">
+      <div className="mb-6 flex items-center justify-center">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+        >
+          ← Back to home
+        </Link>
+      </div>
       <GlassCard className="p-8 md:p-10">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
