@@ -11,117 +11,85 @@ Gupshup is our recommended WhatsApp provider for Indian clinics. It provides:
 ## Architecture
 
 ```
-Clinic WhatsApp Setup Flow:
-┌─────────────────────────────────┐
-│   Clinic Owner Starts Setup      │
-│   (Settings > WhatsApp)          │
-└────────────┬────────────────────┘
+Clinic WhatsApp Setup Flow (Fully Automated):
+┌─────────────────────────────────────────────┐
+│   Clinic Owner: Go to Settings > WhatsApp   │
+│   Click "Connect WhatsApp"                  │
+└────────────┬────────────────────────────────┘
              │
              ▼
-┌─────────────────────────────────┐
-│  Select Provider: Gupshup       │
-└────────────┬────────────────────┘
+┌─────────────────────────────────────────────┐
+│  PatientFlow Setup Wizard Appears            │
+│  "Enter your clinic's WhatsApp number"      │
+└────────────┬────────────────────────────────┘
              │
              ▼
-┌─────────────────────────────────────────────────┐
-│  Option A: Auto-Setup (Recommended)             │
-│  - We register number on Gupshup for you        │
-│  - You enter Gupshup credentials                │
-├─────────────────────────────────────────────────┤
-│  Option B: Manual Setup                         │
-│  - Register on Gupshup yourself                 │
-│  - Enter credentials manually                   │
-└────────────┬────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  We Create Gupshup Account + Register       │
+│  (All backend, you don't see credentials)   │
+└────────────┬────────────────────────────────┘
              │
              ▼
-┌─────────────────────────────────┐
-│  Click "Start Registration"      │
-│  (Phone number sent OTP)         │
-└────────────┬────────────────────┘
+┌─────────────────────────────────────────────┐
+│  OTP Sent to Your Phone via SMS             │
+│  (You just verify - no credentials needed)  │
+└────────────┬────────────────────────────────┘
              │
              ▼
-┌─────────────────────────────────┐
-│  Enter OTP from SMS              │
-└────────────┬────────────────────┘
+┌─────────────────────────────────────────────┐
+│  Enter OTP Code (6 digits)                  │
+└────────────┬────────────────────────────────┘
              │
              ▼
-┌─────────────────────────────────┐
-│  WhatsApp Connection Active!     │
-│  (All reminders & automations    │
-│   now enabled)                   │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  ✅ WhatsApp Active!                        │
+│  (All reminders, campaigns, automations     │
+│   start working immediately)                │
+└─────────────────────────────────────────────┘
 ```
 
-## Setup Instructions
+## Setup Instructions (Simple 2-Step Process)
 
-### For Clinic Owners (Self-Service Setup)
-
-#### Step 1: Create Gupshup Account
-1. Go to [Gupshup.io](https://www.gupshup.io/)
-2. Click "Sign Up" 
-3. Register with business email
-4. Verify email address
-5. Complete business information form
-
-#### Step 2: Access WhatsApp Business API
-1. Log in to Gupshup dashboard
-2. Navigate to "WhatsApp Business"
-3. Click "Add New Business Account"
-4. Select your country (India)
-5. Provide business details
-
-#### Step 3: Register Your Phone Number
-1. In Gupshup dashboard, go to "Phone Numbers"
-2. Click "Add Phone Number"
-3. Enter your clinic's WhatsApp number (with country code)
-   - Format: 919988776655 (not +919988776655)
-4. Gupshup will send OTP to that number
-5. Enter OTP to verify
-
-#### Step 4: Get Your Credentials
-1. Once phone is verified, go to "API & SDK"
-2. Find these values:
-   - **App ID**: Your Gupshup application ID
-   - **API Key** (App Token): Your authentication key
-   - **Phone Number ID**: Your registered phone's ID
-
-#### Step 5: Connect in PatientFlow
+### Step 1: Open Setup Wizard
 1. Log in to PatientFlow AI
 2. Go to **Settings > WhatsApp Connection**
 3. Click **"Connect WhatsApp"**
-4. Select **"Gupshup"** as provider
-5. Choose **"Manual Setup"** (you have credentials)
-6. Enter:
-   - App ID
-   - API Key
-   - Phone Number ID
-7. Click **"Test Connection"**
-8. If successful, status changes to **"Connected"**
-9. Enable automation by clicking **"Activate"**
+4. Setup wizard opens automatically
 
-### For PatientFlow Support Team (Auto-Setup)
+### Step 2: Enter Phone Number & Verify OTP
+1. **You enter**: Your clinic's WhatsApp number
+   - Example: 919988776655 (just the digits)
+2. **We do**: Automatically create Gupshup account + register number
+3. **You receive**: OTP via SMS to that phone
+4. **You enter**: The 6-digit OTP code
+5. **Done!** WhatsApp connection is live
 
-If clinic doesn't have Gupshup account:
+### That's It!
 
-1. Clinic provides phone number
-2. We create Gupshup account on their behalf
-3. Register phone number through Gupshup API
-4. Store credentials securely in clinic's profile
-5. Enable automation automatically
+No need to:
+- ❌ Create Gupshup account manually
+- ❌ Deal with API keys or credentials
+- ❌ Navigate Gupshup dashboard
+- ❌ Copy-paste complex values
 
-## Environment Variables
+We handle everything automatically. You just:
+1. Provide phone number
+2. Verify OTP
+3. Start sending reminders ✅
 
-Set these in your `.env.local`:
+## Environment Variables (Server-Only)
+
+These are managed automatically. For developers only:
 
 ```bash
-# Gupshup Setup (Doctor's number → patients)
-GUPSHUP_APP_ID=your_app_id_here
-GUPSHUP_APP_TOKEN=your_api_key_here
-GUPSHUP_API_KEY=your_app_token_here
+# Gupshup Base Configuration
 GUPSHUP_BASE_URL=https://api.gupshup.io/wa/api/v1
-GUPSHUP_WEBHOOK_SECRET=your_webhook_secret_here
-GUPSHUP_SOURCE_NUMBER=919988776655
+
+# Webhook Configuration (Optional)
+GUPSHUP_WEBHOOK_SECRET=generated_during_setup
 ```
+
+**Note**: API Keys and credentials are stored securely in the database per clinic. Clinic owners don't need to handle them.
 
 ## How Messages Flow
 
@@ -186,6 +154,15 @@ Parameters:
   - apikey: YOUR_API_KEY
 ```
 
+## Credentials Storage (Automatic)
+
+When you complete setup:
+- ✅ Gupshup credentials stored securely in database
+- ✅ Encrypted at rest
+- ✅ Per-clinic isolation
+- ✅ Never exposed to client-side code
+- ✅ Admin can't view raw credentials (by design)
+
 ## Webhook Configuration (Optional)
 
 ### Setup Webhook
@@ -218,28 +195,16 @@ Parameters:
 
 ### "Registration Failed" Error
 **Causes:**
-- Phone number already registered to another Gupshup account
-- Phone number not reachable by SMS OTP
+- Phone number not reachable by SMS
 - OTP expired (valid for 10 minutes only)
+- Network connectivity issue
 
 **Solution:**
 1. Verify phone number is correct
-2. Check SMS inbox for OTP
-3. Ensure network connectivity
-4. Try registration again
-
-### "API Key Invalid" Error
-**Causes:**
-- API key copied incorrectly
-- API key is expired
-- Environment variable not set
-
-**Solution:**
-1. Log in to Gupshup dashboard
-2. Go to API & SDK section
-3. Regenerate API key if needed
-4. Copy exact value (no spaces)
-5. Update environment variable
+2. Give it 2-3 minutes for SMS to arrive
+3. Check SMS inbox (may come from shortcode)
+4. Ensure phone has signal and SMS enabled
+5. Try setup again
 
 ### "Message Send Failed" Error
 **Causes:**
@@ -392,13 +357,16 @@ CREATE TABLE reminder_logs (
 4. **Monitor logs** for patterns
 5. **Implement caching** for clinic data
 
-## Next Steps
+## After Setup: What Happens Automatically
 
-1. ✅ **Setup Complete?** Send test message to verify
-2. 📱 **Enable Automation** in Settings
-3. 📊 **Monitor Logs** in Settings > Message Logs
-4. 🎯 **Create Campaigns** in Marketing section
-5. 📈 **Track ROI** in Reports > No-Show Recovery
+1. ✅ **Appointment Reminders** - Sent 24h before each appointment
+2. ✅ **Lead Follow-ups** - Auto-sent based on lead status
+3. ✅ **Recall Notifications** - For recurring treatments
+4. ✅ **Campaigns** - You can create manual WhatsApp campaigns
+5. ✅ **Message Logs** - All messages tracked in Settings > Message Logs
+6. ✅ **Delivery Reports** - See which messages were delivered/read
+
+**View Status Anytime**: Settings > WhatsApp Connection (shows green "✅ Connected")
 
 ## Support
 
