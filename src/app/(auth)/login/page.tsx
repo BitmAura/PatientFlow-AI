@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { LoginForm } from '@/components/auth/login-form'
+import { SignupForm } from '@/components/auth/signup-form'
 import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import Link from 'next/link'
 import { GlassCard } from '@/components/ui/glass-card'
@@ -9,21 +11,40 @@ import { useSearchParams } from 'next/navigation'
 export default function LoginPage() {
   const searchParams = useSearchParams()
   const nextParam = searchParams?.get('next') || ''
+  const initialMode = searchParams?.get('mode') === 'signup' ? 'signup' : 'login'
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
+
   return (
     <div className="mx-auto w-full max-w-lg">
       <GlassCard className="p-8 md:p-10">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome back
+            {mode === 'login' ? 'Welcome back' : 'Create your account'}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            New to PatientFlow AI for clinics?{' '}
-            <Link
-              href={`/signup${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`}
-              className="font-medium text-primary transition-colors hover:text-primary/90"
-            >
-              Create an account
-            </Link>
+            {mode === 'login' ? (
+              <>
+                New to PatientFlow AI for clinics?{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode('signup')}
+                  className="font-medium text-primary transition-colors hover:text-primary/90"
+                >
+                  Create an account
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode('login')}
+                  className="font-medium text-primary transition-colors hover:text-primary/90"
+                >
+                  Log in
+                </button>
+              </>
+            )}
           </p>
         </div>
 
@@ -35,7 +56,11 @@ export default function LoginPage() {
             Continue as Guest (Live Demo)
           </Link>
 
-          <LoginForm />
+          {mode === 'login' ? (
+            <LoginForm />
+          ) : (
+            <SignupForm />
+          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">

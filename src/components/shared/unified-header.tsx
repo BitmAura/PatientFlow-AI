@@ -46,6 +46,7 @@ export function UnifiedHeader({
   }, [])
 
   const marketingNavItems = [
+    { label: 'Home', href: '/' },
     { label: 'How it Works', href: '/how-it-works' },
     { label: 'Features', href: '/features' },
     { label: 'Pricing', href: '/pricing' },
