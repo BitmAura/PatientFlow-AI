@@ -16,6 +16,11 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg">
+      <div className="mb-4 flex items-center justify-center">
+        <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          ← Back to home
+        </Link>
+      </div>
       <GlassCard className="p-8 md:p-10">
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">

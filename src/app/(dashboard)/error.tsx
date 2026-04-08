@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import * as Sentry from '@sentry/nextjs'
+import { capturePostHogException } from '@/lib/posthog-client'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, RefreshCw, Home, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -14,7 +14,7 @@ export default function DashboardError({
   reset: () => void
 }) {
   React.useEffect(() => {
-    Sentry.captureException(error)
+    capturePostHogException(error, { source: 'dashboard_error' })
   }, [error])
 
   return (

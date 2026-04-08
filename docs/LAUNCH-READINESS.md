@@ -41,10 +41,10 @@
 
 ## 🔴 CRITICAL (Next 2 Weeks)
 
-### 4. **Error Tracking (Sentry)** - 20 hours
+### 4. **Error Tracking (PostHog)** - 20 hours
 **Why**: Can't debug production issues without visibility
-- [ ] Install `@sentry/next`
-- [ ] Initialize Sentry in `src/lib/logger.ts`
+- [ ] Install `posthog-js` and `posthog-node`
+- [ ] Initialize PostHog in `src/lib/logger.ts` and `src/components/providers/posthog-provider.tsx`
 - [ ] Set up error boundaries
 - [ ] Configure alerting for critical errors
 - [ ] Test error capture locally

@@ -68,7 +68,7 @@ If any step fails, fix that path before scaling.
 | **Cron jobs** | `vercel.json` has send-reminders, process-campaigns, **leads**, **recalls**. In Vercel project settings, confirm crons are enabled and use the same `CRON_SECRET`. |
 | **Cron client** | Lead and recall crons use **admin client** so they work with RLS. No change needed if you kept that. |
 | **Rate limiting** | WhatsApp send path uses a rate limiter. Tune per clinic if you hit Gupshup/Meta limits. |
-| **Errors** | **Done.** `src/lib/logger.ts`: `logError` / `logWarn` / `logInfo`. Wire Sentry in `logError` when `SENTRY_DSN` is set. Gupshup webhook and send path use it. |
+| **Errors** | **Done.** `src/lib/logger.ts`: `logError` / `logWarn` / `logInfo`. Wire PostHog in `logError` when `POSTHOG_API_KEY` is set. Gupshup webhook and send path use it. |
 | **Reminder_logs** | **Done.** Migration `20260218_reminder_logs_patient_nullable.sql` makes `patient_id` nullable so lead messages can be logged. |
 
 ---

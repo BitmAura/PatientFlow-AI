@@ -6,6 +6,11 @@ import { Label } from '@/components/ui/label'
 export default function ForgotPasswordPage() {
   return (
     <div className="w-full">
+      <div className="mb-4">
+        <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          ← Back to home
+        </Link>
+      </div>
       <div className="mb-8">
         <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Forgot password?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

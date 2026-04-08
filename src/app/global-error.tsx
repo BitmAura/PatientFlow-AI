@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import * as Sentry from '@sentry/nextjs'
+import { capturePostHogException } from '@/lib/posthog-client'
 
 export default function GlobalError({
   error,
@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   React.useEffect(() => {
-    Sentry.captureException(error)
+    capturePostHogException(error, { source: 'global_error' })
     console.error(error)
   }, [error])
 

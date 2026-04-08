@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { OfflineIndicator } from '@/components/shared/offline-indicator'
 import { UpdatePrompt } from '@/components/shared/update-prompt'
 import { LanguageProviderComponent } from '@/hooks/use-language'
+import { PostHogProvider } from '@/components/providers/posthog-provider'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -22,14 +23,16 @@ export function Providers({ children }: ProvidersProps) {
         enableSystem={false}
         disableTransitionOnChange
       >
-        <LanguageProviderComponent>
-          <TooltipProvider>
-            {children}
-            <Toaster position="top-right" />
-            <OfflineIndicator />
-            <UpdatePrompt />
-          </TooltipProvider>
-        </LanguageProviderComponent>
+        <PostHogProvider>
+          <LanguageProviderComponent>
+            <TooltipProvider>
+              {children}
+              <Toaster position="top-right" />
+              <OfflineIndicator />
+              <UpdatePrompt />
+            </TooltipProvider>
+          </LanguageProviderComponent>
+        </PostHogProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

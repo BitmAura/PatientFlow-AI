@@ -32,6 +32,6 @@ export function isSupabaseError(error: unknown): boolean {
 }
 
 export function logError(error: unknown, context?: object): void {
-  // In production, send to Sentry/LogRocket
+  // In production, send to PostHog or another centralized error capture service.
   console.error('Logged Error:', { error, context })
 }
