@@ -54,6 +54,9 @@ BEGIN
   )
   ON CONFLICT (user_id) DO NOTHING;
 
+  -- Seed demo data for the trial user
+  PERFORM seed_trial_demo_data(NEW.id);
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

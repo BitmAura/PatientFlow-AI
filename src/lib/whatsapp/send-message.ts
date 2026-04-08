@@ -140,14 +140,52 @@ async function sendViaGupshup(
 
   const provider = WhatsAppProviderFactory.getProvider('gupshup')
   const isText = typeof content === 'string'
-  const result = await provider.sendMessage(
-    cleanPhone,
-    isText
-      ? { type: 'text', content }
-      : { type: 'template', content },
-    config
-  )
 
+  // Retry logic: up to 3 attempts with exponential backoff
+  let lastError: string | undefined
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const result = await provider.sendMessage(
+        cleanPhone,
+        isText
+          ? { type: 'text', content }
+          : { type: 'template', content },
+        config
+      )
+
+      if (result.success) {
+        const logContent = isText ? content : `Template: ${(content as WhatsAppTemplate).name}`
+        await supabase.from('reminder_logs').insert({
+          clinic_id: clinicId,
+          patient_id: metadata?.patientId ?? null,
+          appointment_id: metadata?.appointmentId ?? null,
+          phone: cleanPhone,
+          message: logContent,
+          type: metadata?.type || 'manual',
+          status: 'sent',
+          message_id: result.messageId,
+          error: null,
+          created_at: new Date().toISOString(),
+          retry_count: attempt - 1, // Track retries
+        } as any)
+
+        return { success: true, messageId: result.messageId, status: 'sent' }
+      }
+
+      lastError = result.error
+      // If not the last attempt, wait before retrying
+      if (attempt < 3) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000)) // 2s, 4s, 8s
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : 'Unknown error'
+      if (attempt < 3) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
+      }
+    }
+  }
+
+  // All retries failed
   const logContent = isText ? content : `Template: ${(content as WhatsAppTemplate).name}`
   await supabase.from('reminder_logs').insert({
     clinic_id: clinicId,
@@ -156,16 +194,14 @@ async function sendViaGupshup(
     phone: cleanPhone,
     message: logContent,
     type: metadata?.type || 'manual',
-    status: result.success ? 'sent' : 'failed',
-    message_id: result.messageId,
-    error: result.error ?? null,
+    status: 'failed',
+    message_id: null,
+    error: lastError ?? 'Failed after 3 retries',
     created_at: new Date().toISOString(),
+    retry_count: 3,
   } as any)
 
-  if (!result.success) {
-    return { success: false, error: result.error, status: 'failed' }
-  }
-  return { success: true, messageId: result.messageId, status: 'sent' }
+  return { success: false, error: lastError ?? 'Failed after retries', status: 'failed' }
 }
 
 /** Send via Meta Cloud API (fallback when not using Gupshup). */

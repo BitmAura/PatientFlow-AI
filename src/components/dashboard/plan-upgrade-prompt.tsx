@@ -69,28 +69,38 @@ export function PlanUpgradePrompt() {
 
   const isTrial = status === 'trialing'
   const title = isTrial
-    ? `Your ${currentPlan.name} trial is running`
-    : 'Messaging is restricted until billing is active'
+    ? `⚠️ Trial ends in ${subscription?.trial_end ? Math.max(0, Math.ceil((new Date(subscription.trial_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0} days`
+    : '🚫 Messaging blocked - subscription required'
   const body = isTrial
-    ? 'Upgrade now to keep WhatsApp automation and recall journeys active after your 7-day trial.'
-    : 'Your clinic automation is paused because the subscription is inactive. Upgrade to resume campaign and follow-up messaging.'
+    ? 'Your trial is ending soon. Upgrade now to avoid losing WhatsApp automation, patient recalls, and booking confirmations. Clinics lose ₹1,500-5,000 per missed no-show without automation.'
+    : 'Your clinic messaging is completely blocked. Patients won\'t receive reminders, recalls, or confirmations. Upgrade immediately to restore full functionality.'
+
+  const urgencyColor = isTrial ? 'amber' : 'red'
+  const bgColor = isTrial ? 'bg-amber-50/40 border-amber-200' : 'bg-red-50/40 border-red-200'
+  const textColor = isTrial ? 'text-amber-900' : 'text-red-900'
+  const buttonColor = isTrial ? 'bg-amber-600 hover:bg-amber-700' : 'bg-red-600 hover:bg-red-700'
 
   return (
-    <Card className="border-amber-200 bg-amber-50/40">
-      <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
+    <Card className={`${bgColor} border-2 animate-pulse`}>
+      <CardContent className="flex flex-col gap-3 p-6 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-700" />
-            <p className="font-semibold text-amber-900">{title}</p>
-            <Badge variant="secondary" className="bg-amber-100 text-amber-900">
-              Billing
+            <AlertTriangle className={`h-5 w-5 text-${urgencyColor}-700`} />
+            <p className={`font-bold text-lg ${textColor}`}>{title}</p>
+            <Badge variant="destructive" className={`bg-${urgencyColor}-100 text-${urgencyColor}-900 border-${urgencyColor}-200`}>
+              {isTrial ? 'Trial' : 'Blocked'}
             </Badge>
           </div>
-          <p className="text-sm text-amber-800">{body}</p>
+          <p className={`text-sm ${textColor} opacity-90`}>{body}</p>
+          {isTrial && (
+            <p className={`text-xs ${textColor} font-medium`}>
+              💰 Save ₹15,000+ monthly in no-shows with automation
+            </p>
+          )}
         </div>
         <Link href="/dashboard/billing">
-          <Button className="bg-amber-600 hover:bg-amber-700">
-            Upgrade Plan
+          <Button className={`${buttonColor} px-6 py-3 text-white font-semibold shadow-lg`}>
+            {isTrial ? 'Upgrade Now' : 'Restore Access'}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
