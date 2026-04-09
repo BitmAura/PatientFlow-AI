@@ -26,7 +26,9 @@ export function useUpgradePlan() {
           const payload = await res.json()
           errorMsg = payload?.error || errorMsg
         } catch (e) {
-          errorMsg = res.statusText || errorMsg
+          // Try to read raw text (HTML error page, stack traces) as fallback
+          const text = await res.text().catch(() => null)
+          errorMsg = text || res.statusText || errorMsg
         }
         throw new Error(errorMsg)
       }
