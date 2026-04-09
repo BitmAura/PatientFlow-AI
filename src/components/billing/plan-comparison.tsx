@@ -27,7 +27,10 @@ export function PlanComparison({ currentPlanId }: PlanComparisonProps) {
   const handleConfirmUpgrade = async () => {
     if (!selectedPlan) return
     try {
-      const response = await upgradePlan.mutateAsync({ planId: selectedPlan.id })
+      const response = await upgradePlan.mutateAsync({ 
+        planId: selectedPlan.id,
+        billing_cycle: 'monthly' // TODO: Add annual option toggle
+      })
       if (response?.shortUrl) {
         toast({ title: 'Upgrade Initiated', description: 'Redirecting to payment...' })
         window.location.href = response.shortUrl
