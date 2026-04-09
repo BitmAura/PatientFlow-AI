@@ -9,6 +9,9 @@
 -- 1. DOCTOR_SERVICES - Link between doctors and services
 ALTER TABLE public.doctor_services ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view doctor services" ON public.doctor_services;
+DROP POLICY IF EXISTS "Clinic staff can manage doctor services" ON public.doctor_services;
+
 CREATE POLICY "Staff can view doctor services" ON public.doctor_services FOR SELECT
 USING (
   doctor_id IN (
@@ -33,6 +36,9 @@ USING (
 -- 2. PATIENT_TAGS - Custom patient categorization
 ALTER TABLE public.patient_tags ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Clinic staff can view patient tags" ON public.patient_tags;
+DROP POLICY IF EXISTS "Clinic staff can manage patient tags" ON public.patient_tags;
+
 CREATE POLICY "Clinic staff can view patient tags" ON public.patient_tags FOR SELECT
 USING (
   clinic_id IN (
@@ -49,6 +55,9 @@ USING (
 
 -- 3. PATIENT_TAG_LINKS - Junction table for patient tags
 ALTER TABLE public.patient_tag_links ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view patient tag links" ON public.patient_tag_links;
+DROP POLICY IF EXISTS "Staff can manage patient tag links" ON public.patient_tag_links;
 
 CREATE POLICY "Staff can view patient tag links" ON public.patient_tag_links FOR SELECT
 USING (
@@ -73,6 +82,9 @@ USING (
 -- 4. RECURRING_PATTERNS - Appointment recurrence rules
 ALTER TABLE public.recurring_patterns ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view recurring patterns" ON public.recurring_patterns;
+DROP POLICY IF EXISTS "Staff can manage recurring patterns" ON public.recurring_patterns;
+
 CREATE POLICY "Staff can view recurring patterns" ON public.recurring_patterns FOR SELECT
 USING (
   clinic_id IN (
@@ -90,6 +102,9 @@ USING (
 -- 5. COMMUNICATION_LOGS - Audit trail of all messages sent
 ALTER TABLE public.communication_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view communication logs" ON public.communication_logs;
+DROP POLICY IF EXISTS "Staff can create communication logs" ON public.communication_logs;
+
 CREATE POLICY "Staff can view communication logs" ON public.communication_logs FOR SELECT
 USING (
   clinic_id IN (
@@ -106,6 +121,9 @@ WITH CHECK (
 
 -- 6. CAMPAIGN_RECIPIENTS - Individual campaign delivery tracking
 ALTER TABLE public.campaign_recipients ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view campaign recipients" ON public.campaign_recipients;
+DROP POLICY IF EXISTS "Staff can manage campaign recipients" ON public.campaign_recipients;
 
 CREATE POLICY "Staff can view campaign recipients" ON public.campaign_recipients FOR SELECT
 USING (
@@ -131,6 +149,9 @@ USING (
 -- 7. PAYMENT_SETTINGS - Razorpay credentials per clinic
 ALTER TABLE public.payment_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Clinic owners can view payment settings" ON public.payment_settings;
+DROP POLICY IF EXISTS "Clinic owners can manage payment settings" ON public.payment_settings;
+
 CREATE POLICY "Clinic owners can view payment settings" ON public.payment_settings FOR SELECT
 USING (
   clinic_id IN (
@@ -147,6 +168,9 @@ USING (
 
 -- 8. WAITING_LIST - Patients waiting for availability
 ALTER TABLE public.waiting_list ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view waiting list" ON public.waiting_list;
+DROP POLICY IF EXISTS "Staff can manage waiting list" ON public.waiting_list;
 
 CREATE POLICY "Staff can view waiting list" ON public.waiting_list FOR SELECT
 USING (
@@ -165,6 +189,9 @@ USING (
 -- 9. FOLLOWUPS - Post-treatment follow-ups
 ALTER TABLE public.followups ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view followups" ON public.followups;
+DROP POLICY IF EXISTS "Staff can manage followups" ON public.followups;
+
 CREATE POLICY "Staff can view followups" ON public.followups FOR SELECT
 USING (
   clinic_id IN (
@@ -181,6 +208,9 @@ USING (
 
 -- 10. BLOCKED_SLOTS - Holidays, breaks, vacations
 ALTER TABLE public.blocked_slots ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view blocked slots" ON public.blocked_slots;
+DROP POLICY IF EXISTS "Staff can manage blocked slots" ON public.blocked_slots;
 
 CREATE POLICY "Staff can view blocked slots" ON public.blocked_slots FOR SELECT
 USING (
@@ -199,6 +229,9 @@ USING (
 -- 11. AUDIT_LOGS - Activity audit trail (most restrictive - audit only, rarely needed by users)
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Clinic owners can view audit logs" ON public.audit_logs;
+DROP POLICY IF EXISTS "Audit logs are insert-only by system" ON public.audit_logs;
+
 CREATE POLICY "Clinic owners can view audit logs" ON public.audit_logs FOR SELECT
 USING (
   clinic_id IN (
@@ -211,6 +244,9 @@ WITH CHECK (true); -- System can insert logs
 
 -- 12. LEADS - Lead management for marketing
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view leads" ON public.leads;
+DROP POLICY IF EXISTS "Staff can manage leads" ON public.leads;
 
 CREATE POLICY "Staff can view leads" ON public.leads FOR SELECT
 USING (
@@ -228,6 +264,9 @@ USING (
 
 -- 13. LEAD_ACTIVITIES - Lead interaction history
 ALTER TABLE public.lead_activities ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view lead activities" ON public.lead_activities;
+DROP POLICY IF EXISTS "Staff can create lead activities" ON public.lead_activities;
 
 CREATE POLICY "Staff can view lead activities" ON public.lead_activities FOR SELECT
 USING (
@@ -252,6 +291,9 @@ WITH CHECK (
 -- 14. PATIENT_JOURNEYS - Custom patient journey workflows
 ALTER TABLE public.patient_journeys ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view patient journeys" ON public.patient_journeys;
+DROP POLICY IF EXISTS "Staff can manage patient journeys" ON public.patient_journeys;
+
 CREATE POLICY "Staff can view patient journeys" ON public.patient_journeys FOR SELECT
 USING (
   clinic_id IN (
@@ -268,6 +310,9 @@ USING (
 
 -- 15. PATIENT_JOURNEY_STAGES - Journey workflow stages
 ALTER TABLE public.patient_journey_stages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view journey stages" ON public.patient_journey_stages;
+DROP POLICY IF EXISTS "Staff can manage journey stages" ON public.patient_journey_stages;
 
 CREATE POLICY "Staff can view journey stages" ON public.patient_journey_stages FOR SELECT
 USING (
@@ -293,6 +338,9 @@ USING (
 -- 16. JOURNEY_TRANSITIONS - Transitions between journey stages
 ALTER TABLE public.journey_transitions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff can view journey transitions" ON public.journey_transitions;
+DROP POLICY IF EXISTS "Staff can manage journey transitions" ON public.journey_transitions;
+
 CREATE POLICY "Staff can view journey transitions" ON public.journey_transitions FOR SELECT
 USING (
   journey_id IN (
@@ -317,6 +365,9 @@ USING (
 -- 17. JOURNEY_TEMPLATES - Pre-built journey templates
 ALTER TABLE public.journey_templates ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "All clinic staff can view journey templates" ON public.journey_templates;
+DROP POLICY IF EXISTS "Clinic owners can manage journey templates" ON public.journey_templates;
+
 CREATE POLICY "All clinic staff can view journey templates" ON public.journey_templates FOR SELECT
 USING (
   clinic_id IN (
@@ -334,6 +385,9 @@ USING (
 
 -- 18. JOURNEY_STAGES (template level) - Stages available in templates
 ALTER TABLE public.journey_stages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "All clinic staff can view journey template stages" ON public.journey_stages;
+DROP POLICY IF EXISTS "Clinic owners can manage journey template stages" ON public.journey_stages;
 
 CREATE POLICY "All clinic staff can view journey template stages" ON public.journey_stages FOR SELECT
 USING (
