@@ -3,7 +3,7 @@
 -- Purpose: Add Row-Level Security policies to tables missing them to prevent cross-clinic data leakage
 
 -- ==========================================
--- TABLES MISSING RLS (19 tables)
+-- TABLES MISSING RLS (18 tables)
 -- ==========================================
 
 -- 1. DOCTOR_SERVICES - Link between doctors and services
@@ -13,8 +13,9 @@ CREATE POLICY "Staff can view doctor services" ON public.doctor_services FOR SEL
 USING (
   doctor_id IN (
     SELECT d.id FROM public.doctors d
-    INNER JOIN public.staff s ON s.clinic_id = d.clinic_id
-    WHERE s.user_id = auth.uid()
+    WHERE d.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
@@ -22,8 +23,10 @@ CREATE POLICY "Clinic staff can manage doctor services" ON public.doctor_service
 USING (
   doctor_id IN (
     SELECT d.id FROM public.doctors d
-    INNER JOIN public.staff s ON s.clinic_id = d.clinic_id
-    WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    WHERE d.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s 
+      WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    )
   )
 );
 
@@ -33,14 +36,14 @@ ALTER TABLE public.patient_tags ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clinic staff can view patient tags" ON public.patient_tags FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Clinic staff can manage patient tags" ON public.patient_tags FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
@@ -51,8 +54,9 @@ CREATE POLICY "Staff can view patient tag links" ON public.patient_tag_links FOR
 USING (
   patient_id IN (
     SELECT p.id FROM public.patients p
-    INNER JOIN public.staff s ON s.clinic_id = p.clinic_id
-    WHERE s.user_id = auth.uid()
+    WHERE p.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
@@ -60,8 +64,9 @@ CREATE POLICY "Staff can manage patient tag links" ON public.patient_tag_links F
 USING (
   patient_id IN (
     SELECT p.id FROM public.patients p
-    INNER JOIN public.staff s ON s.clinic_id = p.clinic_id
-    WHERE s.user_id = auth.uid()
+    WHERE p.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
@@ -71,14 +76,14 @@ ALTER TABLE public.recurring_patterns ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view recurring patterns" ON public.recurring_patterns FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage recurring patterns" ON public.recurring_patterns FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role IN ('owner', 'receptionist')
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
   )
 );
 
@@ -88,14 +93,14 @@ ALTER TABLE public.communication_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view communication logs" ON public.communication_logs FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can create communication logs" ON public.communication_logs FOR INSERT
 WITH CHECK (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
@@ -105,18 +110,21 @@ ALTER TABLE public.campaign_recipients ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view campaign recipients" ON public.campaign_recipients FOR SELECT
 USING (
   campaign_id IN (
-    SELECT id FROM public.campaigns c
-    INNER JOIN public.staff s ON s.clinic_id = c.clinic_id
-    WHERE s.user_id = auth.uid()
+    SELECT c.id FROM public.campaigns c
+    WHERE c.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
 CREATE POLICY "Staff can manage campaign recipients" ON public.campaign_recipients FOR ALL
 USING (
   campaign_id IN (
-    SELECT id FROM public.campaigns c
-    INNER JOIN public.staff s ON s.clinic_id = c.clinic_id
-    WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    SELECT c.id FROM public.campaigns c
+    WHERE c.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s 
+      WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    )
   )
 );
 
@@ -126,14 +134,14 @@ ALTER TABLE public.payment_settings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clinic owners can view payment settings" ON public.payment_settings FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role = 'owner'
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role = 'owner'
   )
 );
 
 CREATE POLICY "Clinic owners can manage payment settings" ON public.payment_settings FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role = 'owner'
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role = 'owner'
   )
 );
 
@@ -143,14 +151,14 @@ ALTER TABLE public.waiting_list ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view waiting list" ON public.waiting_list FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage waiting list" ON public.waiting_list FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
@@ -160,14 +168,14 @@ ALTER TABLE public.followups ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view followups" ON public.followups FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage followups" ON public.followups FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
@@ -177,14 +185,14 @@ ALTER TABLE public.blocked_slots ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view blocked slots" ON public.blocked_slots FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage blocked slots" ON public.blocked_slots FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role IN ('owner', 'receptionist')
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
   )
 );
 
@@ -194,7 +202,7 @@ ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clinic owners can view audit logs" ON public.audit_logs FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role = 'owner'
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role = 'owner'
   )
 );
 
@@ -207,14 +215,14 @@ ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view leads" ON public.leads FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage leads" ON public.leads FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
@@ -224,18 +232,20 @@ ALTER TABLE public.lead_activities ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view lead activities" ON public.lead_activities FOR SELECT
 USING (
   lead_id IN (
-    SELECT id FROM public.leads l
-    INNER JOIN public.staff s ON s.clinic_id = l.clinic_id
-    WHERE s.user_id = auth.uid()
+    SELECT l.id FROM public.leads l
+    WHERE l.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
 CREATE POLICY "Staff can create lead activities" ON public.lead_activities FOR INSERT
 WITH CHECK (
   lead_id IN (
-    SELECT id FROM public.leads l
-    INNER JOIN public.staff s ON s.clinic_id = l.clinic_id
-    WHERE s.user_id = auth.uid()
+    SELECT l.id FROM public.leads l
+    WHERE l.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
@@ -245,14 +255,14 @@ ALTER TABLE public.patient_journeys ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view patient journeys" ON public.patient_journeys FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
   )
 );
 
 CREATE POLICY "Staff can manage patient journeys" ON public.patient_journeys FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role IN ('owner', 'receptionist')
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
   )
 );
 
@@ -262,18 +272,21 @@ ALTER TABLE public.patient_journey_stages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view journey stages" ON public.patient_journey_stages FOR SELECT
 USING (
   journey_id IN (
-    SELECT id FROM public.patient_journeys j
-    INNER JOIN public.staff s ON s.clinic_id = j.clinic_id
-    WHERE s.user_id = auth.uid()
+    SELECT pj.id FROM public.patient_journeys pj
+    WHERE pj.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
 CREATE POLICY "Staff can manage journey stages" ON public.patient_journey_stages FOR ALL
 USING (
   journey_id IN (
-    SELECT id FROM public.patient_journeys j
-    INNER JOIN public.staff s ON s.clinic_id = j.clinic_id
-    WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    SELECT pj.id FROM public.patient_journeys pj
+    WHERE pj.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s 
+      WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    )
   )
 );
 
@@ -283,18 +296,21 @@ ALTER TABLE public.journey_transitions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Staff can view journey transitions" ON public.journey_transitions FOR SELECT
 USING (
   journey_id IN (
-    SELECT id FROM public.patient_journeys j
-    INNER JOIN public.staff s ON s.clinic_id = j.clinic_id
-    WHERE s.user_id = auth.uid()
+    SELECT pj.id FROM public.patient_journeys pj
+    WHERE pj.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    )
   )
 );
 
 CREATE POLICY "Staff can manage journey transitions" ON public.journey_transitions FOR ALL
 USING (
   journey_id IN (
-    SELECT id FROM public.patient_journeys j
-    INNER JOIN public.staff s ON s.clinic_id = j.clinic_id
-    WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    SELECT pj.id FROM public.patient_journeys pj
+    WHERE pj.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s 
+      WHERE s.user_id = auth.uid() AND s.role IN ('owner', 'receptionist')
+    )
   )
 );
 
@@ -304,14 +320,15 @@ ALTER TABLE public.journey_templates ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "All clinic staff can view journey templates" ON public.journey_templates FOR SELECT
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
-  ) OR clinic_id IS NULL -- Global templates
+    SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+  ) OR clinic_id IS NULL
 );
 
 CREATE POLICY "Clinic owners can manage journey templates" ON public.journey_templates FOR ALL
 USING (
   clinic_id IN (
-    SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role = 'owner'
+    SELECT s.clinic_id FROM public.staff s 
+    WHERE s.user_id = auth.uid() AND s.role = 'owner'
   )
 );
 
@@ -321,19 +338,20 @@ ALTER TABLE public.journey_stages ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "All clinic staff can view journey template stages" ON public.journey_stages FOR SELECT
 USING (
   template_id IN (
-    SELECT id FROM public.journey_templates
-    WHERE clinic_id IN (
-      SELECT clinic_id FROM public.staff WHERE user_id = auth.uid()
-    ) OR clinic_id IS NULL
+    SELECT jt.id FROM public.journey_templates jt
+    WHERE jt.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s WHERE s.user_id = auth.uid()
+    ) OR jt.clinic_id IS NULL
   )
 );
 
 CREATE POLICY "Clinic owners can manage journey template stages" ON public.journey_stages FOR ALL
 USING (
   template_id IN (
-    SELECT id FROM public.journey_templates
-    WHERE clinic_id IN (
-      SELECT clinic_id FROM public.staff WHERE user_id = auth.uid() AND role = 'owner'
+    SELECT jt.id FROM public.journey_templates jt
+    WHERE jt.clinic_id IN (
+      SELECT s.clinic_id FROM public.staff s 
+      WHERE s.user_id = auth.uid() AND s.role = 'owner'
     )
   )
 );
