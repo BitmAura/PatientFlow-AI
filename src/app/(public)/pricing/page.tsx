@@ -12,7 +12,7 @@ export default function PricingPage() {
   const trackCta = useTrackCta()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const trackCta = useTrackCta()
+  
 
   const price = formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise)
 
