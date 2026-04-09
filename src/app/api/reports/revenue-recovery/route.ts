@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { startOfMonth, endOfMonth, subMonths, subQuarters, subYears, format } from 'date-fns'
+import { logError } from '@/lib/logger'
 
 /**
  * GET /api/reports/revenue-recovery
@@ -17,7 +18,8 @@ import { startOfMonth, endOfMonth, subMonths, subQuarters, subYears, format } fr
  *   period — "month" (default) | "quarter" | "year"
  */
 export async function GET(req: NextRequest) {
-  const supabase = createClient() as any
+  try {
+    const supabase = createClient() as any
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -210,4 +212,8 @@ export async function GET(req: NextRequest) {
     recall_details: recallDetails,
     noshow_details: noshowDetails,
   })
+  } catch (err) {
+    logError('revenue_recovery_exception', err instanceof Error ? err : new Error(String(err)))
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
