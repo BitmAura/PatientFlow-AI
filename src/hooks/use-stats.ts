@@ -21,6 +21,17 @@ export interface DashboardStats {
   estimated_revenue_recovered: number
   uncontacted_leads_count: number
   weekly_bookings: Array<{ day: string; booked: number; conversionRate: number }>
+  money_leak_list: Array<{ id: string; full_name: string; phone: string; last_visit: string }>
+  lead_pipeline_stats: {
+    new: number
+    contacted: number
+    responsive: number
+    booked: number
+    lost: number
+  }
+  today_no_shows_count: number
+  today_leads_count: number
+  today_revenue_recovered: number
 }
 
 export function useStats() {

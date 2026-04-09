@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 
 export async function GET() {
-  const supabase = createClient() as any
-  
-  // Get current user's clinic
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return new NextResponse('Unauthorized', { status: 401 })
+  try {
+    const supabase = createClient() as any
+    
+    // Get current user's clinic
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
   const { data: staff } = await supabase
     .from('staff')
@@ -140,6 +141,66 @@ export async function GET() {
   const currentMonthRate = calculateNoShowRate(currentMonthStats.data)
   const lastMonthRate = calculateNoShowRate(lastMonthStats.data)
 
+  // Today's Specific Stats (User Request)
+  const todayLeadsCount = (totalLeads.data as any[])?.filter(l => 
+    new Date(l.created_at).toDateString() === now.toDateString()
+  ).length || 0
+
+  const todayNoShowsCount = (todayAppointments.data as any[])?.filter(a => a.status === 'no_show').length || 0
+  
+  const todayRevenueRecovered = (todayAppointments.data as any[])?.filter(a => a.status === 'confirmed').length * 2000
+
+  // Money Leak Logic: Patients with a completed appt but NO future scheduled appt
+  const { data: allAppts } = await supabase
+    .from('appointments')
+    .select('patient_id, status, start_time')
+    .eq('clinic_id', clinicId)
+
+  const patientHistory: Record<string, { lastVisit: string, hasFuture: boolean }> = {}
+  allAppts?.forEach((a: any) => {
+    if (!patientHistory[a.patient_id]) {
+      patientHistory[a.patient_id] = { lastVisit: '', hasFuture: false }
+    }
+    const start = new Date(a.start_time)
+    if (a.status === 'completed' || a.status === 'visited') {
+      if (!patientHistory[a.patient_id].lastVisit || start > new Date(patientHistory[a.patient_id].lastVisit)) {
+        patientHistory[a.patient_id].lastVisit = a.start_time
+      }
+    }
+    if (['scheduled', 'confirmed', 'pending'].includes(a.status) && start > now) {
+      patientHistory[a.patient_id].hasFuture = true
+    }
+  })
+
+  const moneyLeakIds = Object.keys(patientHistory).filter(id => 
+    patientHistory[id].lastVisit && !patientHistory[id].hasFuture
+  ).slice(0, 10)
+
+  const { data: moneyLeakPatients } = await supabase
+    .from('patients')
+    .select('id, full_name, phone')
+    .in('id', moneyLeakIds)
+
+  const moneyLeakList = moneyLeakPatients?.map((p: any) => ({
+    ...p,
+    last_visit: patientHistory[p.id].lastVisit
+  })) || []
+
+  // Month Statistics
+  const monthAppts = (currentMonthStats.data as any[]) || []
+  const monthLeadsList = (totalLeads.data as any[])?.filter(l => new Date(l.created_at) >= new Date(monthStart)) || []
+  
+  const leadPipelineStats = {
+    new: monthLeadsList.filter(l => l.status === 'new').length,
+    contacted: monthLeadsList.filter(l => l.status === 'contacted').length,
+    responsive: monthLeadsList.filter(l => l.status === 'responsive').length,
+    booked: monthLeadsList.filter(l => l.status === 'booked').length,
+    lost: monthLeadsList.filter(l => l.status === 'lost').length,
+  }
+
+  const leadConversionRate = monthLeadsList.length ? (monthLeadsList.filter(l => l.status === 'booked').length / monthLeadsList.length) * 100 : 0
+
+
   // ROI / Revenue Calculation
   const monthAppointments = (currentMonthStats.data as any[]) || []
   
@@ -208,6 +269,15 @@ export async function GET() {
     estimated_revenue_recovered: estimatedRevenueRecovered,
     uncontacted_leads_count: uncontactedLeads.count || 0,
     weekly_bookings: weeklyBookings,
-    actual_revenue: actualRevenue
+    actual_revenue: actualRevenue,
+    money_leak_list: moneyLeakList,
+    lead_pipeline_stats: leadPipelineStats,
+    today_no_shows_count: todayNoShowsCount,
+    today_leads_count: todayLeadsCount,
+    today_revenue_recovered: todayRevenueRecovered
   })
+  } catch (error: any) {
+    console.error('Dashboard Stats Error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 }

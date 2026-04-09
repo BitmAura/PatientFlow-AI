@@ -40,7 +40,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils/cn'
 
 export default function WhatsAppSettingsPage() {
-  const { data, isLoading, disconnect, refresh, sendTestMessage } = useWhatsApp()
+  const { data, isLoading, disconnect, refresh, sendTestMessage, setSharedNumberMode } = useWhatsApp()
   const { toast } = useToast()
   const [testPhone, setTestPhone] = React.useState('')
   const [sendingTest, setSendingTest] = React.useState(false)
@@ -95,6 +95,47 @@ export default function WhatsAppSettingsPage() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* ── Main Column ────────────────────────────────────────────── */}
         <div className="space-y-6 lg:col-span-2">
+
+          {/* ── SHARED vs PRIVATE TOGGLE (NEW) ────────────────────────── */}
+          <Card className="border-blue-100 bg-blue-50/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Wifi className="h-4 w-4 text-blue-600" />
+                Connection Priority
+              </CardTitle>
+              <CardDescription>
+                Choose whether to use PatientFlow AI infrastructure or your own.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <button
+                  onClick={() => setSharedNumberMode(true)}
+                  className={cn(
+                    "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
+                    data?.use_shared_number 
+                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
+                      : "border-slate-200 bg-white hover:border-blue-300"
+                  )}
+                >
+                  <span className="text-sm font-bold text-slate-900">Shared Number Mode</span>
+                  <span className="text-xs text-slate-500">Launch instantly, no setup required. (Limited quota)</span>
+                </button>
+                <button
+                  onClick={() => setSharedNumberMode(false)}
+                  className={cn(
+                    "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
+                    !data?.use_shared_number 
+                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
+                      : "border-slate-200 bg-white hover:border-blue-300"
+                  )}
+                >
+                  <span className="text-sm font-bold text-slate-900">Private Provider Mode</span>
+                  <span className="text-xs text-slate-500">Use your own Gupshup/Number for unlimited scale.</span>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* ── STATUS CARD (shown when connected) ─────────────────── */}
           {isLoading ? (

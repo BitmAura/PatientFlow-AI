@@ -26,29 +26,38 @@ export function validateImportData(data: any[], mappings: Record<string, string>
     if (!mappedRow.full_name) errors.full_name = 'Name is missing'
     if (!mappedRow.phone) errors.phone = 'Phone is missing'
 
-    // Clean Phone Number (simple)
+    // 3. Clean & Validate Phone Number (Strict 10-digit Indian format)
     if (mappedRow.phone) {
       const cleaned = String(mappedRow.phone).replace(/[^0-9]/g, '')
-      if (cleaned.length < 10) {
-        errors.phone = 'Invalid phone number format'
+      // Remove country code prefix if present (91)
+      const finalPhone = cleaned.length === 12 && cleaned.startsWith('91') ? cleaned.substring(2) : cleaned
+      
+      if (finalPhone.length !== 10) {
+        errors.phone = 'Phone must be exactly 10 digits'
       } else {
-        mappedRow.phone = cleaned
+        mappedRow.phone = finalPhone
       }
+    }
+
+    // 4. Internal Duplicate Detection
+    const phoneCount = data.filter(r => {
+      const p = String(r[mappings.phone] || '').replace(/[^0-9]/g, '')
+      const cleanP = p.length === 12 && p.startsWith('91') ? p.substring(2) : p
+      return cleanP === mappedRow.phone
+    }).length
+    
+    if (phoneCount > 1) {
+      errors.phone = 'Duplicate phone number in file'
     }
 
     // Attempt Zod Validation
     const result = importRowSchema.safeParse(mappedRow)
-
     if (!result.success) {
       result.error.issues.forEach((issue) => {
         const path = issue.path[0] as string
-        errors[path] = issue.message
+        if (!errors[path]) errors[path] = issue.message
       })
     }
-
-    // Custom Warnings
-    if (!mappedRow.email) warnings.email = 'Email missing (recommended)'
-    if (!mappedRow.dob) warnings.dob = 'DOB missing'
 
     return {
       row: mappedRow,

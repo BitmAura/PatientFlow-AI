@@ -12,6 +12,7 @@ import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { PlanUpgradePrompt } from '@/components/dashboard/plan-upgrade-prompt'
 import { ConversionFunnel } from '@/components/dashboard/conversion-funnel'
 import { MorningIntelligenceCard } from '@/components/dashboard/morning-intelligence'
+import { MoneyLeakList } from '@/components/dashboard/money-leak-list'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
@@ -96,6 +97,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
           {/* Left Column (Timeline) - 4 cols wide */}
           <div className="col-span-1 space-y-6 lg:col-span-4">
+            <MoneyLeakList />
             <TodayAppointments />
             <RecentActivity />
           </div>

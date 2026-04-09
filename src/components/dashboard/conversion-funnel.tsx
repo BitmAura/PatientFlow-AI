@@ -10,9 +10,10 @@ export function ConversionFunnel() {
 
   const funnel = useMemo(
     () => [
-      { stage: 'Leads', value: stats?.total_leads_count ?? 0 },
-      { stage: 'Booked', value: stats?.booked_leads_count ?? 0 },
-      { stage: 'Completed', value: stats?.week_completed_count ?? 0 },
+      { stage: 'New', value: stats?.lead_pipeline_stats?.new ?? 0 },
+      { stage: 'Contacted', value: stats?.lead_pipeline_stats?.contacted ?? 0 },
+      { stage: 'Responsive', value: stats?.lead_pipeline_stats?.responsive ?? 0 },
+      { stage: 'Booked', value: stats?.lead_pipeline_stats?.booked ?? 0 },
     ],
     [stats]
   )

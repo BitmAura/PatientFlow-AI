@@ -11,43 +11,76 @@ export async function handleIncomingMessage(params: {
   content: string
   metadata?: any
 }): Promise<void> {
+  const supabase = createAdminClient() as any
   const text = params.content.trim()
   const upper = normalize(text)
 
-  if (['STOP', 'NO', 'UNSUBSCRIBE'].includes(upper)) {
+  // 1. Log to Inbox (patient_messages) - For all messages
+  await supabase.from('patient_messages').insert({
+    clinic_id: params.clinicId,
+    phone_number: params.fromPhone,
+    content: text,
+    direction: 'inbound',
+    status: 'unread',
+    message_id_external: params.metadata?.externalId
+  })
+
+  // 2. Handle STOP / OPT OUT (Global Block)
+  if (['STOP', 'OPT OUT', 'UNSUBSCRIBE'].some(opt => upper.includes(opt))) {
     const { markLeadOptOut } = await import('@/services/leads/service')
     await markLeadOptOut(params.clinicId, params.fromPhone)
+    
+    // Update patient record
+    await supabase.from('patients')
+      .update({ opted_out: true })
+      .eq('clinic_id', params.clinicId)
+      .eq('phone', params.fromPhone)
+
+    const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
+    await sendWhatsAppMessage(params.clinicId, params.fromPhone, "You have been opted out from all communications. ⛔")
     return
   }
 
-  // 1. Handle Appointment Buttons (Iron-Clad Logic)
+  // 3. Handle Appointment Buttons
   if (upper.startsWith('CONFIRM_APPT_')) {
     const appointmentId = text.split('CONFIRM_APPT_')[1]
-    const supabase = createAdminClient() as any
     await supabase.from('appointments').update({ status: 'confirmed' }).eq('id', appointmentId)
     
-    // Send confirmation nudge
     const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
     await sendWhatsAppMessage(params.clinicId, params.fromPhone, "Great! Your appointment is confirmed. See you soon! ✅")
     return
   }
 
+  if (upper.startsWith('CANCEL_APPT_')) {
+    const appointmentId = text.split('CANCEL_APPT_')[1]
+    await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId)
+    
+    const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
+    await sendWhatsAppMessage(params.clinicId, params.fromPhone, "Your appointment has been cancelled. If you'd like to book a new slot, let us know.")
+    
+    // TRIGGER: Auto-fill Waiting List
+    const { processWaitingList } = await import('@/services/appointments/service')
+    await processWaitingList(params.clinicId)
+    return
+  }
+
   if (upper.startsWith('RESCHEDULE_APPT_')) {
     const appointmentId = text.split('RESCHEDULE_APPT_')[1]
-    const slots = await suggestUpcomingSlots(params.clinicId)
+    await supabase.from('appointments').update({ status: 'reschedule_requested' }).eq('id', appointmentId)
     
+    const slots = await suggestUpcomingSlots(params.clinicId)
     const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
     await sendWhatsAppMessage(params.clinicId, params.fromPhone, `No problem! Here are some open slots:\n\n${slots.join('\n')}\n\nPlease reply with your choice or call us.`)
     return
   }
 
-  // 2. Default Lead Logic (Fallback)
+  // 4. Default Lead Logic (Fallback for unstructured chat)
   const { createLeadFromInboundMessage } = await import('@/services/leads/service')
   const lead = await createLeadFromInboundMessage({
-    clinicId: params.clinicId,
+    clinic_id: params.clinicId,
     phone: params.fromPhone,
     text,
-  })
+  } as any)
 
   if (!lead) return
 

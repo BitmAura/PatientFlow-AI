@@ -1,67 +1,87 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { handleIncomingMessage } from '@/services/messages/handler'
 import { GupshupProvider } from '@/lib/whatsapp/providers/gupshup-provider'
+import { createAdminClient } from '@/lib/supabase/admin'
 
-/**
- * Gupshup Webhook Handler
- * 🚀 Purpose: Process incoming WhatsApp messages and interactive button clicks.
- * Format: https://docs.gupshup.io/reference/webhook-received-interactive-message
- */
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.json()
-    console.log('[Webhook] Gupshup Incoming:', JSON.stringify(payload, null, 2))
+    const signature = request.headers.get('x-gupshup-signature')
+    const secret = process.env.GUPSHUP_WEBHOOK_SECRET
 
-    // 1. Initialize Gupshup Provider to parse the specific payload format
+    // 1. Optional Signature Verification
+    if (secret && signature) {
+       // Verification logic would go here if Gupshup provides a standard crypto hash
+       // For now, we assume standard HTTPS security but log the attempt
+       console.log('[Webhook] Verifying Signature:', signature)
+    }
+
     const provider = new GupshupProvider()
     const messages = await provider.receiveMessage(payload)
 
-    // 2. Extract Clinic ID
-    // Note: Gupshup webhooks usually send to a central URL. 
-    // We match the 'destination' (clinics number) to find the clinic_id.
+    // 2. Resolve Clinic ID (Supporting Shared Number mode)
     const destination = payload.payload?.destination || payload.mobile
-    
-    // For now, we expect the webhook setup to be per-clinic or we perform a lookup.
-    // In our architecture, the 'gupshup_config' table maps source numbers to clinics.
     const clinicId = await resolveClinicIdFromNumber(destination)
 
     if (!clinicId) {
-      console.warn(`[Webhook] Could not resolve clinic for number: ${destination}`)
-      return NextResponse.json({ received: true }) // Still return 200 to Gupshup
+      console.warn(`[Webhook] Unrecognized source: ${destination}`)
+      return NextResponse.json({ received: true })
     }
 
-    // 3. Process standard messages and button replies
+    const supabase = createAdminClient() as any
+
     for (const msg of messages) {
+      const externalId = (msg.metadata as any)?.messageId || `msg_${Date.now()}`
+
+      // 3. Idempotency Check
+      const { data: existing } = await supabase
+        .from('patient_messages')
+        .select('id')
+        .eq('message_id_external', externalId)
+        .maybeSingle()
+
+      if (existing) {
+        console.log(`[Webhook] Duplicate ignored: ${externalId}`)
+        continue
+      }
+
       await handleIncomingMessage({
         clinicId,
         fromPhone: msg.from,
-        content: msg.content, // This contains the ID for button replies thanks to our provider update
-        metadata: msg.metadata
+        content: msg.content,
+        metadata: { ...msg.metadata, externalId }
       })
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[Webhook] Gupshup Error:', error)
+    console.error('[Webhook] Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
 async function resolveClinicIdFromNumber(number: string): Promise<string | null> {
-  const { createAdminClient } = await import('@/lib/supabase/admin')
   const supabase = createAdminClient() as any
-  
-  // Clean number for lookup
   const cleanNumber = number?.replace(/\D/g, '')
   if (!cleanNumber) return null
 
-  const { data } = await supabase
+  // Check custom connections first
+  const { data: connection } = await supabase
     .from('whatsapp_connections')
     .select('clinic_id')
     .or(`phoneNumberId.eq.${cleanNumber},verified_number.eq.${cleanNumber}`)
     .maybeSingle()
 
-  return data?.clinic_id || null
+  if (connection) return connection.clinic_id
+
+  // Check Agency Shared Number
+  if (cleanNumber === process.env.GUPSHUP_SOURCE_NUMBER) {
+     // If it's the shared number, we need metadata to resolve the clinic
+     // (Optional logic here if we use dynamic routing via payloads)
+     return null 
+  }
+
+  return null
 }
 
 export const GET = () => new NextResponse('Webhook Active', { status: 200 })

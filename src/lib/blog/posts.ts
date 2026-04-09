@@ -89,6 +89,33 @@ export const blogPosts: BlogPost[] = [
       'Fixing these four issues can stabilize booking quality and reduce front desk pressure without increasing headcount.'
     ],
   },
+  {
+    slug: 'why-bangalore-dental-clinics-lose-revenue',
+    title: 'Why Dental Clinics in Bangalore Lose ₹50,000/Month to No-Shows',
+    description: 'A deep dive into how traffic and manual booking errors are costing Bangalore clinics a fortune, and how to plug the leak.',
+    publishedAt: '2026-04-09',
+    readTime: '12 min read',
+    keywords: ['Bangalore dental clinic', 'no-show revenue loss', 'WhatsApp automation Bangalore'],
+    content: ['Coming soon...']
+  },
+  {
+    slug: 'whatsapp-for-clinics-guide-2026',
+    title: 'WhatsApp for Clinics: Complete Guide for Indian Doctors 2026',
+    description: 'The updated definitive guide for Indian doctors to leverage WhatsApp Business API for sustainable clinical growth.',
+    publishedAt: '2026-04-09',
+    readTime: '15 min read',
+    keywords: ['WhatsApp for doctors', 'healthcare automation India', 'digital clinic 2026'],
+    content: ['Coming soon...']
+  },
+  {
+    slug: 'reduce-patient-no-shows-india-strategies',
+    title: 'How to Reduce Patient No-Shows: 7 Strategies That Work in India',
+    description: 'Proven tactics to improve patient attendance in the Indian context, from deposit links to interactive reminders.',
+    publishedAt: '2026-04-09',
+    readTime: '11 min read',
+    keywords: ['reduce patient no-shows India', 'clinic efficiency', 'patient engagement'],
+    content: ['Coming soon...']
+  },
 ]
 
 export function getAllBlogPosts(): BlogPost[] {

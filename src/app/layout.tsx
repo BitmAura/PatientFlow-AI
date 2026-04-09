@@ -20,13 +20,16 @@ export const viewport: Viewport = {
   ],
 }
 
+const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'PatientFlow AI'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://patientflow.ai'
+
 export const metadata: Metadata = {
   title: {
-    default: 'PatientFlow AI',
-    template: '%s | PatientFlow AI',
+    default: brandName,
+    template: `%s | ${brandName}`,
   },
   description:
-    'Indian dental and skin clinics use PatientFlow AI to recover ₹40,000+/month from missed appointments with WhatsApp automation.',
+    `Indian dental and skin clinics use ${brandName} to recover ₹40,000+/month from missed appointments with WhatsApp automation.`,
   keywords: [
     'clinic appointment software India',
     'WhatsApp clinic automation',
@@ -36,24 +39,24 @@ export const metadata: Metadata = {
   ],
   authors: [
     {
-      name: 'Aura Digital Services',
-      url: 'https://auradigitalservices.me',
+      name: brandName,
+      url: appUrl,
     },
   ],
-  creator: 'Aura Digital Services',
-  metadataBase: new URL('https://auradigitalservices.me'),
+  creator: brandName,
+  metadataBase: new URL(appUrl),
   openGraph: {
-    title: 'PatientFlow AI',
+    title: brandName,
     description:
       'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
-    url: 'https://auradigitalservices.me',
-    siteName: 'PatientFlow AI',
+    url: appUrl,
+    siteName: brandName,
     images: ['/logo.png'],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PatientFlow AI',
+    title: brandName,
     description:
       'Reduce clinic no-shows with WhatsApp automation built for Indian healthcare teams.',
     images: ['/logo.png'],

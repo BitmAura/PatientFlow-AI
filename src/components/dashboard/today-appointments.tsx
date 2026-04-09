@@ -111,6 +111,17 @@ export function TodayAppointments() {
                         Confirmed
                       </Badge>
                     )}
+                    {/* Risk Badge */}
+                    {appointment.no_show_risk_score >= 60 && (
+                      <Badge className="ml-2 mt-1 border-red-200 bg-red-50 text-red-600">
+                        High Risk No-Show
+                      </Badge>
+                    )}
+                    {appointment.no_show_risk_score >= 30 && appointment.no_show_risk_score < 60 && (
+                      <Badge className="ml-2 mt-1 border-amber-200 bg-amber-50 text-amber-600">
+                        Medium Risk
+                      </Badge>
+                    )}
                   </div>
                 </div>
 

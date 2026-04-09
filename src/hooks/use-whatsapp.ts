@@ -11,6 +11,7 @@ export type WhatsAppStatus = {
   clinicId?: string | null
   bot_personality?: BotPersonality | null
   name?: string | null
+  use_shared_number?: boolean
 }
 
 function normalizeWhatsAppStatus(payload: any): WhatsAppStatus {
@@ -166,6 +167,24 @@ export function useWhatsApp() {
     return response.json()
   }
 
+  const setSharedNumberMode = async (enabled: boolean) => {
+    const response = await fetch('/api/whatsapp/mode', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ useSharedNumber: enabled })
+    })
+
+    if (!response.ok) {
+      throw new Error(await getApiErrorMessage(response, 'Failed to update WhatsApp mode'))
+    }
+
+    const { data: updatedData } = await response.json()
+    const normalized = normalizeWhatsAppStatus(updatedData)
+    writeStatusCache(normalized)
+    setData(normalized)
+    return normalized
+  }
+
   return {
     data,
     isLoading,
@@ -173,7 +192,8 @@ export function useWhatsApp() {
     startAutoSetup,
     saveApiKeys,
     disconnect,
-    sendTestMessage
+    sendTestMessage,
+    setSharedNumberMode
   }
 }
 

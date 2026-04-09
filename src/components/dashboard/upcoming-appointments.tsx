@@ -83,6 +83,11 @@ export function UpcomingAppointments() {
                     >
                       {appointment.status}
                     </Badge>
+                    {appointment.no_show_risk_score >= 60 && (
+                      <Badge className="ml-2 border-red-200 bg-red-50 text-red-600">
+                        High Risk
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
