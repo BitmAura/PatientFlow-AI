@@ -39,8 +39,8 @@ export function FeatureGrid() {
       <div className="container mx-auto px-4">
         {/* Why Dental Clinics Lose Patients */}
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            Why Dental Clinics Lose High-Intent Patients
+          <h2 className="font-heading text-3xl font-black uppercase tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+            Why Dental Clinics Lose <br className="hidden sm:block" /> <span className="text-emerald-600">High-Intent</span> Patients
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-500 sm:text-lg dark:text-slate-400">
             Most dental teams are not short on inquiries. They are short on instant, consistent follow-up.
@@ -55,8 +55,8 @@ export function FeatureGrid() {
         {/* India-Market Trust Signals */}
         <div className="mt-24 md:mt-32">
           <div className="mx-auto max-w-3xl text-center mb-12">
-             <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">India-Market Trust Signals</h2>
-             <p className="mt-4 text-slate-500">Built for the unique operational requirements of Indian healthcare.</p>
+             <h2 className="font-heading text-3xl font-black uppercase tracking-tight text-slate-900 sm:text-4xl dark:text-white">India-Market Trust Signals</h2>
+             <p className="mt-4 text-base font-bold text-slate-500">Built for the unique operational requirements of Indian healthcare.</p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {trustSignals.map((t, idx) => (

@@ -99,11 +99,11 @@ export default function LandingPage() {
                 Performance Promise
             </div>
             
-            <h2 className="text-balance text-3xl font-black tracking-tight text-slate-900 sm:text-5xl dark:text-white">
-              Get Your First <span className="text-emerald-500">10 Bookings</span> Guaranteed.
+            <h2 className="font-heading text-balance text-3xl font-black uppercase tracking-tight text-slate-900 sm:text-5xl dark:text-white leading-tight">
+              Get Your First <span className="text-emerald-500">10 Bookings</span> <br className="hidden sm:block" /> Guaranteed.
             </h2>
             
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg dark:text-slate-400">
+            <p className="mx-auto mt-6 max-w-2xl text-base font-bold leading-relaxed text-slate-500 sm:text-lg dark:text-slate-400">
               Stop guessing if your clinic is growing. See exactly how PatientFlow AI fits your clinical process in a personalized executive demo.
             </p>
             

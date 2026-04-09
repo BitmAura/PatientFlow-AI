@@ -105,7 +105,7 @@ export function UnifiedHeader({
               <Image src="/logo.png" alt="" fill className="object-contain" priority />
             </div>
             <div className="min-w-0 text-left">
-              <h1 className="truncate text-lg font-bold leading-tight text-emerald-900 sm:text-xl lg:text-2xl dark:text-emerald-100">
+              <h1 className="font-heading truncate text-lg font-black leading-tight text-emerald-900 sm:text-xl lg:text-2xl dark:text-emerald-100 uppercase tracking-tight">
                 {logoText || config.logo}
               </h1>
               <p

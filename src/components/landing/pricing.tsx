@@ -1,97 +1,181 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarCheck2, MessageCircleMore, ArrowRight, Zap } from 'lucide-react'
-import { PRICING_PLANS, formatPriceInrFromPaise } from '@/lib/billing/plans'
+import { Check, ArrowRight, Zap, Shield, Sparkles } from 'lucide-react'
+import { PRICING_PLANS, formatPriceInrFromPaise, BillingCycle, PricingPlanId } from '@/lib/billing/plans'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils/cn'
 
 /**
  * Landing Pricing Section
  * 📈 Persona: Revenue Strategist
- * 🎨 Aura Vision (Light Mode) Aesthetic
+ * 🎨 Premium Multi-tier Grid
  */
 export function Pricing() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
 
-  const price = formatPriceInrFromPaise(PRICING_PLANS.starter.monthlyPricePaise)
+  const plans = Object.values(PRICING_PLANS)
 
-  async function handleSubscribe() {
-    setLoading(true)
+  async function handleSubscribe(planId: PricingPlanId) {
+    setLoading(planId)
     setError(null)
     try {
       const res = await fetch('/api/subscription/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan_id: 'starter', billing_cycle: 'monthly' }),
+        body: JSON.stringify({ plan_id: planId, billing_cycle: billingCycle }),
       })
 
       if (res.status === 401) {
-        // user not signed in — send to signup with starter preselected
-        window.location.href = '/signup?plan=starter'
+        window.location.href = `/signup?plan=${planId}&cycle=${billingCycle}`
         return
       }
 
       const payload = await res.json().catch(() => null)
       if (!res.ok) {
-        const msg = payload?.error || payload?.details || (await res.text().catch(() => res.statusText))
+        const msg = payload?.error || (await res.text().catch(() => res.statusText))
         throw new Error(msg || 'Subscription failed')
       }
 
-      // If Razorpay returned a hosted short URL, open it; otherwise go to billing
-      if (payload?.shortUrl) {
-        window.open(payload.shortUrl, '_blank')
-      } else {
-        window.location.href = '/dashboard/billing'
-      }
+      if (payload?.shortUrl) window.open(payload.shortUrl, '_blank')
+      else window.location.href = '/dashboard/billing'
     } catch (err: any) {
       console.error('Subscribe error', err)
       setError(err?.message || String(err))
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
   return (
-    <section id="pricing" className="bg-white py-14 md:py-20 lg:py-28 dark:bg-slate-900/50">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:bg-blue-900/20 dark:border-blue-800/40">
-            <Zap className="h-3 w-3" />
+    <section id="pricing" className="relative overflow-hidden bg-slate-50 py-24 dark:bg-slate-950">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center mb-16">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm backdrop-blur-xl dark:border-emerald-900/40 dark:bg-emerald-950/20">
+            <Shield className="h-3 w-3" />
             Simple Transparent Pricing
           </div>
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            Simple Pricing for Every Clinic Stage
+          <h2 className="font-heading text-4xl font-black tracking-tight text-slate-900 sm:text-6xl dark:text-white uppercase">
+            Built for <span className="text-emerald-600">Pure Recovery</span>
           </h2>
-          <p className="mt-4 text-base text-slate-500 sm:text-lg dark:text-slate-400">
-             Subscribe — starting at {price} / month
+          <p className="mt-4 text-lg font-bold text-slate-500 dark:text-slate-400">
+            Scale your practice with confidence. No hidden fees. No per-message taxes.
           </p>
-        </div>
 
-        <div className="mx-auto mt-14 max-w-2xl">
-          <div className="rounded-3xl border p-8 shadow-xl bg-white dark:bg-slate-900/50">
-            <h3 className="text-xl font-black text-slate-900 dark:text-white">Subscribe</h3>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Get started with our Starter plan. You can change plans later.</p>
-
-            <div className="mt-6 flex items-center gap-4">
-              <span className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">{price}</span>
-              <span className="text-sm font-bold text-slate-400">/month</span>
-            </div>
-
-            <div className="mt-8">
-              <button
-                onClick={handleSubscribe}
-                disabled={loading}
-                className="inline-flex items-center justify-center h-14 w-full rounded-lg bg-emerald-500 px-6 font-black text-white hover:bg-emerald-600 disabled:opacity-60"
-              >
-                {loading ? 'Processing…' : 'Subscribe'}
-              </button>
-              {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {/* Billing Toggle */}
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <span className={cn("text-sm font-bold", billingCycle === 'monthly' ? "text-slate-900 dark:text-white" : "text-slate-400")}>Monthly</span>
+            <button 
+              onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'annual' : 'monthly')}
+              className="relative h-7 w-12 rounded-full bg-slate-200 transition-colors dark:bg-slate-800"
+            >
+              <div className={cn(
+                "absolute top-1 h-5 w-5 rounded-full bg-emerald-500 transition-all",
+                billingCycle === 'annual' ? "left-6" : "left-1"
+              )} />
+            </button>
+            <div className="flex items-center gap-2">
+              <span className={cn("text-sm font-bold", billingCycle === 'annual' ? "text-slate-900 dark:text-white" : "text-slate-400")}>Annual</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black uppercase text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">Save 20%</span>
             </div>
           </div>
+        </div>
+
+        {error && (
+          <div className="mx-auto mb-10 max-w-xl rounded-2xl bg-red-50 p-4 text-center text-sm font-black text-red-600 border border-red-100 dark:bg-red-900/20">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          {plans.map((plan) => (
+            <PricingCard 
+              key={plan.id}
+              plan={plan}
+              billingCycle={billingCycle}
+              loading={loading === plan.id}
+              onSelect={() => handleSubscribe(plan.id)}
+            />
+          ))}
+        </div>
+
+        <div className="mt-16 text-center">
+            <p className="text-sm font-bold text-slate-500">
+                Need more than 2,000 monthly appointments? <span className="text-emerald-600 underline cursor-pointer">Contact Enterprise Sales</span>
+            </p>
         </div>
       </div>
     </section>
   )
 }
 
-// PricingCard removed — simplified single-CTA pricing per co-founder decision.
+function PricingCard({ plan, billingCycle, loading, onSelect }: { 
+  plan: any; 
+  billingCycle: BillingCycle; 
+  loading: boolean; 
+  onSelect: () => void 
+}) {
+  const isGrowth = plan.id === 'growth'
+  const isPro = plan.id === 'pro'
+  const price = billingCycle === 'monthly' ? plan.monthlyPricePaise : plan.annualPricePaise
+  const displayPrice = formatPriceInrFromPaise(price)
+  const monthlyLabel = billingCycle === 'monthly' ? '/mo' : '/yr'
+
+  return (
+    <div className={cn(
+      "group relative flex flex-col rounded-[32px] border p-8 transition-all duration-300",
+      isGrowth 
+        ? "border-emerald-500 bg-white shadow-2xl shadow-emerald-500/10 z-10 scale-105 dark:bg-slate-900" 
+        : "border-slate-200 bg-white/60 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/60 hover:border-emerald-200"
+    )}>
+      {isGrowth && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white">
+          Most Popular
+        </div>
+      )}
+
+      <div className="mb-8">
+        <h3 className="font-heading text-xl font-black text-slate-900 uppercase tracking-tight dark:text-white">{plan.name}</h3>
+        <p className="mt-2 text-sm font-bold text-slate-400">
+          {isGrowth ? 'Ideal for growing practices' : isPro ? 'Multi-location elite care' : 'Core clinical tools'}
+        </p>
+      </div>
+
+      <div className="mb-8">
+        <div className="flex items-baseline gap-1">
+          <span className="text-4xl font-black text-slate-900 dark:text-white">{displayPrice}</span>
+          <span className="text-sm font-bold text-slate-400">{monthlyLabel}</span>
+        </div>
+        {billingCycle === 'annual' && (
+          <p className="mt-1 text-xs font-black text-emerald-500 uppercase">Effective {formatPriceInrFromPaise(price / 12)}/month</p>
+        )}
+      </div>
+
+      <div className="mb-8 flex-1">
+        <ul className="space-y-4">
+          {plan.features.map((feature: string) => (
+            <li key={feature} className="flex items-start gap-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+              <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <Button 
+        onClick={onSelect}
+        disabled={loading}
+        className={cn(
+          "h-14 w-full rounded-2xl text-sm font-black uppercase tracking-widest transition-all active:scale-[0.98]",
+          isGrowth 
+            ? "bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-600" 
+            : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+        )}
+      >
+        {loading ? 'Activating…' : `Start 14-Day Trial`}
+      </Button>
+    </div>
+  )
+}

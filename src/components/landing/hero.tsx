@@ -21,15 +21,15 @@ export function Hero() {
         <div className="relative mx-auto max-w-5xl text-center">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/50 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 shadow-sm backdrop-blur-xl dark:border-emerald-900/20 dark:bg-emerald-950/20">
             <Sparkles className="h-3 w-3" />
-            Aura Vision Protocol Activated
+            #1 Patient Recovery Engine for Clinics
           </div>
           
-          <h1 className="text-balance text-5xl font-black tracking-tight text-slate-900 lg:text-7xl dark:text-white">
-            Turn Your Clinic's WhatsApp into a <span className="text-emerald-500">Revenue Generating</span> Machine.
+          <h1 className="font-heading text-balance text-5xl font-black tracking-tight text-slate-900 lg:text-7xl dark:text-white leading-[1.1]">
+            Your Clinic Loses <span className="text-emerald-600 text-glow-emerald">₹40,000 Every Month</span> to No-Shows.
           </h1>
           
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-500 lg:text-xl dark:text-slate-400">
-            Stop losing ₹40,000+ every month to no-shows. Recover leaked revenue with AI-driven patient recalls and automated dental follow-ups.
+          <p className="mx-auto mt-6 max-w-3xl text-lg font-medium leading-relaxed text-slate-600 lg:text-xl dark:text-slate-400">
+            PatientFlow AI sends automated WhatsApp reminders, recovers overdue patients, and fills cancelled slots — <span className="text-slate-900 dark:text-white font-bold">so your doctors never sit idle again.</span>
           </p>
           
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
