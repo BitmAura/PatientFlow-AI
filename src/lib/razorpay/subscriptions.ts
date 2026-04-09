@@ -252,34 +252,37 @@ export async function fetchInvoices(subscriptionId: string) {
 
 /**
  * Update subscription plan (upgrade/downgrade)
+ * Uses Razorpay's native schedule update functionality
  */
 export async function updateSubscriptionPlan(
   subscriptionId: string,
   newPlanId: string
 ) {
   try {
-    // Razorpay doesn't support direct plan changes
-    // Strategy: Cancel current, create new subscription with proration
-    const currentSub = await fetchSubscription(subscriptionId)
-    
-    // Cancel current subscription immediately
-    await getRazorpay().subscriptions.cancel(subscriptionId)
-    
-    // Calculate proration credit if applicable
-    // (This is simplified - in production you'd calculate exact proration)
-    
-    // Create new subscription
-    const newSubscription = await getRazorpay().subscriptions.create({
+    // Razorpay supports plan updates via scheduled changes
+    // This updates the plan effective immediately on next billing cycle
+    const updatedSubscription = await getRazorpay().subscriptions.update(subscriptionId, {
       plan_id: newPlanId,
-      customer_id: currentSub.customer_id,
+      customer_notify: 1,  // Notify customer of the change
       quantity: 1,
-      customer_notify: 1,
+      total_count: 0,  // 0 = infinite subscriptions
+      proration_type: 'immediate'  // Apply immediately instead of next cycle
     } as any)
     
-    return newSubscription
+    return updatedSubscription
   } catch (error) {
-    console.error('Error updating subscription plan:', error)
-    throw new Error('Failed to update subscription plan')
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('Error updating subscription plan:', message)
+    
+    // Provide helpful error message
+    if (message.includes('plan')) {
+      throw new Error(`Invalid plan ID. Please ensure the Razorpay plan exists: ${newPlanId}`)
+    }
+    if (message.includes('invalid_subscription_id')) {
+      throw new Error(`Subscription not found or already cancelled: ${subscriptionId}`)
+    }
+    
+    throw new Error(`Failed to update subscription plan: ${message}`)
   }
 }
 
