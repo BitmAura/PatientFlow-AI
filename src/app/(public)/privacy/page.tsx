@@ -12,25 +12,39 @@ export default function PrivacyPage() {
       <p className="mt-2 text-muted-foreground">Last updated: February 2025</p>
 
       <div className="prose prose-sm mt-8 dark:prose-invert">
+        <h2>1. Data Collection & Purpose</h2>
         <p>
-          PatientFlow AI (&quot;we&quot;) collects and processes data necessary to provide appointment
-          reminders, recall campaigns, and practice management. This includes clinic and staff
-          account data, patient and lead contact information (e.g. name, phone, email), and
-          appointment and message logs.
+          PatientFlow AI acts as a Data Processor for healthcare clinics (Data Controllers). We collect strictly necessary operational data: 
+          <strong>Patient Identity</strong> (Name, Encrypted Phone Numbers, Encrypted Email), and <strong>Clinical Logistics</strong> (Appointment times, basic service categories, and reminder logs).
+          We do not collect or request excessive medical records or deep clinical history metadata.
         </p>
+        
+        <h2>2. Data Retention & Deletion Rights (Erasure)</h2>
         <p>
-          We use this data to deliver the Service, send messages via WhatsApp and other channels
-          you configure, and improve our product. We do not sell your or your patients&apos; data.
-          Data is stored on secure infrastructure (e.g. Supabase) and access is restricted.
+          Operational logs (e.g. sent reminders) are automatically purged after 24 months. 
+          Upon formal request by a patient or a clinic termination, PatientFlow AI permanently erases all associated patient records, 
+          identifiable phone metadata, and clinical associations within <strong>30 operational days</strong>.
         </p>
+
+        <h2>3. Authorized Third-Party Sub-Processors</h2>
         <p>
-          You are the data controller for your patients&apos; information. You must have a lawful
-          basis (e.g. consent, legitimate interest) for sending communications. Patients can opt out
-          (e.g. by replying STOP); we honour opt-outs and reflect them in the product.
+          To maintain utility, PatientFlow AI routes data strictly through audited vendors:
         </p>
+        <ul>
+            <li><strong>Supabase (AWS):</strong> Secure PostgreSQL hosting and infrastructural encryption.</li>
+            <li><strong>Gupshup:</strong> Approved Meta provider for delivering WhatsApp Business API utility texts.</li>
+            <li><strong>Razorpay:</strong> Secure payment gateway that exclusively processes clinic subscription limits (No patient data shared).</li>
+        </ul>
+        <p>Patient info is NEVER sold to data brokers, ad networks, or external aggregators.</p>
+
+        <h2>4. Data Breach Protocol & DISHA Adherence</h2>
         <p>
-          For questions or to request access, correction, or deletion of your data, contact us at
-          the details on our website.
+          In alignment with Indian healthcare digital standards (DISHA guidelines), if a security breach exposing Protected Health Information (PHI) occurs, 
+          we mandate a <strong>72-hour notification SLA</strong> to all affected clinic administrators, empowering them to immediately notify their patients.
+        </p>
+        
+        <p>
+          For privacy audits, compliance requests, or automated data extraction workflows, contact your assigned success manager or reach out directly to operations.
         </p>
       </div>
 

@@ -23,6 +23,14 @@ export default function TermsPage() {
           ensure you have consent from patients where required. Automated messaging (e.g. reminders,
           recalls) can be paused or disconnected from your dashboard at any time.
         </p>
+        
+        <h2>WhatsApp Business API & AI Utilization Limits</h2>
+        <p>
+          As of January 2026, Meta strictly regulates the deployment of AI chatbots over the WhatsApp Business API.
+          By using PatientFlow AI, you agree that our AI engine is explicitly bounded to <strong>appointment scheduling, 
+          rescheduling, and utility confirmations</strong>. The deployment of general-purpose generative AI querying or open-ended 
+          conversations via our system is strictly prohibited. Violations may result in the immediate suspension of your WhatsApp integration.
+        </p>
         <p>
           We may update these terms; we will notify you of material changes. Continued use after
           changes constitutes acceptance.

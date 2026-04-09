@@ -63,6 +63,17 @@ export async function sendWhatsAppMessage(
       return { success: false, status: 'skipped', error: `Blocked by Guard: ${guard.reason}`, skippedReason: guard.reason }
     }
 
+    // 2.1 TRAI DND Check (For Marketing/Recall in India)
+    if (metadata?.type === 'recall' || metadata?.type === 'marketing') {
+      const { checkDndStatus } = await import('@/lib/compliance/trai-dnd')
+      const dndStatus = await checkDndStatus(phoneNumber)
+      if (dndStatus.isDnd) {
+         await logBlockedMessage(clinicId, patientId ?? null, phoneNumber, message, 'opted_out' as any, metadata?.type)
+         if (queueEntry) await supabase.from('message_queue').update({ status: 'failed', error_log: [{ reason: 'dnd_blocked', at: new Date().toISOString() }] }).eq('id', queueEntry.id)
+         return { success: false, status: 'skipped', error: 'Blocked by TRAI DND Registry', skippedReason: 'opted_out' }
+      }
+    }
+
     // 3. SESSION WINDOW & TEMPLATE ENFORCEMENT
     const sessionOpen = await isWithinSessionWindow(clinicId, phoneNumber)
     let sendType: 'text' | 'template' = 'text'

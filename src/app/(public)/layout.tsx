@@ -10,6 +10,7 @@ export default function PublicLayout({
     { label: 'Home', href: '/' },
     { label: 'Features', href: '/features' },
     { label: 'How It Works', href: '/how-it-works' },
+    { label: 'ROI Calculator', href: '/#roi-calculator' },
     { label: 'Blog', href: '/blog' },
     { label: 'About', href: '/about' },
     { label: 'Pricing', href: '/pricing' },

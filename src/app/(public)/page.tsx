@@ -80,7 +80,9 @@ export default function LandingPage() {
       <FeatureGrid />
 
       {/* ⚡ Phase 3: Dynamic ROI Engine (Lazy Loaded via Wrapper) */}
-      <AuraRoiSection />
+      <section id="roi-calculator">
+        <AuraRoiSection />
+      </section>
 
       {/* 📱 Phase 4: WhatsApp Live Flow Simulation */}
       <WhatsAppFlow />

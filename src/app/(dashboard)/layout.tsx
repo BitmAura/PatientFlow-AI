@@ -14,6 +14,7 @@ import { UnifiedHeader } from '@/components/shared/unified-header'
 import { OnboardingGuard } from '@/components/auth/onboarding-guard'
 import { DashboardThemeToggle } from '@/components/dashboard/theme-toggle'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
+import { SupportWidget } from '@/components/dashboard/support-widget'
 
 export default function DashboardLayout({
   children,
@@ -72,6 +73,7 @@ export default function DashboardLayout({
       </div>
       
       <InstallPrompt />
+      <SupportWidget />
     </div>
   )
 }
