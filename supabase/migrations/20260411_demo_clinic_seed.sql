@@ -1,21 +1,21 @@
 -- 🧬 Persona: Sales Engineering
--- ⚡ Purpose: Pre-populates a "Live Demo" clinic with high-density data for investor/clinic pitches.
--- 🛠 Fix: Using valid UUID strings and matching the patient_lifecycle_stage enums.
+-- ⚡ Purpose: Pre-populates a "Live Demo" clinic with high-density data.
+-- 🛠 Refactor: Removed problematic 'color' column from doctors.
 
 -- 1. The Clinic
 INSERT INTO public.clinics (id, name, status, use_shared_number)
 VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Aura Dental Care & Spa', 'active', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 2. The Doctors
-INSERT INTO public.doctors (id, clinic_id, name, color)
+-- 2. The Doctors (Removed 'color' column)
+INSERT INTO public.doctors (id, clinic_id, name)
 VALUES 
-  ('550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Aryan Sharma (Oral Surgeon)', '#ef4444'),
-  ('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Priya Verma (Pedodontist)', '#3b82f6'),
-  ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Meera N (Endodontist)', '#10b981')
+  ('550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Aryan Sharma (Oral Surgeon)'),
+  ('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Priya Verma (Pedodontist)'),
+  ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440000', 'Dr. Meera N (Endodontist)')
 ON CONFLICT (id) DO NOTHING;
 
--- 3. Services
+-- 3. Services (Using 'duration' as per database types)
 INSERT INTO public.services (id, clinic_id, name, duration, price, color)
 VALUES
   ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440000', 'Consultation', 15, 500, '#64748b'),
@@ -23,7 +23,7 @@ VALUES
   ('550e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440000', 'Pediatric Cleaning', 30, 1200, '#ec4899')
 ON CONFLICT (id) DO NOTHING;
 
--- 4. Patients (50 Fake Patients - Core 5 for display)
+-- 4. Patients
 INSERT INTO public.patients (id, clinic_id, full_name, phone, lifecycle_stage, whatsapp_opt_in)
 VALUES
   ('550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440000', 'Rohan Mehra', '+919999999001', 'visited', true),
@@ -33,20 +33,16 @@ VALUES
   ('550e8400-e29b-41d4-a716-446655440105', '550e8400-e29b-41d4-a716-446655440000', 'Vikram Singh', '+919999999005', 'visited', true)
 ON CONFLICT (id) DO NOTHING;
 
--- 5. Appointments (Past & Future)
+-- 5. Appointments
 INSERT INTO public.appointments (id, clinic_id, patient_id, doctor_id, service_id, start_time, end_time, status)
 VALUES
-  -- Past Confirmed
   ('550e8400-e29b-41d4-a716-446655440201', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440011', NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 hour 45 minutes', 'confirmed'),
-  -- Today Upcoming
   ('550e8400-e29b-41d4-a716-446655440202', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440102', '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440013', NOW() + INTERVAL '2 hours', NOW() + INTERVAL '2 hours 30 minutes', 'pending'),
-  -- Tomorrow
   ('550e8400-e29b-41d4-a716-446655440203', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440104', '550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440012', NOW() + INTERVAL '24 hours', NOW() + INTERVAL '25 hours', 'pending'),
-  -- No-Show Case (For Demo)
   ('550e8400-e29b-41d4-a716-446655440204', '550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440103', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440012', NOW() - INTERVAL '5 days', NOW() - INTERVAL '4 hours', 'no_show')
 ON CONFLICT (id) DO NOTHING;
 
--- 6. Reminder Logs (Communication History)
+-- 6. Reminder Logs
 INSERT INTO public.reminder_logs (clinic_id, patient_id, appointment_id, type, status, message)
 VALUES
   ('550e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440201', 'reminder_24h', 'sent', 'Hi Rohan, your appointment at Aura Dental is tomorrow!'),
