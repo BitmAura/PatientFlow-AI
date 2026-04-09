@@ -5,12 +5,18 @@ import { SocialAuthButtons } from '@/components/auth/social-auth-buttons'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { GlassCard } from '@/components/ui/glass-card'
-import { FREE_TRIAL_DAYS, PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
+import { FREE_TRIAL_DAYS, PRICING_PLANS, normalizePlanId, formatPriceInrFromPaise } from '@/lib/billing/plans'
 import { useSearchParams } from 'next/navigation'
 
 export function SignupView() {
   const searchParams = useSearchParams()
   const selectedPlan = normalizePlanId(searchParams.get('plan') || 'starter')
+  const cycle = searchParams.get('cycle') === 'annual' ? 'annual' : 'monthly'
+
+  const planData = PRICING_PLANS[selectedPlan]
+  const pricePaise = cycle === 'annual' ? planData.annualPricePaise : planData.monthlyPricePaise
+  const displayPrice = formatPriceInrFromPaise(pricePaise)
+  const billingPeriod = cycle === 'annual' ? '/year' : '/month'
 
   const planDetails: Record<
     string,
@@ -18,17 +24,17 @@ export function SignupView() {
   > = {
     starter: {
       name: PRICING_PLANS.starter.name,
-      price: '₹2,999/month',
+      price: `${displayPrice}${billingPeriod}`,
       description: 'For doctors and small clinics',
     },
     growth: {
       name: PRICING_PLANS.growth.name,
-      price: '₹8,999/month',
+      price: `${displayPrice}${billingPeriod}`,
       description: 'For scaling clinics and multi-doctor practices',
     },
     pro: {
       name: PRICING_PLANS.pro.name,
-      price: '₹14,999/month',
+      price: `${displayPrice}${billingPeriod}`,
       description: 'For multi-location clinics and hospital groups',
     },
   }
