@@ -141,6 +141,8 @@ export class GupshupProvider implements WhatsAppProvider {
         params.append('message', JSON.stringify({ type: 'text', text: options.content, previewUrl: false }))
       } else if (options.type === 'template') {
         params.append('template', JSON.stringify(options.content))
+      } else if (options.type === 'interactive') {
+        params.append('message', JSON.stringify(options.content))
       } else {
         return { success: false, error: 'Unsupported message type', rawResponse: null }
       }
@@ -173,12 +175,21 @@ export class GupshupProvider implements WhatsAppProvider {
     // Case 1: Standard Gupshup Payload (type = 'message')
     if (payload.type === 'message') {
       const body = payload.payload;
+      let content = body.body?.text || body.body || '';
+      
+      // Handle interactive button replies
+      if (body.type === 'button_reply') {
+        content = body.payload?.id || content;
+      } else if (body.type === 'list_reply') {
+        content = body.payload?.id || content;
+      }
+
       messages.push({
-        from: body.sender.phone,
+        from: body.sender?.phone || body.source,
         type: body.type,
-        content: body.body.text || body.body, // Text is often in body.text for text type
+        content: content,
         messageId: body.id,
-        timestamp: new Date(payload.timestamp).toISOString(),
+        timestamp: new Date(payload.timestamp || Date.now()).toISOString(),
         metadata: payload
       });
     }

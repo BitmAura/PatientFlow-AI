@@ -7,8 +7,8 @@ export interface WhatsAppProviderConfig {
 }
 
 export interface SendMessageOptions {
-  type: 'text' | 'template' | 'image' | 'document';
-  content: string | any; // Text body or template object
+  type: 'text' | 'template' | 'image' | 'document' | 'interactive';
+  content: string | any; // Text body, template object, or interactive object
   metadata?: any;
 }
 

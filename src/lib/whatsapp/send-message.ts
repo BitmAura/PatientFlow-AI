@@ -140,6 +140,8 @@ async function sendViaGupshup(
 
   const provider = WhatsAppProviderFactory.getProvider('gupshup')
   const isText = typeof content === 'string'
+  // Determine message type
+  const messageType = metadata?.messageType || (isText ? 'text' : 'template');
 
   // Retry logic: up to 3 attempts with exponential backoff
   let lastError: string | undefined
@@ -147,9 +149,7 @@ async function sendViaGupshup(
     try {
       const result = await provider.sendMessage(
         cleanPhone,
-        isText
-          ? { type: 'text', content }
-          : { type: 'template', content },
+        { type: messageType as any, content },
         config
       )
 

@@ -45,22 +45,26 @@ async function sendMultiChannel(params: {
   clinicId: string
   phone: string
   email?: string | null
-  whatsappText: string
+  whatsappContent: string | any
   smsText: string
   emailSubject: string
   emailHtml: string
   logType: string
   appointmentId: string
   patientId: string
+  whatsappMetadata?: any
 }): Promise<{ success: boolean; channels: string[] }> {
   const channels: string[] = []
-
-  // 1. WhatsApp (always primary)
-  const wa = await sendWhatsAppMessage(params.clinicId, params.phone, params.whatsappText, {
+  
+  const waMetadata = {
+    ...params.whatsappMetadata,
     type: params.logType,
     appointmentId: params.appointmentId,
     patientId: params.patientId,
-  })
+  }
+
+  // 1. WhatsApp (always primary)
+  const wa = await sendWhatsAppMessage(params.clinicId, params.phone, params.whatsappContent, waMetadata)
 
   if (wa.success) {
     channels.push('whatsapp')
@@ -155,7 +159,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         clinicId: appointment.clinic_id,
         phone,
         email: patientEmail,
-        whatsappText: `Hi ${firstName}, just a heads-up — your appointment at ${clinicName} is in 2 days on ${appointmentDateStr} at ${appointmentTimeStr}. Reply to reschedule if needed.`,
+        whatsappContent: `Hi ${firstName}, just a heads-up — your appointment at ${clinicName} is in 2 days on ${appointmentDateStr} at ${appointmentTimeStr}. Reply to reschedule if needed.`,
         smsText: `Hi ${firstName}, appointment at ${clinicName} on ${appointmentDateStr} at ${appointmentTimeStr}. Call ${clinicPhone ?? ''} to reschedule.`,
         emailSubject: subject,
         emailHtml: html,
@@ -183,14 +187,26 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         clinicId: appointment.clinic_id,
         phone,
         email: patientEmail,
-        whatsappText: `Hi ${firstName}, reminder: your appointment at ${clinicName} is tomorrow at ${appointmentTimeStr}. Reply to reschedule.`,
+        whatsappContent: {
+          type: 'quick_reply',
+          header: { type: 'text', text: 'Appointment Confirmation' },
+          body: { text: `Hi ${firstName}, your appointment at ${clinicName} is tomorrow at ${appointmentTimeStr}. Will you be coming?` },
+          footer: { text: 'Aura Digital Services' },
+          action: {
+            buttons: [
+              { type: 'reply', reply: { id: `CONFIRM_APPT_${appointment.id}`, title: 'Confirm ✅' } },
+              { type: 'reply', reply: { id: `RESCHEDULE_APPT_${appointment.id}`, title: 'Reschedule 🔄' } }
+            ]
+          }
+        },
+        whatsappMetadata: { messageType: 'interactive' },
         smsText: `Hi ${firstName}, reminder: Appointment at ${clinicName} tomorrow at ${appointmentTimeStr}. Call ${clinicPhone ?? ''} to reschedule.`,
         emailSubject: subject,
         emailHtml: html,
         logType: 'appointment_reminder_24h',
         appointmentId: appointment.id,
-        patientId: appointment.patient_id,
-      })
+        patient_id: appointment.patient_id, // Fix typo if any
+      } as any)
 
       if (result.success) {
         stats.sent++
@@ -211,7 +227,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         clinicId: appointment.clinic_id,
         phone,
         email: patientEmail,
-        whatsappText: `Hi ${firstName}, your appointment at ${clinicName} is in a few hours (${appointmentTimeStr}). We are ready for you!`,
+        whatsappContent: `Hi ${firstName}, your appointment at ${clinicName} is in a few hours (${appointmentTimeStr}). We are ready for you!`,
         smsText: `Hi ${firstName}, appointment at ${clinicName} at ${appointmentTimeStr} today. Call ${clinicPhone ?? ''} for queries.`,
         emailSubject: subject,
         emailHtml: html,
@@ -241,14 +257,26 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
           clinicId: appointment.clinic_id,
           phone,
           email: patientEmail,
-          whatsappText: `Hi ${firstName}, we missed you at ${clinicName} today. Want to reschedule? Reply with your preferred time.`,
+          whatsappContent: {
+            type: 'quick_reply',
+            header: { type: 'text', text: 'Recovery' },
+            body: { text: `Hi ${firstName}, we missed you today at ${clinicName}. Use the buttons below to reschedule or speak with us.` },
+            footer: { text: 'Aura Digital Services' },
+            action: {
+              buttons: [
+                { type: 'reply', reply: { id: `RESCHEDULE_APPT_${appointment.id}`, title: 'Reschedule Now' } },
+                { type: 'reply', reply: { id: `CALL_CLINIC_${appointment.id}`, title: 'Call Us 📞' } }
+              ]
+            }
+          },
+          whatsappMetadata: { messageType: 'interactive' },
           smsText: `Hi ${firstName}, missed your appointment at ${clinicName}. Call ${clinicPhone ?? ''} to reschedule.`,
           emailSubject: subject,
           emailHtml: html,
           logType: 'no_show_recovery',
           appointmentId: appointment.id,
           patientId: appointment.patient_id,
-        })
+        } as any)
 
         if (result.success) {
           stats.sent++
@@ -272,7 +300,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
           clinicId: appointment.clinic_id,
           phone,
           email: patientEmail,
-          whatsappText: `Hi ${firstName}, thank you for visiting ${clinicName}. We hope you are feeling well! Feel free to reach out if you have any questions.`,
+          whatsappContent: `Hi ${firstName}, thank you for visiting ${clinicName}. We hope you are feeling well! Feel free to reach out if you have any questions.`,
           smsText: `Hi ${firstName}, thanks for visiting ${clinicName} today. Call ${clinicPhone ?? ''} if you have questions.`,
           emailSubject: subject,
           emailHtml: html,

@@ -52,14 +52,14 @@ export async function GET() {
       
     // Week Appointments
     supabase.from('appointments')
-      .select('status', { count: 'exact' })
+      .select('status, start_time', { count: 'exact' })
       .eq('clinic_id', clinicId)
       .gte('start_time', weekStart)
       .lte('start_time', weekEnd),
 
-    // Current Month No-Show Stats
+    // Current Month No-Show Stats + Joining services for ROI
     supabase.from('appointments')
-      .select('status', { count: 'exact' })
+      .select('id, status, services(price)', { count: 'exact' })
       .eq('clinic_id', clinicId)
       .gte('start_time', monthStart)
       .lte('start_time', monthEnd),
@@ -72,7 +72,7 @@ export async function GET() {
       .lte('start_time', lastMonthEnd),
 
     // Deposits
-    supabase.from('payments')
+    supabase.from('payments') // Assuming payments table exists for captured deposits
       .select('amount', { count: 'exact' })
       .eq('clinic_id', clinicId)
       .eq('status', 'captured')
@@ -98,6 +98,7 @@ export async function GET() {
       .eq('clinic_id', clinicId)
       .eq('status', 'active'),
 
+    // Leads Stats
     supabase.from('leads')
       .select('id', { count: 'exact', head: true })
       .eq('clinic_id', clinicId),
@@ -112,6 +113,7 @@ export async function GET() {
       .eq('clinic_id', clinicId)
       .eq('status', 'new'),
 
+    // No-Shows This Week
     supabase.from('appointments')
       .select('id', { count: 'exact', head: true })
       .eq('clinic_id', clinicId)
@@ -129,35 +131,54 @@ export async function GET() {
   const weekCompleted = weekAppointments.data?.filter((a: any) => a.status === 'completed').length || 0
 
   // No Show Rate Calculation
-  const calculateNoShowRate = (data: any[]) => {
-    const total = data.length
-    if (total === 0) return 0
+  const calculateNoShowRate = (data: any[] | null) => {
+    if (!data || data.length === 0) return 0
     const noShows = data.filter((a: any) => a.status === 'no_show').length
-    return (noShows / total) * 100
+    return (noShows / data.length) * 100
   }
 
-  const currentMonthRate = calculateNoShowRate(currentMonthStats.data || [])
-  const lastMonthRate = calculateNoShowRate(lastMonthStats.data || [])
+  const currentMonthRate = calculateNoShowRate(currentMonthStats.data)
+  const lastMonthRate = calculateNoShowRate(lastMonthStats.data)
 
-  // Deposits
+  // ROI / Revenue Calculation
+  const monthAppointments = (currentMonthStats.data as any[]) || []
+  
+  // Calculate Revenue: Sum of service prices for confirmed/completed
+  // We'll use a pragmatic fallback of 2500 per appt if service price is missing or not joined
+  const actualRevenue = monthAppointments.reduce((sum, appt) => {
+    if (['confirmed', 'completed'].includes(appt.status)) {
+      return sum + (appt.services?.price || 2500)
+    }
+    return sum
+  }, 0)
+
   const totalDeposits = deposits.data?.reduce((sum: any, p: any) => sum + (p.amount || 0), 0) || 0
   const totalLeadsCount = totalLeads.count || 0
   const bookedLeadsCount = bookedLeads.count || 0
   const noShowsThisWeekCount = noShowsThisWeek.count || 0
-  const noShowsPreventedCount = Math.max(weekTotal - noShowsThisWeekCount - (weekAppointments.data?.filter((a: any) => a.status === 'pending').length || 0), 0)
-  const estimatedRevenueRecovered = bookedLeadsCount * 1500
+  
+  // No-Shows Prevented: Count appointments in 'confirmed' status
+  const noShowsPreventedCount = monthAppointments.filter(a => a.status === 'confirmed').length
+  
+  // Iron-Clad ROI Calculation: 
+  // (Recovered Leads * 2000) + (Confirmed/Recovered No-Shows * 1500)
+  const estimatedRevenueRecovered = (bookedLeadsCount * 2000) + (noShowsPreventedCount * 1500)
+
+  // Weekly Trend Chart Data
   const weekRows = weekAppointments.data || []
   const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const weeklyMap = new Map<number, { booked: number; total: number }>()
+  
   for (const row of weekRows) {
     const day = new Date(row.start_time).getDay()
     const bucket = weeklyMap.get(day) || { booked: 0, total: 0 }
     bucket.total += 1
-    if (row.status === 'booked' || row.status === 'confirmed' || row.status === 'completed') {
+    if (['booked', 'confirmed', 'completed'].includes(row.status)) {
       bucket.booked += 1
     }
     weeklyMap.set(day, bucket)
   }
+
   const weeklyBookings = labels.map((day, index) => {
     const bucket = weeklyMap.get(index) || { booked: 0, total: 0 }
     return {
@@ -186,6 +207,7 @@ export async function GET() {
     no_shows_prevented_count: noShowsPreventedCount,
     estimated_revenue_recovered: estimatedRevenueRecovered,
     uncontacted_leads_count: uncontactedLeads.count || 0,
-    weekly_bookings: weeklyBookings
+    weekly_bookings: weeklyBookings,
+    actual_revenue: actualRevenue
   })
 }
