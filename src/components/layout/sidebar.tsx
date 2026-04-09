@@ -8,11 +8,12 @@ import { useUIStore } from '@/stores/ui-store'
 import { useClinicStore } from '@/stores/clinic-store'
 import { SidebarItem } from './sidebar-item'
 import { LocationSwitcher } from './location-switcher'
-import { MAIN_NAV, COMMUNICATION_NAV, INSIGHTS_NAV, SETTINGS_NAV } from '@/constants/navigation'
+import { MAIN_NAV, COMMUNICATION_NAV, INSIGHTS_NAV, SETTINGS_NAV, NavItem } from '@/constants/navigation'
 import { ChevronLeft, ChevronRight, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { PRICING_PLANS, normalizePlanId } from '@/lib/billing/plans'
+import { useInboxUnreadCount } from '@/hooks/use-inbox'
 
 interface SidebarProps {
   className?: string
@@ -23,6 +24,17 @@ export function Sidebar({ className }: SidebarProps) {
   const { clinic, subscription } = useClinicStore()
   const normalizedPlan = normalizePlanId(subscription.plan)
   const planConfig = PRICING_PLANS[normalizedPlan]
+  const { data: inboxUnread = 0 } = useInboxUnreadCount()
+
+  // Inject live unread count into the Inbox nav item
+  const communicationNav: NavItem[] = React.useMemo(() =>
+    COMMUNICATION_NAV.map((item) =>
+      item.href === '/inbox'
+        ? { ...item, badge: inboxUnread > 0 ? Math.min(inboxUnread, 99) : undefined }
+        : item
+    ),
+    [inboxUnread]
+  )
 
   // On mobile/tablet, sidebar is always "expanded" visually when inside the sheet
   // But we use the store state for desktop behavior
@@ -111,7 +123,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-4 space-y-6 px-2 scrollbar-thin">
         <NavGroup title="Main" items={MAIN_NAV} collapsed={sidebarCollapsed && !className} />
-        <NavGroup title="Communication" items={COMMUNICATION_NAV} collapsed={sidebarCollapsed && !className} />
+        <NavGroup title="Communication" items={communicationNav} collapsed={sidebarCollapsed && !className} />
         <NavGroup title="Insights" items={INSIGHTS_NAV} collapsed={sidebarCollapsed && !className} />
         <NavGroup title="Configuration" items={SETTINGS_NAV} collapsed={sidebarCollapsed && !className} />
       </div>

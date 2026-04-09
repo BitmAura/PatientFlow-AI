@@ -1,5 +1,9 @@
 export async function register() {
-  // PostHog is used for analytics and error tracking instead of Sentry.
+  // Only validate on server startup (Node.js runtime), not Edge
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { validateEnv } = await import('@/lib/utils/env-validation')
+    validateEnv()
+  }
 }
 
 export const onRequestError = undefined

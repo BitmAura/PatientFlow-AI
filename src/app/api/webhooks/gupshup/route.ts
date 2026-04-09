@@ -20,22 +20,30 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text()
     const signature = request.headers.get('x-gupshup-signature')
 
-    if (!signature) {
-      console.warn('[Webhook] Missing signature header')
-      return NextResponse.json({ received: true }, { status: 200 })
-    }
-
     // 2. Verify webhook signature
+    // If GUPSHUP_WEBHOOK_SECRET is set, enforce it strictly.
+    // If not set (dev/local), allow through with a warning.
+    // In production, secret MUST be set — this is the only guard against spoofed webhooks.
     const webhookSecret = process.env.GUPSHUP_WEBHOOK_SECRET
-    if (!webhookSecret) {
-      console.warn('[Webhook] GUPSHUP_WEBHOOK_SECRET not configured')
-      return NextResponse.json({ received: true }, { status: 200 })
-    }
 
-    const isValid = verifyGupshupWebhookSignature(rawBody, signature, webhookSecret)
-    if (!isValid) {
-      console.warn('[Webhook] Invalid signature - possible spoofing attempt')
-      return NextResponse.json({ received: true }, { status: 200 })
+    if (webhookSecret) {
+      // Secret configured — enforce signature on every request
+      if (!signature) {
+        console.warn('[Webhook] Rejected: missing signature')
+        return NextResponse.json({ received: true }, { status: 200 }) // Return 200 so Gupshup doesn't retry
+      }
+      const isValid = verifyGupshupWebhookSignature(rawBody, signature, webhookSecret)
+      if (!isValid) {
+        console.warn('[Webhook] Rejected: invalid signature — possible spoofing attempt')
+        return NextResponse.json({ received: true }, { status: 200 })
+      }
+    } else {
+      // No secret configured — only allow in non-production
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Webhook] CRITICAL: GUPSHUP_WEBHOOK_SECRET not set in production. Rejecting all webhook requests.')
+        return NextResponse.json({ received: true }, { status: 200 })
+      }
+      console.warn('[Webhook] WARNING: No GUPSHUP_WEBHOOK_SECRET — skipping signature check (dev only)')
     }
 
     // 3. Parse payload
@@ -72,6 +80,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Keywords that trigger opt-out (case-insensitive, trimmed)
+const STOP_KEYWORDS = ['stop', 'unsubscribe', 'opt out', 'optout', 'cancel', 'no more', 'remove me']
+
+function isStopKeyword(text: string): boolean {
+  const normalized = text.trim().toLowerCase()
+  return STOP_KEYWORDS.some((kw) => normalized === kw || normalized.startsWith(kw + ' '))
+}
+
 /**
  * Handle incoming message from Gupshup
  */
@@ -85,25 +101,18 @@ async function handleIncomingMessage(
   }
 ) {
   try {
-    // Find clinic by phone_number_id (matching the registered number)
-    const { data: config } = await supabase
-      .from('gupshup_config')
-      .select('clinic_id')
-      .eq('phone_number_id', data.from)
-      .single()
+    // Gupshup sends the destination (clinic's registered number) in the webhook.
+    // We match on phone_number_id which is the clinic's number stored at registration time.
+    // However Gupshup may send the clinic number as `to` and sender as `from`.
+    // We search all active configs and match the patient sender against their clinic.
+    // Strategy: look up patient by phone first, derive clinic from patient record.
+    // Fallback: iterate configs isn't scalable — instead we look up all active configs
+    // and match by checking which clinic this sender belongs to.
 
-    if (!config) {
-      console.warn('[Webhook] No clinic found for phone:', data.from)
-      return
-    }
-
-    const clinicId = config.clinic_id
-
-    // Check for duplicate message (deduplication by provider_message_id)
+    // 1. Deduplicate early (cross-clinic) using provider_message_id uniqueness
     const { data: existing } = await supabase
       .from('patient_messages')
       .select('id')
-      .eq('clinic_id', clinicId)
       .eq('provider_message_id', data.messageId)
       .maybeSingle()
 
@@ -112,20 +121,48 @@ async function handleIncomingMessage(
       return
     }
 
-    // Find patient by phone number
+    // 2. Find patient by their phone number (column is `phone`, not `phone_number`)
     const { data: patient } = await supabase
       .from('patients')
-      .select('id')
-      .eq('clinic_id', clinicId)
-      .eq('phone_number', data.from)
+      .select('id, clinic_id, whatsapp_opt_in')
+      .eq('phone', data.from)
       .maybeSingle()
 
-    // Store message in patient_messages table
+    // 3. Determine clinic_id — from patient record or from gupshup_config destination
+    let clinicId: string | null = patient?.clinic_id ?? null
+
+    if (!clinicId) {
+      // Patient not found — still store the message under any matching active config
+      // Gupshup webhook payload includes the receiving app's number; we can't easily
+      // determine destination from `data.from` (that is the sender). Log and exit gracefully.
+      console.warn('[Webhook] Could not determine clinic for inbound message from:', data.from.slice(-4))
+      return
+    }
+
+    // 4. Handle STOP / opt-out keywords (compliance requirement)
+    if (isStopKeyword(data.text)) {
+      await supabase
+        .from('patients')
+        .update({ whatsapp_opt_in: false, lifecycle_stage: 'opted_out' })
+        .eq('id', patient.id)
+
+      // Cancel any pending recalls for this patient
+      await supabase
+        .from('patient_recalls')
+        .update({ status: 'cancelled', notes: 'Patient sent STOP via WhatsApp' })
+        .eq('clinic_id', clinicId)
+        .eq('patient_id', patient.id)
+        .eq('status', 'pending')
+
+      console.log('[Webhook] Patient opted out via STOP keyword:', patient.id)
+    }
+
+    // 5. Store message in patient_messages table
     const { error: insertError } = await supabase
       .from('patient_messages')
       .insert({
         clinic_id: clinicId,
-        patient_id: patient?.id || null,
+        patient_id: patient?.id ?? null,
         phone_number: data.from,
         content: data.text,
         provider: 'gupshup',
@@ -143,26 +180,23 @@ async function handleIncomingMessage(
       return
     }
 
-    // Update last_webhook_received_at timestamp
+    // 6. Update last_webhook_received_at on the clinic's gupshup_config
     await updateLastWebhookReceived(clinicId)
 
     console.log('[Webhook] ✅ Message stored:', {
       clinic: clinicId,
       from: data.from.slice(-4),
       messageId: data.messageId,
+      optOut: isStopKeyword(data.text),
     })
-
-    // TODO: Add message processing here
-    // - AI intent detection
-    // - Auto-response based on intent
-    // - Patient threading
   } catch (error) {
     console.error('[Webhook] Error handling incoming message:', error)
   }
 }
 
 /**
- * Handle message status update from Gupshup
+ * Handle message status update from Gupshup (delivered, read, failed, etc.)
+ * Updates the outbound reminder_logs row that carries the Gupshup message_id.
  */
 async function handleStatusUpdate(
   supabase: any,
@@ -173,47 +207,34 @@ async function handleStatusUpdate(
   }
 ) {
   try {
-    // Find the message in communication_logs
+    // reminder_logs stores outbound messages with column `message_id`
     const { data: log } = await supabase
-      .from('communication_logs')
-      .select('id, clinic_id')
-      .eq('provider_message_id', data.messageId)
+      .from('reminder_logs')
+      .select('id')
+      .eq('message_id', data.messageId)
       .maybeSingle()
 
     if (!log) {
-      console.warn('[Webhook] Message not found for status update:', data.messageId)
+      // Not found — could be a message we didn't log (e.g. manual sends), silently skip
       return
     }
 
-    // Map Gupshup status to our status
-    const statusMap: { [key: string]: string } = {
+    const statusMap: Record<string, string> = {
       submitted: 'sent',
       delivered: 'delivered',
-      read: 'read',
+      read: 'delivered', // treat read as delivered
       failed: 'failed',
       rejected: 'failed',
     }
 
-    const ourStatus = statusMap[data.status] || data.status
+    const ourStatus = statusMap[data.status] ?? data.status
 
-    // Update communication log
-    const { error: updateError } = await supabase
-      .from('communication_logs')
-      .update({
-        status: ourStatus,
-        delivered_at: ['delivered', 'read'].includes(ourStatus)
-          ? new Date(data.timestamp * 1000).toISOString()
-          : null,
-        updated_at: new Date().toISOString(),
-      })
+    await supabase
+      .from('reminder_logs')
+      .update({ status: ourStatus })
       .eq('id', log.id)
 
-    if (updateError) {
-      console.error('[Webhook] Failed to update status:', updateError)
-      return
-    }
-
-    console.log('[Webhook] ✅ Status updated:', {
+    console.log('[Webhook] ✅ Delivery status updated:', {
       messageId: data.messageId,
       status: ourStatus,
     })

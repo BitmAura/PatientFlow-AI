@@ -16,6 +16,7 @@ import {
   Magnet,
   RefreshCcw,
   KeyRound,
+  Inbox,
 } from 'lucide-react'
 
 export interface NavItem {
@@ -74,6 +75,11 @@ export const MAIN_NAV: NavItem[] = [
 
 export const COMMUNICATION_NAV: NavItem[] = [
   {
+    title: 'Inbox',
+    href: '/inbox',
+    icon: Inbox,
+  },
+  {
     title: 'Reminders',
     href: '/reminders',
     icon: MessageSquare,
@@ -103,6 +109,7 @@ export const INSIGHTS_NAV: NavItem[] = [
       { title: 'Overview', href: '/reports', icon: TrendingUp },
       { title: 'No-Shows', href: '/reports/no-shows', icon: LogOut },
       { title: 'Revenue', href: '/reports/revenue', icon: CreditCard },
+      { title: 'Revenue Recovery', href: '/reports/revenue-recovery', icon: TrendingUp },
     ],
   },
   {
