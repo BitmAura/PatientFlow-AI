@@ -1,7 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+export interface Subscription {
+  planId: 'starter' | 'growth' | 'pro';
+  status: 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired';
+  trialEnd: string | null;
+  periodEnd: string | null;
+  appointmentsUsed: number;
+  appointmentsLimit: number;
+  messagesUsed: number;
+  messagesLimit: number;
+  doctorsCount: number;
+  doctorsLimit: number;
+  canAddDoctor: boolean;
+  daysLeft: number;
+  isTrial: boolean;
+}
+
 export function useSubscription() {
-  return useQuery({
+  return useQuery<Subscription>({
     queryKey: ['subscription'],
     queryFn: async () => {
       const res = await fetch('/api/subscription')

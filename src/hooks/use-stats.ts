@@ -1,5 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useClinicStore } from '@/stores/clinic-store'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect } from 'react'
 
 export interface DashboardStats {
   today_appointments_count: number
@@ -36,6 +38,38 @@ export interface DashboardStats {
 
 export function useStats() {
   const { clinic } = useClinicStore()
+  const queryClient = useQueryClient()
+
+  // Real-time synchronization
+  useEffect(() => {
+    if (!clinic?.id) return
+
+    const supabase = createClient()
+    
+    // Subscribe to all relevant tables for this clinic
+    const channel = supabase
+      .channel(`dashboard-realtime-${clinic.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments', filter: `clinic_id=eq.${clinic.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ['dashboard-stats', clinic.id] })
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads', filter: `clinic_id=eq.${clinic.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ['dashboard-stats', clinic.id] })
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'morning_briefs', filter: `clinic_id=eq.${clinic.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ['dashboard-stats', clinic.id] })
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [clinic?.id, queryClient])
 
   return useQuery({
     queryKey: ['dashboard-stats', clinic?.id],

@@ -1,34 +1,29 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUsage } from '@/lib/services/subscription'
+import { SubscriptionGate } from '@/lib/subscription-gate'
 
-export async function GET(request: Request) {
-  const supabase = createClient() as any
+export async function GET() {
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
-  // Clinics are linked via the staff table, not clinics.user_id
+  // Find the clinic this user belongs to
   const { data: staff } = await supabase
     .from('staff')
     .select('clinic_id')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+    .maybeSingle()
 
-  if (!staff?.clinic_id) return new NextResponse('Clinic not found', { status: 404 })
+  if (!staff?.clinic_id) {
+    return NextResponse.json({ error: 'Clinic not found' }, { status: 404 })
+  }
 
-  const clinic = { id: staff.clinic_id as string }
+  const subData = await SubscriptionGate.getSubscription(supabase, staff.clinic_id)
 
-  const usage = await getCurrentUsage(clinic.id)
+  if (!subData) {
+    return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
+  }
 
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('razorpay_subscription_id, status')
-    .eq('user_id', user.id)
-    .single()
-
-  return NextResponse.json({
-    ...usage,
-    subscription_id: subscription?.razorpay_subscription_id || null,
-    status: subscription?.status || usage.status,
-  })
+  return NextResponse.json(subData)
 }

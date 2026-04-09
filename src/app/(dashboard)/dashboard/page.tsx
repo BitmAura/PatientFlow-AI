@@ -21,6 +21,8 @@ import { TwentyOneButton } from '@/components/ui/twentyone-button'
 import { PageHeader } from '@/components/dashboard/PageStructure'
 import Link from 'next/link'
 import { useMorningIntelligence } from '@/hooks/use-morning-intelligence'
+import { useToast } from '@/hooks/use-toast'
+import { useEffect } from 'react'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -28,6 +30,18 @@ export default function DashboardPage() {
   const clinicId = user?.user_metadata?.clinicId || user?.user_metadata?.clinic_id
   
   const insights = useMorningIntelligence(clinicId)
+  const { toast } = useToast()
+
+  // Notify when a new brief arrives
+  useEffect(() => {
+    if (insights.brief && !insights.loading) {
+       toast({
+         title: "Morning Brief Available 📋",
+         description: `Recovered: ₹${insights.recoveredRevenue.toLocaleString()} | New Leads: ${insights.newLeads}. Efficiency up ${insights.growth}%.`,
+         duration: 8000
+       })
+    }
+  }, [insights.brief?.id, toast])
 
   return (
     <PageContainer>

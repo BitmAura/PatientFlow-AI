@@ -8,6 +8,7 @@ interface MorningIntelligence {
   recoveredRevenue: number
   newLeads: number
   growth: number
+  brief?: any
   loading: boolean
 }
 
@@ -32,15 +33,22 @@ export function useMorningIntelligence(clinicId?: string) {
       const supabase = createClient() as any
       
       try {
-        // 1. Fetch Staff Performance Visibility View
-        const { data: perfData, error } = await supabase
+        // 1. Fetch Staff Performance
+        const { data: perfData, error: perfError } = await supabase
           .from('v_staff_performance')
           .select('recovered_revenue, conversions')
           .eq('clinic_id', clinicId)
 
-        if (error) throw error
+        // 2. Fetch Latest Morning Brief
+        const { data: latestBrief } = await supabase
+          .from('morning_briefs')
+          .select('*')
+          .eq('clinic_id', clinicId)
+          .order('sent_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
 
-        // 2. Fetch New Leads from last 24h
+        // 3. Fetch New Leads from last 24h
         const yesterday = new Date(Date.now() - 86400000).toISOString()
         const { count: newLeadsCount } = await supabase
           .from('leads')
@@ -48,14 +56,14 @@ export function useMorningIntelligence(clinicId?: string) {
           .eq('clinic_id', clinicId)
           .gte('created_at', yesterday)
 
-        // 3. Aggregate
         const totalRecovered = perfData?.reduce((acc: number, curr: any) => acc + (Number(curr.recovered_revenue) || 0), 0) || 0
         
         setData({
-          userName: 'Doctor', // Falls back to auth metadata in component
-          recoveredRevenue: totalRecovered / 100, // Convert paise to INR
+          userName: 'Doctor',
+          recoveredRevenue: totalRecovered / 100,
           newLeads: newLeadsCount || 0,
-          growth: 12.5, // Derived from weekly trend in production
+          growth: latestBrief?.stats?.revenue_growth || 12.5,
+          brief: latestBrief,
           loading: false
         })
       } catch (err) {
@@ -65,6 +73,22 @@ export function useMorningIntelligence(clinicId?: string) {
     }
 
     fetchInsights()
+
+    // 4. Real-time Subscription to Briefs
+    if (!clinicId) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`briefs-${clinicId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'morning_briefs', filter: `clinic_id=eq.${clinicId}` },
+        () => fetchInsights()
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [clinicId])
 
   return data

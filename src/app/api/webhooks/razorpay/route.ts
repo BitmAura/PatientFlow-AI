@@ -133,10 +133,58 @@ async function handlePaymentFailed(payment: RazorpayPaymentEntity) {
 /**
  * Handle subscription events (for recurring subscriptions)
  */
-async function handleSubscriptionEvent(event: string, payload: Record<string, unknown>) {
+async function handleSubscriptionEvent(event: string, payload: any) {
   console.log('[Razorpay Webhook] Subscription event:', event)
-  // Handle subscription.activated, subscription.charged, etc.
-  // This is for clinic subscription management, not booking deposits
+  const supabase = createClient()
+
+  const subId = payload.id
+  const status = payload.status
+
+  // Map Razorpay status to our internal status
+  let internalStatus: string = 'active'
+  if (status === 'authenticated' || status === 'active') internalStatus = 'active'
+  if (status === 'halted') internalStatus = 'past_due'
+  if (status === 'cancelled') internalStatus = 'cancelled'
+  if (status === 'expired') internalStatus = 'expired'
+
+  // Update subscription record
+  const { data: sub, error: subError } = await supabase
+    .from('subscriptions')
+    .update({ 
+      status: internalStatus,
+      current_period_end: payload.current_end ? new Date(payload.current_end * 1000).toISOString() : undefined,
+      updated_at: new Date().toISOString()
+    })
+    .eq('razorpay_subscription_id', subId)
+    .select('id, user_id')
+    .single()
+
+  if (subError) {
+    console.error('[Razorpay Webhook] Error updating subscription:', subError)
+    return
+  }
+
+  // If charged/captured, reset the usage counters for the new period
+  if (event === 'subscription.charged' || event === 'payment.captured') {
+    // Reset usage counters
+    const { error: usageError } = await supabase
+      .from('subscription_usage')
+      .update({
+        appointments_count: 0,
+        whatsapp_messages_sent: 0,
+        period_start: new Date().toISOString(),
+        period_end: payload.current_end ? new Date(payload.current_end * 1000).toISOString() : undefined,
+        updated_at: new Date().toISOString()
+      })
+      .eq('subscription_id', sub.id)
+
+    if (usageError) {
+        console.error('[Razorpay Webhook] Error resetting usage:', usageError)
+    }
+
+    // Notify owner on WhatsApp if payment was successful (optional but good practice)
+    // We can implement this later via the WhatsApp service
+  }
 }
 
 export async function POST(request: Request) {

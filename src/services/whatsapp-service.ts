@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { GupshupProvider } from '@/lib/whatsapp/providers/gupshup-provider'
 import { WhatsAppProviderConfig } from '@/lib/whatsapp/provider-interface'
 import { parseWhatsAppSession, getApiKeyFromSession, getPhoneNumberIdFromSession } from '@/lib/whatsapp/session'
+import { messageGuard, logBlockedMessage } from './message-guard'
+import { SubscriptionGate } from '@/lib/subscription-gate'
 
 interface SendMessageResult {
   success: boolean
@@ -38,109 +40,15 @@ export async function sendWhatsAppMessage(
        return { success: false, status: 'failed', error: 'Clinic not found' }
     }
 
-    // 2. Quota Check
-    const { canClinicSendMessage } = await import('@/lib/billing/usage')
-    const hasQuota = await canClinicSendMessage(clinicId) // Default 500
-    if (!hasQuota) {
+    // 2. Central Security Guard Check
+    const guard = await messageGuard(clinicId, patientId ?? null, phoneNumber, (metadata?.type as any) || 'manual')
+    if (!guard.allowed) {
+      await logBlockedMessage(clinicId, patientId ?? null, phoneNumber, message, guard.reason!, metadata?.type || 'manual')
       return { 
         success: false, 
         status: 'skipped', 
-        error: 'Monthly WhatsApp quota exceeded',
-        skippedReason: 'quota_exceeded' 
-      }
-    }
-
-    let config: WhatsAppProviderConfig;
-
-    if (clinic.use_shared_number) {
-      // Use Global Shared Number (ENV vars)
-      config = {
-        apiKey: process.env.GUPSHUP_APP_TOKEN || '',
-        appId: process.env.GUPSHUP_APP_ID || '',
-        phoneNumberId: process.env.GUPSHUP_SOURCE_NUMBER || '',
-        appName: process.env.GUPSHUP_APP_NAME || 'PatientFlowAI_Shared'
-      }
-    } else {
-      // Use Custom Clinic Number
-      const { data: connection, error: connectionError } = await supabase
-        .from('whatsapp_connections')
-        .select('status, session_data')
-        .eq('clinic_id', clinicId)
-        .single()
-
-      if (connectionError || !connection || connection.status !== 'active') {
-        console.warn(`[WhatsApp] Skipped: Clinic ${clinicId} WhatsApp not active`)
-        return { 
-          success: false, 
-          status: 'skipped', 
-          error: 'WhatsApp not active',
-          skippedReason: 'whatsapp_inactive' 
-        }
-      }
-      
-      const session = parseWhatsAppSession(connection.session_data)
-      config = {
-        apiKey: getApiKeyFromSession(session) || '',
-        appId: session?.appId || '',
-        phoneNumberId: getPhoneNumberIdFromSession(session) || '',
-        appName: session?.appName || ''
-      }
-    }
-
-    if (!config.apiKey || !config.phoneNumberId) {
-      return { success: false, status: 'failed', error: 'Missing WhatsApp credentials' }
-    }
-
-    // 2. Check: automation not locked (Global Journey Lock)
-    // If no patientId provided, try to find one by phone number
-    if (!patientId) {
-      const { data: patient } = await supabase
-        .from('patients')
-        .select('id')
-        .eq('clinic_id', clinicId)
-        .eq('phone', phoneNumber) // Assumes exact match, might need normalization
-        .single()
-      
-      if (patient) {
-        patientId = patient.id
-      }
-    }
-
-    // If we have a patientId, check if they have a locked journey
-    if (patientId) {
-      const { data: journey } = await supabase
-        .from('patient_journeys')
-        .select('automation_locked')
-        .eq('patient_id', patientId)
-        .eq('status', 'active')
-        .single()
-
-      if (journey?.automation_locked) {
-        console.warn(`[WhatsApp] Skipped: Patient ${patientId} automation locked`)
-        return { 
-          success: false, 
-          status: 'skipped', 
-          error: 'Automation locked',
-          skippedReason: 'automation_locked' 
-        }
-      }
-    } else {
-       console.warn(`[WhatsApp] Warning: No patient found for ${phoneNumber}`)
-    }
-
-    // 4. Check: business hours (9 AM - 7 PM IST)
-    const now = new Date()
-    // Convert to IST (UTC+5:30) if environment isn't local
-    const istTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
-    const currentHour = istTime.getHours()
-    
-    if (currentHour < 9 || currentHour >= 19) {
-      console.warn(`[WhatsApp] Skipped: Outside business hours (${currentHour}:00 IST)`)
-      return { 
-        success: false, 
-        status: 'skipped', 
-        error: 'Outside business hours',
-        skippedReason: 'outside_business_hours' 
+        error: `Blocked by Guard: ${guard.reason}`,
+        skippedReason: guard.reason 
       }
     }
 
@@ -198,22 +106,44 @@ export async function sendWhatsAppMessage(
       }
     }
 
-    // 5. Build Final Provider Config (if not already set via shared mode)
-    if (!clinic.use_shared_number) {
+    let config: WhatsAppProviderConfig;
+
+    if (clinic.use_shared_number) {
+      // Use Global Shared Number (ENV vars)
+      config = {
+        apiKey: process.env.GUPSHUP_APP_TOKEN || '',
+        appId: process.env.GUPSHUP_APP_ID || '',
+        phoneNumberId: process.env.GUPSHUP_SOURCE_NUMBER || '',
+        appName: process.env.GUPSHUP_APP_NAME || 'PatientFlowAI_Shared'
+      }
+    } else {
       // Use Custom Clinic Number credentials from connection
-      const connection = await supabase
+      const { data: connection, error: connectionError } = await supabase
         .from('whatsapp_connections')
-        .select('session_data')
+        .select('session_data, status')
         .eq('clinic_id', clinicId)
         .single()
 
-      const connSession = parseWhatsAppSession(connection.data?.session_data)
+      if (connectionError || !connection || connection.status !== 'active') {
+        return { 
+          success: false, 
+          status: 'skipped', 
+          error: 'WhatsApp not active',
+          skippedReason: 'whatsapp_inactive' 
+        }
+      }
+
+      const connSession = parseWhatsAppSession(connection.session_data)
       config = {
         apiKey: getApiKeyFromSession(connSession) || '',
         appId: connSession?.appId || '',
         phoneNumberId: getPhoneNumberIdFromSession(connSession) || '',
         appName: connSession?.appName || ''
       }
+    }
+
+    if (!config.apiKey || !config.phoneNumberId) {
+      return { success: false, status: 'failed', error: 'Missing WhatsApp credentials' }
     }
 
     // 5. Call Gupshup send message API
@@ -228,6 +158,9 @@ export async function sendWhatsAppMessage(
     if (!result.success) {
       throw new Error(result.error || 'Gupshup send failed')
     }
+
+    // 6. Increment Usage Counter
+    await SubscriptionGate.incrementUsage(supabase, clinicId, 'message')
 
     // 6. Store: message_id, status, timestamp
     if (patientId) {

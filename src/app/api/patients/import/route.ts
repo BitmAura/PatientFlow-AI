@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
 import { writeAuditLog } from '@/lib/audit/log'
+import { processImportedPatients } from '@/lib/import/processor'
 
 export async function POST(request: Request) {
   const { data, options } = await request.json()
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
     errors: [] as any[]
   }
 
+  const importedPatients: any[] = []
+
   // Process in batches of 50
   const BATCH_SIZE = 50
   
@@ -105,6 +108,19 @@ export async function POST(request: Request) {
           })
 
         if (error) throw error
+        
+        // Fetch the created/updated patient ID if not skip
+        const { data: currentPatient } = await supabase
+            .from('patients')
+            .select('id, last_visit_at, treatment_type')
+            .eq('clinic_id', (staff as any).clinic_id)
+            .eq('phone', row.phone)
+            .single()
+
+        if (currentPatient) {
+            importedPatients.push(currentPatient)
+        }
+
         results.success++
 
       } catch (err: any) {
@@ -115,6 +131,11 @@ export async function POST(request: Request) {
         })
       }
     }
+  }
+
+  // Final Step: Post-Import Automation logic
+  if (importedPatients.length > 0) {
+    await processImportedPatients(supabase, (staff as any).clinic_id, importedPatients)
   }
 
   await writeAuditLog({

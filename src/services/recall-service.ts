@@ -16,6 +16,36 @@ function parseTimeToMinutes(value: string | null | undefined): number | null {
 }
 
 export class RecallService {
+  /**
+   * Programmatically enroll a patient in a recall flow
+   */
+  static async enrollPatient(
+    supabase: SupabaseClient, 
+    clinicId: string, 
+    patientId: string, 
+    treatmentCategory: string,
+    dueDate: string
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('patient_recalls')
+      .upsert({
+        clinic_id: clinicId,
+        patient_id: patientId,
+        treatment_category: treatmentCategory,
+        recall_due_date: dueDate,
+        status: 'pending',
+        attempt_count: 0,
+        updated_at: new Date().toISOString()
+      } as any, { onConflict: 'patient_id,treatment_category' })
+
+    if (error) throw error
+
+    // Update patient lifecycle
+    await supabase.from('patients')
+      .update({ lifecycle_stage: 'recall_pending' } as any)
+      .eq('id', patientId)
+  }
+
   private static async getClinicAverageServicePrice(clinicId: string): Promise<number> {
     const supabase = createClient() as any
     const { data: services } = await supabase

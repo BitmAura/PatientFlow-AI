@@ -4,7 +4,7 @@ import * as React from 'react'
 import { CurrentPlanCard } from '@/components/billing/current-plan-card'
 import { PlanComparison } from '@/components/billing/plan-comparison'
 import { BillingHistory } from '@/components/billing/billing-history'
-import { useSubscription, useBillingHistory } from '@/hooks/use-subscription'
+import { useSubscription, useBillingHistory, type Subscription } from '@/hooks/use-subscription'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, AlertTriangle } from 'lucide-react'
@@ -12,14 +12,26 @@ import { PageContainer } from '@/components/layout/page-container'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { PageHeader } from '@/components/dashboard/PageStructure'
 
-// Fallback subscription data so the page never crashes
-const DEFAULT_SUBSCRIPTION = {
-  plan: { id: 'starter', name: 'Starter', appointments_limit: 500 },
-  usage: 0,
-  limit: 500,
-  period_end: null,
+const PLAN_DETAILS = {
+  starter: { name: 'Starter', price: 0, features: ['500 Automations', 'Basic Analytics', 'WhatsApp Support'] },
+  growth: { name: 'Growth', price: 10000, features: ['2,500 Automations', 'Advanced Analytics', 'Priority Support', 'Custom Branding'] },
+  pro: { name: 'Pro', price: 25000, features: ['Unlimited Automations', 'Enterprise Dashboards', 'dedicated Account Manager', 'API Access'] },
+}
+
+const DEFAULT_SUBSCRIPTION: Subscription = {
+  planId: 'starter',
+  appointmentsUsed: 0,
+  appointmentsLimit: 500,
+  messagesUsed: 0,
+  messagesLimit: 1000,
   status: 'trialing',
-  subscription_id: null,
+  trialEnd: null,
+  periodEnd: null,
+  doctorsCount: 1,
+  doctorsLimit: 1,
+  canAddDoctor: false,
+  daysLeft: 14,
+  isTrial: true
 }
 
 export default function BillingPage() {
@@ -54,10 +66,10 @@ export default function BillingPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="md:col-span-1">
           <CurrentPlanCard
-            plan={subscription.plan}
-            usage={subscription.usage}
-            limit={subscription.limit}
-            periodEnd={subscription.period_end}
+            plan={PLAN_DETAILS[subscription.planId as keyof typeof PLAN_DETAILS]}
+            usage={subscription.appointmentsUsed}
+            limit={subscription.appointmentsLimit}
+            periodEnd={subscription.periodEnd || ''}
             status={subscription.status}
           />
         </div>
@@ -84,7 +96,7 @@ export default function BillingPage() {
           <TabsTrigger value="history">Billing History</TabsTrigger>
         </TabsList>
         <TabsContent value="plans" className="space-y-4">
-          <PlanComparison currentPlanId={subscription.plan?.id ?? 'starter'} />
+          <PlanComparison currentPlanId={subscription.planId} />
         </TabsContent>
         <TabsContent value="history">
           <Card>

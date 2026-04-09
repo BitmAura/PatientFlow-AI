@@ -27,12 +27,19 @@ export async function handleIncomingMessage(params: {
 
   // 2. Handle STOP / OPT OUT (Global Block)
   if (['STOP', 'OPT OUT', 'UNSUBSCRIBE'].some(opt => upper.includes(opt))) {
-    const { markLeadOptOut } = await import('@/services/leads/service')
-    await markLeadOptOut(params.clinicId, params.fromPhone)
-    
-    // Update patient record
+    // 2a. Clinic level opt-out
     await supabase.from('patients')
       .update({ opted_out: true })
+      .eq('clinic_id', params.clinicId)
+      .eq('phone', params.fromPhone)
+
+    // 2b. Global Blacklist (Atomic)
+    await supabase.from('global_blacklist')
+      .upsert({ phone: params.fromPhone, reason: 'user_requested_stop' })
+
+    // 2c. Lead status update
+    await supabase.from('leads')
+      .update({ status: 'lost', notes: 'Lead opted out via STOP command' })
       .eq('clinic_id', params.clinicId)
       .eq('phone', params.fromPhone)
 
@@ -44,8 +51,16 @@ export async function handleIncomingMessage(params: {
   // 3. Handle Appointment Buttons
   if (upper.startsWith('CONFIRM_APPT_')) {
     const appointmentId = text.split('CONFIRM_APPT_')[1]
+    
+    // Atomic: Confirm appt + Convert Lead
     await supabase.from('appointments').update({ status: 'confirmed' }).eq('id', appointmentId)
     
+    // If there is a lead with this phone, mark as converted
+    await supabase.from('leads')
+        .update({ status: 'converted', converted_patient_id: (await supabase.from('appointments').select('patient_id').eq('id', appointmentId).single()).data?.patient_id })
+        .eq('clinic_id', params.clinicId)
+        .eq('phone', params.fromPhone)
+
     const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
     await sendWhatsAppMessage(params.clinicId, params.fromPhone, "Great! Your appointment is confirmed. See you soon! ✅")
     return

@@ -73,11 +73,48 @@ export async function calculateNoShowRisk(appointmentId: string): Promise<number
   // Clamp score
   const finalScore = Math.max(0, Math.min(100, score))
   
-  // Update appointment with new score
+  // Update appointment with new score and log
   await supabase
     .from('appointments')
-    .update({ no_show_risk_score: finalScore })
+    .update({ 
+      no_show_risk_score: finalScore,
+      risk_score_log: JSON.stringify([{ 
+        at: new Date().toISOString(), 
+        score: finalScore, 
+        factors: {
+          prevNoShows: (prevNoShows || 0) > 0,
+          longBooking: daysDiff > 7,
+          status: appointment.status,
+          isNew: totalAppts === 1,
+          rescheduled: (appointment.patient?.reschedule_count || 0) >= 2
+        }
+      }])
+    })
     .eq('id', appointmentId)
+
+  // 7. HIGH RISK TRIGGER: Create Staff Task
+  if (finalScore > 60) {
+    // Find a receptionist or owner to assign to
+    const { data: staffMember } = await supabase
+      .from('staff')
+      .select('id')
+      .eq('clinic_id', appointment.clinic_id)
+      .eq('status', 'active')
+      .order('role', { ascending: false }) // Receptionist usually has lower priority string but we'll try to find one
+      .limit(1)
+      .maybeSingle()
+
+    await supabase.from('staff_tasks').insert({
+      clinic_id: appointment.clinic_id,
+      patient_id: appointment.patient_id,
+      appointment_id: appointment.id,
+      staff_id: staffMember?.id || null,
+      task_type: 'call_high_risk',
+      due_at: new Date().toISOString(),
+      status: 'pending',
+      notes: `High risk score (${finalScore}%) detected. Manual confirmation call required.`
+    })
+  }
 
   return finalScore
 }
