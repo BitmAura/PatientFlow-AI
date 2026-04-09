@@ -49,7 +49,16 @@ export function PatientDetailsForm({ data, onChange }: PatientDetailsFormProps) 
             maxLength={10}
           />
         </div>
-        <p className="text-xs text-muted-foreground">We'll send your appointment confirmation here via WhatsApp.</p>
+        <div className="flex items-center gap-3 bg-primary/5 p-3 rounded-lg border border-primary/10 mt-2 hover:bg-primary/10 transition-colors cursor-pointer group">
+          <Checkbox 
+            id="whatsapp_consent" 
+            checked={Boolean((data as any).whatsapp_consent)}
+            onCheckedChange={(v) => handleChange('whatsapp_consent' as any, Boolean(v))}
+          />
+          <Label htmlFor="whatsapp_consent" className="text-xs font-semibold text-primary cursor-pointer select-none">
+            Send my appointment details & reminders via WhatsApp
+          </Label>
+        </div>
       </div>
 
       {/* Email */}

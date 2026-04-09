@@ -197,6 +197,28 @@ export async function POST(request: Request) {
 
     const endTime = new Date(startTime.getTime() + ((service as any).duration || 30) * 60000)
 
+    // 3.5 Double-Booking Detection
+    const apptCheckQuery = (supabase as any)
+      .from('appointments')
+      .select('id')
+      .eq('start_time', startTime.toISOString())
+      .neq('status', 'cancelled')
+    
+    if (doctor_id) {
+       apptCheckQuery.eq('doctor_id', doctor_id)
+    } else {
+       apptCheckQuery.eq('clinic_id', clinic_id)
+    }
+
+    const { data: existingAppt } = await apptCheckQuery.maybeSingle()
+
+    if (existingAppt) {
+      return NextResponse.json(
+        { error: 'This time slot is no longer available. Please choose another time.' },
+        { status: 409 }
+      )
+    }
+
     const appointmentData = {
       clinic_id,
       patient_id: patientId,

@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { suggestUpcomingSlots } from '@/services/appointments/service'
+import { analyzePatientIntent, getSmartResponse } from '@/services/ai/intent-analyzer'
 
 function normalize(input: string): string {
   return input.trim().toUpperCase()
@@ -25,6 +26,16 @@ export async function handleIncomingMessage(params: {
     message_id_external: params.metadata?.externalId
   })
 
+  // 1b. AI Insight Layer - Analyze Sentiment & Urgency
+  const intent = await analyzePatientIntent(text)
+  
+  // Update message with AI metadata for staff visibility
+  if (params.metadata?.externalId) {
+    await supabase.from('patient_messages')
+        .update({ metadata: intent } as any)
+        .eq('message_id_external', params.metadata.externalId)
+  }
+
   // 2. Handle STOP / OPT OUT (Global Block)
   if (['STOP', 'OPT OUT', 'UNSUBSCRIBE'].some(opt => upper.includes(opt))) {
     // 2a. Clinic level opt-out
@@ -46,6 +57,29 @@ export async function handleIncomingMessage(params: {
     const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
     await sendWhatsAppMessage(params.clinicId, params.fromPhone, "You have been opted out from all communications. ⛔")
     return
+  }
+
+  // 2b. AI INTERVENTION: Handle Emergencies & High Frustration
+  if (intent.interventionRequired) {
+    const { sendWhatsAppMessage } = await import('@/lib/whatsapp/send-message')
+    const smartReply = getSmartResponse(intent)
+    
+    // 1. Send the calming AI response
+    if (smartReply) {
+      await sendWhatsAppMessage(params.clinicId, params.fromPhone, smartReply)
+    }
+
+    // 2. Create Staff Task for immediate human takeover
+    await supabase.from('staff_tasks').insert({
+      clinic_id: params.clinicId,
+      task_type: intent.category === 'symptom_emergency' ? 'call_emergency' : 'intervention_needed',
+      status: 'pending',
+      phone: params.fromPhone,
+      notes: `AI Detection: ${intent.summary}`,
+      due_at: new Date().toISOString()
+    } as any)
+
+    return // Halt further automated bot logic to allow for human takeover
   }
 
   // 3. Handle Appointment Buttons

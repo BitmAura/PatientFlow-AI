@@ -4,6 +4,7 @@ import { WhatsAppProviderConfig } from '@/lib/whatsapp/provider-interface'
 import { parseWhatsAppSession, getApiKeyFromSession, getPhoneNumberIdFromSession } from '@/lib/whatsapp/session'
 import { messageGuard, logBlockedMessage } from './message-guard'
 import { SubscriptionGate } from '@/lib/subscription-gate'
+import { isWithinSessionWindow } from '@/lib/whatsapp/session-utils'
 
 interface SendMessageResult {
   success: boolean
@@ -23,93 +24,73 @@ export async function sendWhatsAppMessage(
     type?: string
     isTemplate?: boolean
     templateName?: string
+    variables?: any[]
   }
 ): Promise<SendMessageResult> {
   const supabase = createClient() as any
   let patientId = metadata?.patientId
   
+  // 0. Initialize Queue Entry (Queue-First Model)
+  const { data: queueEntry, error: queueError } = await supabase.from('message_queue').insert({
+    clinic_id: clinicId,
+    patient_id: patientId,
+    phone: phoneNumber,
+    message_body: message,
+    message_type: metadata?.type || 'manual',
+    status: 'pending',
+    attempts: 0
+  }).select('id').single()
+
+  if (queueError) {
+    console.error('[WhatsApp] Queue insert failed:', queueError)
+  }
+
   try {
-    // 1. Fetch Clinic Config (Shared Number vs Own Number)
-    const { data: clinic, error: clinicError } = await supabase
+    // 1. Fetch Clinic Config
+    const { data: clinic } = await supabase
       .from('clinics')
       .select('use_shared_number, name')
       .eq('id', clinicId)
       .single()
 
-    if (clinicError || !clinic) {
-       return { success: false, status: 'failed', error: 'Clinic not found' }
-    }
+    if (!clinic) return { success: false, status: 'failed', error: 'Clinic not found' }
 
-    // 2. Central Security Guard Check
+    // 2. Central Guard Check
     const guard = await messageGuard(clinicId, patientId ?? null, phoneNumber, (metadata?.type as any) || 'manual')
     if (!guard.allowed) {
       await logBlockedMessage(clinicId, patientId ?? null, phoneNumber, message, guard.reason!, metadata?.type || 'manual')
-      return { 
-        success: false, 
-        status: 'skipped', 
-        error: `Blocked by Guard: ${guard.reason}`,
-        skippedReason: guard.reason 
-      }
+      if (queueEntry) await supabase.from('message_queue').update({ status: 'failed', error_log: [{ reason: guard.reason, at: new Date().toISOString() }] }).eq('id', queueEntry.id)
+      return { success: false, status: 'skipped', error: `Blocked by Guard: ${guard.reason}`, skippedReason: guard.reason }
     }
 
-    // 4. Check: Template approved (if applicable).
-    if (metadata?.isTemplate && metadata?.templateName) {
-      const templateName = metadata.templateName
-      const { data: templateData, error: templateError } = await supabase
-        .from('message_templates')
-        .select('status')
-        .eq('name', templateName)
+    // 3. SESSION WINDOW & TEMPLATE ENFORCEMENT
+    const sessionOpen = await isWithinSessionWindow(clinicId, phoneNumber)
+    let sendType: 'text' | 'template' = 'text'
+    let templateData: any = null
+
+    if (!sessionOpen && (metadata?.type !== 'manual')) {
+      // Out of session - MUST use template
+      const templateName = metadata?.templateName || `${metadata?.type}_v1`
+      const { data: tpl } = await supabase
+        .from('whatsapp_templates')
+        .select('*')
         .eq('clinic_id', clinicId)
-        .maybeSingle() as { data: { status?: string } | null; error: any }
+        .eq('name', templateName)
+        .eq('meta_status', 'APPROVED')
+        .maybeSingle()
 
-      if (templateData?.status && templateData.status !== 'approved') {
-        console.warn(`[WhatsApp] Skipped: Template ${templateName} not approved (${templateData.status})`)
-        return {
-          success: false,
-          status: 'skipped',
-          error: 'Template not approved',
-          skippedReason: 'template_not_approved'
-        }
+      if (!tpl) {
+        if (queueEntry) await supabase.from('message_queue').update({ status: 'pending', error_log: [{ error: 'No approved template found for out-of-session message', at: new Date().toISOString() }] }).eq('id', queueEntry.id)
+        return { success: false, status: 'skipped', error: 'Template required but not found/approved', skippedReason: 'template_not_found' }
       }
-
-      // Fallback approval source: clinic reminder settings templates.
-      if (!templateData) {
-        const { data: reminderSettings } = await supabase
-          .from('reminder_settings')
-          .select('whatsapp_template_24h, whatsapp_template_2h')
-          .eq('clinic_id', clinicId)
-          .maybeSingle()
-
-        const allowedTemplates = [
-          reminderSettings?.whatsapp_template_24h,
-          reminderSettings?.whatsapp_template_2h,
-        ].filter(Boolean)
-
-        if (allowedTemplates.length > 0 && !allowedTemplates.includes(templateName)) {
-          return {
-            success: false,
-            status: 'skipped',
-            error: 'Template not approved for clinic',
-            skippedReason: 'template_not_approved'
-          }
-        }
-
-        if (allowedTemplates.length === 0 && templateError) {
-          console.warn('[WhatsApp] Skipped: Unable to verify template approval', templateError)
-          return {
-            success: false,
-            status: 'skipped',
-            error: 'Unable to verify template approval',
-            skippedReason: 'template_verification_failed'
-          }
-        }
-      }
+      
+      sendType = 'template'
+      templateData = tpl
     }
 
+    // 4. Resolve Provider Config
     let config: WhatsAppProviderConfig;
-
     if (clinic.use_shared_number) {
-      // Use Global Shared Number (ENV vars)
       config = {
         apiKey: process.env.GUPSHUP_APP_TOKEN || '',
         appId: process.env.GUPSHUP_APP_ID || '',
@@ -117,22 +98,8 @@ export async function sendWhatsAppMessage(
         appName: process.env.GUPSHUP_APP_NAME || 'PatientFlowAI_Shared'
       }
     } else {
-      // Use Custom Clinic Number credentials from connection
-      const { data: connection, error: connectionError } = await supabase
-        .from('whatsapp_connections')
-        .select('session_data, status')
-        .eq('clinic_id', clinicId)
-        .single()
-
-      if (connectionError || !connection || connection.status !== 'active') {
-        return { 
-          success: false, 
-          status: 'skipped', 
-          error: 'WhatsApp not active',
-          skippedReason: 'whatsapp_inactive' 
-        }
-      }
-
+      const { data: connection } = await supabase.from('whatsapp_connections').select('session_data, status').eq('clinic_id', clinicId).single()
+      if (!connection || connection.status !== 'active') return { success: false, status: 'skipped', error: 'WhatsApp not active' }
       const connSession = parseWhatsAppSession(connection.session_data)
       config = {
         apiKey: getApiKeyFromSession(connSession) || '',
@@ -142,73 +109,56 @@ export async function sendWhatsAppMessage(
       }
     }
 
-    if (!config.apiKey || !config.phoneNumberId) {
-      return { success: false, status: 'failed', error: 'Missing WhatsApp credentials' }
-    }
-
-    // 5. Call Gupshup send message API
+    // 5. Build Content Payload
     const provider = new GupshupProvider()
-    const result = await provider.sendMessage(phoneNumber, {
-      type: 'text',
-      content: clinic.use_shared_number 
-        ? `Hi, this is ${clinic.name} reminding you: ${message}` 
-        : message
-    }, config)
+    const contentPayload: any = sendType === 'template' 
+      ? { type: 'template', templateId: templateData.gupshup_template_id, variables: metadata?.variables || [] }
+      : { type: 'text', content: clinic.use_shared_number ? `Hi, this is ${clinic.name}: ${message}` : message }
 
-    if (!result.success) {
-      throw new Error(result.error || 'Gupshup send failed')
-    }
+    // 6. Send Attempt
+    let result = await provider.sendMessage(phoneNumber, contentPayload, config)
 
-    // 6. Increment Usage Counter
-    await SubscriptionGate.incrementUsage(supabase, clinicId, 'message')
-
-    // 6. Store: message_id, status, timestamp
-    if (patientId) {
-      const { error: logError } = await supabase.from('reminder_logs').insert({
-        clinic_id: clinicId,
-        patient_id: patientId,
-        appointment_id: null, // We don't have appointment_id in generic send
-        phone: phoneNumber,
-        message: message, // Schema has `message` column
-        type: metadata?.type || 'manual',
-        status: 'sent',
-        message_id: result.messageId,
-        created_at: new Date().toISOString()
-      } as any)
-
-      if (logError) {
-        console.error('[WhatsApp] Failed to log message:', logError)
+    // Fallback SMS for criticals
+    if (!result.success && (metadata?.type?.includes('appointment'))) {
+      const { sendSms, isSmsConfigured } = await import('@/lib/sms/msg91')
+      if (isSmsConfigured()) {
+        const smsResult = await sendSms({ to: phoneNumber, message: clinic.use_shared_number ? `Hi, this is ${clinic.name}: ${message}` : message })
+        if (smsResult.success) result = { success: true, status: 'sent', messageId: smsResult.messageId } as any
       }
     }
 
-    return {
-      success: true,
-      messageId: result.messageId,
-      status: 'sent'
+    if (!result.success) throw new Error(result.error || 'Provider send failed')
+
+    // 7. Success Finalization
+    if (queueEntry) await supabase.from('message_queue').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', queueEntry.id)
+    await SubscriptionGate.incrementUsage(supabase, clinicId, 'message')
+
+    if (patientId) {
+      await supabase.from('reminder_logs').insert({
+        clinic_id: clinicId, patient_id: patientId, phone: phoneNumber, message: message,
+        type: metadata?.type || 'manual', status: 'sent', message_id: result.messageId,
+        metadata: { ...metadata, sendType, templateId: templateData?.id }
+      })
     }
+
+    return { success: true, messageId: result.messageId, status: 'sent' }
 
   } catch (error: any) {
     console.error('[WhatsApp] Send failed:', error)
-
-    // Log failure
-    if (patientId) {
-      await supabase.from('reminder_logs').insert({
-        clinic_id: clinicId,
-        patient_id: patientId,
-        appointment_id: null,
-        phone: phoneNumber,
-        message: message,
-        type: metadata?.type || 'manual',
-        status: 'failed',
-        error: error.message,
-        created_at: new Date().toISOString()
-      } as any)
+    if (queueEntry) {
+      // Get current attempts to increment
+      const { data: current } = await supabase.from('message_queue').select('attempts').eq('id', queueEntry.id).single()
+      const nextAttempt = (current?.attempts || 0) + 1
+      
+      await supabase.from('message_queue').update({ 
+        attempts: nextAttempt, 
+        next_retry_at: new Date(Date.now() + (nextAttempt * 10) * 60 * 1000).toISOString(),
+        error_log: supabase.rpc('append_jsonb', { 
+            json_col_name: 'error_log', 
+            payload: { error: error.message, at: new Date().toISOString() } 
+        })
+      } as any).eq('id', queueEntry.id)
     }
-
-    return {
-      success: false,
-      status: 'failed',
-      error: error.message
-    }
+    return { success: false, status: 'failed', error: error.message }
   }
 }

@@ -29,7 +29,7 @@ export default function BookingPage() {
   const [doctorId, setDoctorId] = React.useState<string | undefined>(undefined)
   const [date, setDate] = React.useState<Date | undefined>(undefined)
   const [time, setTime] = React.useState<string | null>(null)
-  const [patient, setPatient] = React.useState<PatientDetails>({ name: '', phone: '', email: '', notes: '' })
+  const [patient, setPatient] = React.useState<PatientDetails>({ name: '', phone: '', email: '', notes: '', whatsapp_consent: false, consentGiven: false })
   const [confirmedData, setConfirmedData] = React.useState<any>(null)
   const [paymentId, setPaymentId] = React.useState<string | null>(null)
 

@@ -13,6 +13,45 @@ export type Followup = Database['public']['Tables']['followups']['Row']
 export interface Database {
   public: {
     Tables: {
+      whatsapp_templates: {
+        Row: {
+          id: string
+          clinic_id: string
+          name: string
+          category: string
+          body_text: string
+          variables: string[]
+          gupshup_template_id: string | null
+          meta_status: string
+          created_at: string
+          approved_at: string | null
+        }
+        Insert: {
+          id?: string
+          clinic_id: string
+          name: string
+          category?: string
+          body_text: string
+          variables?: string[]
+          gupshup_template_id?: string | null
+          meta_status?: string
+          created_at?: string
+          approved_at?: string | null
+        }
+        Update: {
+          id?: string
+          clinic_id?: string
+          name?: string
+          category?: string
+          body_text?: string
+          variables?: string[]
+          gupshup_template_id?: string | null
+          meta_status?: string
+          created_at?: string
+          approved_at?: string | null
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           id: string

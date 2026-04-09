@@ -20,9 +20,13 @@ import {
   MessageSquare,
   Trash2,
   TestTube2,
+  LayoutGrid,
+  FileText,
 } from 'lucide-react'
 import { useWhatsApp } from '@/hooks/use-whatsapp'
 import { WhatsAppOtpWizard } from '@/components/whatsapp/whatsapp-otp-wizard'
+import { WhatsAppTemplates } from '@/components/whatsapp/whatsapp-templates'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import {
   AlertDialog,
@@ -90,194 +94,206 @@ export default function WhatsAppSettingsPage() {
         <p className="mt-1 text-muted-foreground">
           Manage your clinic&apos;s WhatsApp Business integration for automated patient reminders.
         </p>
-      </div>
+      </div>      <Tabs defaultValue="connection" className="space-y-8">
+        <TabsList className="bg-slate-100 p-1 rounded-xl">
+          <TabsTrigger value="connection" className="rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Wifi className="mr-2 h-4 w-4" />
+            Connection
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="rounded-lg px-6 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <FileText className="mr-2 h-4 w-4" />
+            Templates
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* ── Main Column ────────────────────────────────────────────── */}
-        <div className="space-y-6 lg:col-span-2">
-
-          {/* ── SHARED vs PRIVATE TOGGLE (NEW) ────────────────────────── */}
-          <Card className="border-blue-100 bg-blue-50/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Wifi className="h-4 w-4 text-blue-600" />
-                Connection Priority
-              </CardTitle>
-              <CardDescription>
-                Choose whether to use PatientFlow AI infrastructure or your own.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <button
-                  onClick={() => setSharedNumberMode(true)}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
-                    data?.use_shared_number 
-                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
-                      : "border-slate-200 bg-white hover:border-blue-300"
-                  )}
-                >
-                  <span className="text-sm font-bold text-slate-900">Shared Number Mode</span>
-                  <span className="text-xs text-slate-500">Launch instantly, no setup required. (Limited quota)</span>
-                </button>
-                <button
-                  onClick={() => setSharedNumberMode(false)}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
-                    !data?.use_shared_number 
-                      ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
-                      : "border-slate-200 bg-white hover:border-blue-300"
-                  )}
-                >
-                  <span className="text-sm font-bold text-slate-900">Private Provider Mode</span>
-                  <span className="text-xs text-slate-500">Use your own Gupshup/Number for unlimited scale.</span>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ── STATUS CARD (shown when connected) ─────────────────── */}
-          {isLoading ? (
-            <Card className="flex min-h-48 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </Card>
-          ) : isConnected ? (
-            <ConnectedCard
-              phoneDisplay={phoneDisplay}
-              provider={provider}
-              onRefresh={() => refresh(true)}
-              onDisconnect={handleDisconnect}
-              disconnecting={disconnecting}
-            />
-          ) : (
-            /* ── OTP WIZARD (shown when not connected) ─────────────── */
-            <Card className="overflow-hidden">
-              <CardContent className="p-6 sm:p-8">
-                <WhatsAppOtpWizard
-                  compact
-                  showSkip={false}
-                  onSuccess={() => {
-                    refresh(true)
-                    toast({ title: 'WhatsApp is now active!', description: 'Automated reminders will start sending.' })
-                  }}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* ── BOT PERSONALITY TUNER (NEW) ────────────────────────── */}
-          {isConnected && !isLoading && (
-            <BotPersonalityTuner 
-              clinicId={data?.clinicId || ''} 
-              defaultPersonality={data?.bot_personality || 'professional'}
-              clinicName={data?.name || 'Kumars Dentistry'}
-            />
-          )}
-
-          {/* ── SEND TEST MESSAGE (only when connected) ─────────────── */}
-          {isConnected && !isLoading && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <TestTube2 className="h-4 w-4 text-blue-600" />
-                  Send a Test Message
-                </CardTitle>
-                <CardDescription>
-                  Verify your setup by sending a WhatsApp message to any number.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <div className="flex overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-900 flex-1">
-                    <div className="flex items-center gap-1 border-r border-slate-200 bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-800">
-                      <span className="text-sm">🇮🇳</span>
-                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">+91</span>
-                    </div>
-                    <Input
-                      type="tel"
-                      inputMode="numeric"
-                      placeholder="98765 43210"
-                      value={testPhone}
-                      maxLength={10}
-                      onChange={(e) => setTestPhone(e.target.value.replace(/\D/g, ''))}
-                      className="flex-1 rounded-none border-0 shadow-none focus-visible:ring-0"
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendTest()}
-                    />
+        <TabsContent value="connection">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* ── Main Column ────────────────────────────────────────────── */}
+            <div className="space-y-6 lg:col-span-2">
+              {/* ── SHARED vs PRIVATE TOGGLE (NEW) ────────────────────────── */}
+              <Card className="border-blue-100 bg-blue-50/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Wifi className="h-4 w-4 text-blue-600" />
+                    Connection Priority
+                  </CardTitle>
+                  <CardDescription>
+                    Choose whether to use PatientFlow AI infrastructure or your own.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <button
+                      onClick={() => setSharedNumberMode(true)}
+                      className={cn(
+                        "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
+                        data?.use_shared_number 
+                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
+                          : "border-slate-200 bg-white hover:border-blue-300"
+                      )}
+                    >
+                      <span className="text-sm font-bold text-slate-900">Shared Number Mode</span>
+                      <span className="text-xs text-slate-500">Launch instantly, no setup required. (Limited quota)</span>
+                    </button>
+                    <button
+                      onClick={() => setSharedNumberMode(false)}
+                      className={cn(
+                        "flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
+                        !data?.use_shared_number 
+                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500/20" 
+                          : "border-slate-200 bg-white hover:border-blue-300"
+                      )}
+                    >
+                      <span className="text-sm font-bold text-slate-900">Private Provider Mode</span>
+                      <span className="text-xs text-slate-500">Use your own Gupshup/Number for unlimited scale.</span>
+                    </button>
                   </div>
-                  <Button
-                    onClick={handleSendTest}
-                    disabled={sendingTest || testPhone.length < 10}
-                    className="shrink-0"
-                  >
-                    {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                    <span className="ml-2 hidden sm:inline">Send Test</span>
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  The test message will arrive from your connected clinic number.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
 
-          {/* ── CONNECTION HEALTH ────────────────────────────────────── */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Connection Health</CardTitle>
-              <CardDescription>Real-time system diagnostics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <StatusRow label="WhatsApp API" value={isConnected ? 'Active' : 'Not connected'} ok={isConnected} />
-              <StatusRow label="Webhook Receiver" value="Online" ok />
-              <StatusRow label="Message Queue" value="Clear" ok />
-              <StatusRow
-                label="Provider"
-                value={provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Not set'}
-                ok={Boolean(provider)}
-                last
-              />
-            </CardContent>
-          </Card>
-        </div>
+              {/* ── STATUS CARD (shown when connected) ─────────────────── */}
+              {isLoading ? (
+                <Card className="flex min-h-48 items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </Card>
+              ) : isConnected ? (
+                <ConnectedCard
+                  phoneDisplay={phoneDisplay}
+                  provider={provider}
+                  onRefresh={() => refresh(true)}
+                  onDisconnect={handleDisconnect}
+                  disconnecting={disconnecting}
+                />
+              ) : (
+                /* ── OTP WIZARD (shown when not connected) ─────────────── */
+                <Card className="overflow-hidden">
+                  <CardContent className="p-6 sm:p-8">
+                    <WhatsAppOtpWizard
+                      compact
+                      showSkip={false}
+                      onSuccess={() => {
+                        refresh(true)
+                        toast({ title: 'WhatsApp is now active!', description: 'Automated reminders will start sending.' })
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
-        {/* ── Sidebar ───────────────────────────────────────────────── */}
-        <div className="space-y-5">
-          <Alert className="border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/40">
-            <HelpCircle className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-300">How it works</AlertTitle>
-            <AlertDescription className="mt-1 text-xs text-blue-700 dark:text-blue-400">
-              We use the official WhatsApp Business API. Your clinic number sends reminders
-              directly to patients — no extra apps needed.
-            </AlertDescription>
-          </Alert>
+              {/* ── BOT PERSONALITY TUNER (NEW) ────────────────────────── */}
+              {isConnected && !isLoading && (
+                <BotPersonalityTuner 
+                  clinicId={data?.clinicId || ''} 
+                  defaultPersonality={data?.bot_personality || 'professional'}
+                  clinicName={data?.name || 'Kumars Dentistry'}
+                />
+              )}
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ShieldCheck className="h-4 w-4 text-green-600" />
-                Best Practices
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-xs text-muted-foreground">
-              <p><strong className="text-foreground">Dedicated clinic number:</strong> Keep a secondary number just for patient messaging.</p>
-              <p><strong className="text-foreground">Avoid over-messaging:</strong> Only send appointment-related messages to prevent being flagged.</p>
-              <p><strong className="text-foreground">Personal touch:</strong> Messages that mention the doctor's name get better response rates.</p>
-            </CardContent>
-          </Card>
+              {/* ── SEND TEST MESSAGE (only when connected) ─────────────── */}
+              {isConnected && !isLoading && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <TestTube2 className="h-4 w-4 text-blue-600" />
+                      Send a Test Message
+                    </CardTitle>
+                    <CardDescription>
+                      Verify your setup by sending a WhatsApp message to any number.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex gap-2">
+                      <div className="flex overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 dark:border-slate-600 dark:bg-slate-900 flex-1">
+                        <div className="flex items-center gap-1 border-r border-slate-200 bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-800">
+                          <span className="text-sm">🇮🇳</span>
+                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">+91</span>
+                        </div>
+                        <Input
+                          type="tel"
+                          inputMode="numeric"
+                          placeholder="98765 43210"
+                          value={testPhone}
+                          maxLength={10}
+                          onChange={(e) => setTestPhone(e.target.value.replace(/\D/g, ''))}
+                          className="flex-1 rounded-none border-0 shadow-none focus-visible:ring-0"
+                          onKeyDown={(e) => e.key === 'Enter' && handleSendTest()}
+                        />
+                      </div>
+                      <Button
+                        onClick={handleSendTest}
+                        disabled={sendingTest || testPhone.length < 10}
+                        className="shrink-0"
+                      >
+                        {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                        <span className="ml-2 hidden sm:inline">Send Test</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-          {isConnected && (
-            <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950/40">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <AlertTitle className="text-red-800 dark:text-red-300">Important</AlertTitle>
-              <AlertDescription className="text-xs text-red-700 dark:text-red-400">
-                Disconnecting WhatsApp will <strong>pause all automated reminders</strong> until
-                you reconnect.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      </div>
+              {/* ── CONNECTION HEALTH ────────────────────────────────────── */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Connection Health</CardTitle>
+                  <CardDescription>Real-time system diagnostics</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <StatusRow label="WhatsApp API" value={isConnected ? 'Active' : 'Not connected'} ok={isConnected} />
+                  <StatusRow label="Webhook Receiver" value="Online" ok />
+                  <StatusRow label="Message Queue" value="Clear" ok />
+                  <StatusRow
+                    label="Provider"
+                    value={provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Not set'}
+                    ok={Boolean(provider)}
+                    last
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* ── Sidebar ───────────────────────────────────────────────── */}
+            <div className="space-y-5">
+              <Alert className="border-blue-100 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/40">
+                <HelpCircle className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-800 dark:text-blue-300">How it works</AlertTitle>
+                <AlertDescription className="mt-1 text-xs text-blue-700 dark:text-blue-400">
+                  We use the official WhatsApp Business API. Your clinic number sends reminders
+                  directly to patients — no extra apps needed.
+                </AlertDescription>
+              </Alert>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <ShieldCheck className="h-4 w-4 text-green-600" />
+                    Best Practices
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-xs text-muted-foreground">
+                  <p><strong className="text-foreground">Dedicated clinic number:</strong> Keep a secondary number just for patient messaging.</p>
+                  <p><strong className="text-foreground">Avoid over-messaging:</strong> Only send appointment-related messages to prevent being flagged.</p>
+                </CardContent>
+              </Card>
+
+              {isConnected && (
+                <Alert variant="destructive" className="border-red-100 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950/40">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <AlertTitle className="text-red-800 dark:text-red-300">Important</AlertTitle>
+                  <AlertDescription className="text-xs text-red-700 dark:text-red-400">
+                    Disconnecting WhatsApp will <strong>pause all automated reminders</strong> until
+                    you reconnect.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="templates">
+          <WhatsAppTemplates clinicId={data?.clinicId || ''} />
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   )
 }

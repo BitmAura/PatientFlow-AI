@@ -13,6 +13,7 @@ import { PlanUpgradePrompt } from '@/components/dashboard/plan-upgrade-prompt'
 import { ConversionFunnel } from '@/components/dashboard/conversion-funnel'
 import { MorningIntelligenceCard } from '@/components/dashboard/morning-intelligence'
 import { MoneyLeakList } from '@/components/dashboard/money-leak-list'
+import { StaffPerformanceCard } from '@/components/dashboard/staff-performance'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Plus, UserPlus } from 'lucide-react'
@@ -118,6 +119,7 @@ export default function DashboardPage() {
 
           {/* Right Column (Insights/Quick Actions) - 3 cols wide */}
           <div className="col-span-1 space-y-6 lg:col-span-3">
+            <StaffPerformanceCard />
             <QuickActions />
             <UpcomingAppointments />
           </div>

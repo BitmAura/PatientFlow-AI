@@ -1,27 +1,12 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 import { updateSession } from '@/lib/supabase/middleware'
+import { checkRateLimitAsync } from '@/lib/security/rate-limit'
 
-// ─── Simple in-process IP rate limiter ───────────────────────────────────────
-// Suitable for Vercel Edge (single-instance window per cold start).
-// Each entry: { count, windowStart }
-const ipHits = new Map<string, { count: number; windowStart: number }>()
+// ─── Distributed Rate Limiting ───────────────────────────────────────────────
 const RATE_LIMIT_WINDOW_MS = 60_000  // 1 minute
 const RATE_LIMIT_MAX = 30            // max requests per IP per window on public routes
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const entry = ipHits.get(ip)
-
-  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
-    ipHits.set(ip, { count: 1, windowStart: now })
-    return false
-  }
-
-  entry.count++
-  if (entry.count > RATE_LIMIT_MAX) return true
-  return false
-}
 
 // Public routes that need rate limiting (regex)
 const PUBLIC_RATE_LIMITED = /^\/(api\/booking|api\/portal|book)\//
@@ -62,10 +47,12 @@ export async function middleware(request: NextRequest) {
       request.headers.get('x-real-ip') ??
       '127.0.0.1'
 
-    if (isRateLimited(ip)) {
+    const { allowed, retryAfterSeconds } = await checkRateLimitAsync(`edge-limit:${ip}`, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS)
+
+    if (!allowed) {
       return new NextResponse('Too many requests', {
         status: 429,
-        headers: { 'Retry-After': '60' },
+        headers: { 'Retry-After': String(retryAfterSeconds) },
       })
     }
   }

@@ -4,7 +4,9 @@ export const patientDetailsSchema = z.object({
   name: z.string().min(2, 'Name is required').max(100),
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian phone number'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  notes: z.string().max(500).optional()
+  notes: z.string().max(500).optional(),
+  whatsapp_consent: z.boolean().default(false),
+  consentGiven: z.boolean().default(false),
 })
 
 export const confirmBookingSchema = z.object({

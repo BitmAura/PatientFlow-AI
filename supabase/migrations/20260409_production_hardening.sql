@@ -89,3 +89,14 @@ FOR UPDATE USING (clinic_id IN (SELECT clinic_id FROM public.staff WHERE user_id
 -- Global blacklist is read-only for clinics
 CREATE POLICY "Clinics can see blacklist" ON public.global_blacklist
 FOR SELECT USING (true);
+
+-- 7. Double-Booking Prevention Index
+-- Constraint to ensure a doctor cannot be double-booked
+CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_no_double_book_doc 
+ON public.appointments (doctor_id, start_time) 
+WHERE status != 'cancelled' AND doctor_id IS NOT NULL;
+
+-- Constraint for clinic-level resources (if doctor is null)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_appointments_no_double_book_clinic 
+ON public.appointments (clinic_id, start_time) 
+WHERE status != 'cancelled' AND doctor_id IS NULL;

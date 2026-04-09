@@ -9,7 +9,9 @@ export type GuardReason =
   | 'outside_hours' 
   | 'quota_exceeded'
   | 'no_subscription'
-  | 'trial_ended';
+  | 'trial_ended'
+  | 'no_consent'
+  | 'human_active_window';
 
 export interface GuardResult {
   allowed: boolean;
@@ -32,11 +34,17 @@ export async function messageGuard(
   if (patientId) {
     const { data: patient } = await supabase
       .from('patients')
-      .select('opted_out')
+      .select('opted_out, whatsapp_consent')
       .eq('id', patientId)
       .single();
     
     if (patient?.opted_out) return { allowed: false, reason: 'opted_out' };
+
+    // 1b. CONSENT CHECK (New pillar)
+    // Automated engines must only send to consented patients.
+    if (engine !== 'manual' && !patient?.whatsapp_consent) {
+       return { allowed: false, reason: 'no_consent' };
+    }
   }
 
   const { data: blacklisted } = await supabase
@@ -92,6 +100,23 @@ export async function messageGuard(
   
   if (hour < 9 || hour >= 19) {
     return { allowed: false, reason: 'outside_hours' };
+  }
+
+  // 6. HUMAN INTERVENTION CHECK (15-min window)
+  // If a human messaged recently, don't let automation interrupt.
+  if (engine !== 'manual') {
+    const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { data: humanMsg } = await supabase
+      .from('patient_messages')
+      .select('id')
+      .eq('phone_number', phone)
+      .eq('direction', 'outbound')
+      .gt('created_at', fifteenMinsAgo)
+      // Check metadata for manual flag. Assuming human messages are marked as such.
+      .contains('metadata', { source: 'manual' })
+      .maybeSingle();
+
+    if (humanMsg) return { allowed: false, reason: 'human_active_window' };
   }
 
   // 6. SUBSCRIPTION QUOTA

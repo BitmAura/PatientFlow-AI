@@ -57,3 +57,30 @@ export async function processWaitingList(clinicId: string): Promise<void> {
     .update({ status: 'notified', updated_at: new Date().toISOString() })
     .eq('id', waitingEntry.id)
 }
+
+/**
+ * TRIGGER: Appointment Completion & Viral Growth
+ * Mark an appointment as finished and trigger the referral loop.
+ */
+export async function completeAppointment(appointmentId: string): Promise<void> {
+  const admin = createAdminClient() as any
+  
+  // 1. Fetch appointment details
+  const { data: appt } = await admin
+    .from('appointments')
+    .select('id, clinic_id, patient_id, status')
+    .eq('id', appointmentId)
+    .single()
+
+  if (!appt || appt.status === 'completed') return
+
+  // 2. Mark as completed
+  await admin
+    .from('appointments')
+    .update({ status: 'completed' })
+    .eq('id', appt.id)
+
+  // 3. Trigger Referral Loop (Async)
+  const { ReferralService } = await import('@/services/marketing/referral-loop')
+  await ReferralService.triggerReferralNudge(appt.clinic_id, appt.patient_id)
+}
