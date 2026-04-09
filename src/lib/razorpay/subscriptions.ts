@@ -42,21 +42,49 @@ interface SubscriptionResponse {
 }
 
 export function resolveRazorpayPlanId(planId: PricingPlanId, billingCycle: BillingCycle): string {
-  const cycleKey = billingCycle === 'monthly' ? 'MONTHLY' : 'ANNUAL'
-  const primaryKey = `RAZORPAY_PLAN_${planId.toUpperCase()}_${cycleKey}` as const
-
-  if (process.env[primaryKey]) {
-    return process.env[primaryKey] as string
+  // Simplified plan structure:
+  // - Starter: Monthly only
+  // - Growth: Monthly only
+  // - Annual: For annual billing (any plan can use this for yearly charges)
+  
+  if (billingCycle === 'monthly') {
+    // Monthly plans: starter or growth
+    if (planId === 'starter') {
+      const resolved = process.env.RAZORPAY_PLAN_STARTER_MONTHLY
+      if (!resolved) {
+        throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_STARTER_MONTHLY`)
+      }
+      return resolved
+    }
+    
+    if (planId === 'growth') {
+      const resolved = process.env.RAZORPAY_PLAN_GROWTH_MONTHLY
+      if (!resolved) {
+        throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_GROWTH_MONTHLY`)
+      }
+      return resolved
+    }
+    
+    if (planId === 'pro') {
+      // Pro uses annual plan with annual billing
+      const resolved = process.env.RAZORPAY_PLAN_ANNUAL
+      if (!resolved) {
+        throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_ANNUAL`)
+      }
+      return resolved
+    }
   }
-
-  // Backward compatibility with older tier names.
-  const legacyPlanId = planId === 'starter' ? 'CLINIC' : planId === 'growth' ? 'HOSPITAL' : 'PRO'
-  const legacyKey = `RAZORPAY_PLAN_${legacyPlanId}_${cycleKey}` as const
-  const resolved = process.env[legacyKey]
-  if (!resolved) {
-    throw new Error(`Razorpay plan ID not configured for ${planId} ${billingCycle}`)
+  
+  // Annual billing: all plans use the Annual plan
+  if (billingCycle === 'annual') {
+    const resolved = process.env.RAZORPAY_PLAN_ANNUAL
+    if (!resolved) {
+      throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_ANNUAL`)
+    }
+    return resolved
   }
-  return resolved
+  
+  throw new Error(`Invalid plan configuration: ${planId} ${billingCycle}`)
 }
 
 /**
