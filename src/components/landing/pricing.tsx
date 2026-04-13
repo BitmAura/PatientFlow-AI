@@ -68,7 +68,8 @@ export function Pricing() {
           <div className="mt-8 flex items-center justify-center gap-4">
             <span className={cn("text-sm font-bold", billingCycle === 'monthly' ? "text-slate-900 dark:text-white" : "text-slate-400")}>Monthly</span>
             <button 
-              onClick={() => setBillingCycle(prev => prev === 'monthly' ? 'annual' : 'monthly')}
+              onClick={() => setBillingCycle((prev: BillingCycle) => prev === 'monthly' ? 'annual' : 'monthly')}
+              aria-label="Toggle billing cycle"
               className="relative h-7 w-12 rounded-full bg-slate-200 transition-colors dark:bg-slate-800"
             >
               <div className={cn(
