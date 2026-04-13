@@ -11,7 +11,7 @@ import { DateSelection } from '@/components/booking/date-selection'
 import { TimeSlotSelection } from '@/components/booking/time-slot-selection'
 import { PatientDetailsForm } from '@/components/booking/patient-details-form'
 import { BookingConfirmation } from '@/components/booking/booking-confirmation'
-import { DepositPayment } from '@/components/booking/deposit-payment'
+import { DepositPayment, type DepositPaymentResult } from '@/components/booking/deposit-payment'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { Loader2, ArrowLeft } from 'lucide-react'
@@ -31,7 +31,7 @@ export default function BookingPage() {
   const [time, setTime] = React.useState<string | null>(null)
   const [patient, setPatient] = React.useState<PatientDetails>({ name: '', phone: '', email: '', notes: '', whatsapp_consent: false, consentGiven: false })
   const [confirmedData, setConfirmedData] = React.useState<any>(null)
-  const [paymentId, setPaymentId] = React.useState<string | null>(null)
+  const [depositResult, setDepositResult] = React.useState<DepositPaymentResult | null>(null)
 
   const confirmBooking = useConfirmBooking()
   const { toast } = useToast()
@@ -79,7 +79,7 @@ export default function BookingPage() {
     return <div className="flex items-center justify-center min-h-screen text-red-500">Clinic not found</div>
   }
 
-  const handleBookingSubmission = async (pId?: string) => {
+  const handleBookingSubmission = async (deposit?: DepositPaymentResult) => {
     try {
       const result = await confirmBooking.mutateAsync({
         clinic_id: info.clinic.id,
@@ -88,8 +88,11 @@ export default function BookingPage() {
         date: dateStr!,
         time: time!,
         patient,
-        payment_id: pId
-      })
+        payment_id: deposit?.payment_id,
+        order_id: deposit?.order_id,
+        razorpay_signature: deposit?.signature,
+        deposit_amount: deposit ? (selectedService?.deposit_amount || 0) : undefined,
+      } as any)
       setConfirmedData({ 
         ...result, 
         date: dateStr, 
@@ -123,9 +126,9 @@ export default function BookingPage() {
     }
   }
 
-  const handlePaymentSuccess = async (pId: string) => {
-    setPaymentId(pId)
-    await handleBookingSubmission(pId)
+  const handlePaymentSuccess = async (result: DepositPaymentResult) => {
+    setDepositResult(result)
+    await handleBookingSubmission(result)
   }
 
   const handleBack = () => setStep(step - 1)
@@ -184,8 +187,10 @@ export default function BookingPage() {
           )}
 
           {step === STEP_PAYMENT && hasPayment && selectedService && (
-            <DepositPayment 
+            <DepositPayment
               amount={selectedService.deposit_amount}
+              clinicId={(info.clinic as any).id}
+              serviceId={selectedService.id}
               serviceName={selectedService.name}
               clinicName={info.clinic.name}
               patient={patient}

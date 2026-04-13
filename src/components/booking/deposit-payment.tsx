@@ -7,8 +7,16 @@ import { Loader2, Lock } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { useToast } from "@/hooks/use-toast"
 
+export interface DepositPaymentResult {
+  payment_id: string
+  order_id: string
+  signature: string
+}
+
 interface DepositPaymentProps {
   amount: number
+  clinicId: string
+  serviceId: string
   serviceName: string
   clinicName: string
   patient: {
@@ -16,7 +24,7 @@ interface DepositPaymentProps {
     email?: string
     phone: string
   }
-  onSuccess: (paymentId: string) => void
+  onSuccess: (result: DepositPaymentResult) => void
   onCancel: () => void
 }
 
@@ -26,13 +34,15 @@ declare global {
   }
 }
 
-export function DepositPayment({ 
-  amount, 
-  serviceName, 
-  clinicName, 
+export function DepositPayment({
+  amount,
+  clinicId,
+  serviceId,
+  serviceName,
+  clinicName,
   patient,
-  onSuccess, 
-  onCancel 
+  onSuccess,
+  onCancel
 }: DepositPaymentProps) {
   const [loading, setLoading] = React.useState(false)
   const { toast } = useToast()
@@ -44,23 +54,35 @@ export function DepositPayment({
       const res = await fetch('/api/booking/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount })
+        body: JSON.stringify({
+          amount,
+          clinic_id: clinicId,
+          service_id: serviceId,
+          patient_name: patient.name,
+          patient_email: patient.email || '',
+          patient_phone: patient.phone,
+        }),
       })
       if (!res.ok) {
-        throw new Error('Unable to create payment order')
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData?.error || 'Unable to create payment order')
       }
       const order = await res.json()
 
-      // 2. Load Razorpay (Mock logic included)
+      // 2. Open Razorpay checkout
       const options = {
         key: order.key_id,
         amount: order.amount,
         currency: order.currency,
         name: clinicName,
         description: `Deposit for ${serviceName}`,
-        order_id: order.id,
+        order_id: order.order_id,
         handler: function (response: any) {
-          onSuccess(response.razorpay_payment_id || 'mock_pay_id')
+          onSuccess({
+            payment_id: response.razorpay_payment_id,
+            order_id: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+          })
         },
         prefill: {
           name: patient.name,
@@ -81,10 +103,13 @@ export function DepositPayment({
       // Check if Razorpay is loaded
       if (typeof window.Razorpay === 'undefined') {
         if (process.env.NODE_ENV === 'development') {
-          // Allow local flow testing without gateway availability.
           console.warn('Razorpay SDK not loaded in development. Simulating success.')
           setTimeout(() => {
-            onSuccess('mock_payment_' + Math.random().toString(36).substring(7))
+            onSuccess({
+              payment_id: 'mock_pay_' + Math.random().toString(36).substring(7),
+              order_id: order.order_id || 'mock_order',
+              signature: 'mock_sig',
+            })
             setLoading(false)
           }, 1500)
           return
