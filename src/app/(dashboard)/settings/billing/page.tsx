@@ -37,8 +37,15 @@ const DEFAULT_SUBSCRIPTION: Subscription = {
 export default function BillingPage() {
   const { data: subscriptionRaw, isLoading: subLoading, isError } = useSubscription()
   const { data: history, isLoading: historyLoading } = useBillingHistory()
-
+  const [activeTab, setActiveTab] = React.useState('plans')
   const subscription = subscriptionRaw ?? DEFAULT_SUBSCRIPTION
+
+  const scrollToPlans = () => {
+    setActiveTab('plans')
+    setTimeout(() => {
+      document.getElementById('billing-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
 
   if (subLoading) {
     return (
@@ -71,6 +78,7 @@ export default function BillingPage() {
             limit={subscription.appointmentsLimit}
             periodEnd={subscription.periodEnd || ''}
             status={subscription.status}
+            onManageSubscription={scrollToPlans}
           />
         </div>
         
@@ -90,13 +98,13 @@ export default function BillingPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="plans" className="space-y-4">
+      <Tabs id="billing-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="plans">Available Plans</TabsTrigger>
           <TabsTrigger value="history">Billing History</TabsTrigger>
         </TabsList>
         <TabsContent value="plans" className="space-y-4">
-          <PlanComparison currentPlanId={subscription.planId} />
+          <PlanComparison currentPlanId={subscription.planId} subscriptionStatus={subscription.status} />
         </TabsContent>
         <TabsContent value="history">
           <Card>

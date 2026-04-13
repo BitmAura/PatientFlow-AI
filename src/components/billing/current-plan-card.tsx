@@ -14,9 +14,10 @@ interface CurrentPlanCardProps {
   limit: number
   periodEnd: string
   status: string
+  onManageSubscription?: () => void
 }
 
-export function CurrentPlanCard({ plan, usage, limit, periodEnd, status }: CurrentPlanCardProps) {
+export function CurrentPlanCard({ plan, usage, limit, periodEnd, status, onManageSubscription }: CurrentPlanCardProps) {
   const isUnlimited = limit === -1
   const percentage = isUnlimited ? 0 : Math.min((usage / limit) * 100, 100)
   const isPaid = plan.price > 0
@@ -84,7 +85,9 @@ export function CurrentPlanCard({ plan, usage, limit, periodEnd, status }: Curre
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-3">
-        <Button variant="outline" className="w-full">Manage Subscription</Button>
+        <Button variant="outline" className="w-full" onClick={onManageSubscription}>
+          {status === 'trialing' ? 'Activate a Plan' : 'Manage Subscription'}
+        </Button>
         {isPaid && (
           <CancelSubscriptionDialog periodEnd={periodEnd}>
             <Button variant="ghost" className="w-full text-zinc-500 hover:text-zinc-900">
