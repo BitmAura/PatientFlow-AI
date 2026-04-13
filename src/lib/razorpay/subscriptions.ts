@@ -66,10 +66,9 @@ export function resolveRazorpayPlanId(planId: PricingPlanId, billingCycle: Billi
     }
     
     if (planId === 'pro') {
-      // Pro uses annual plan with annual billing
-      const resolved = process.env.RAZORPAY_PLAN_ANNUAL
+      const resolved = process.env.RAZORPAY_PLAN_PRO_MONTHLY || process.env.RAZORPAY_PLAN_ANNUAL
       if (!resolved) {
-        throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_ANNUAL`)
+        throw new Error(`Razorpay plan ID not configured: RAZORPAY_PLAN_PRO_MONTHLY`)
       }
       return resolved
     }

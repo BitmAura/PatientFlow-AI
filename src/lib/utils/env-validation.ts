@@ -21,9 +21,13 @@ const ENV_CHECKS: EnvCheck[] = [
   { key: 'OTP_SECRET',                  required: true,  description: 'HMAC secret for OTP hashing' },
 
   // ── Required for payments ─────────────────────────────────────────────────
-  { key: 'RAZORPAY_KEY_ID',             required: true,  description: 'Razorpay key ID' },
-  { key: 'RAZORPAY_KEY_SECRET',         required: true,  description: 'Razorpay key secret' },
-  { key: 'RAZORPAY_WEBHOOK_SECRET',     required: true,  description: 'Razorpay webhook signature secret' },
+  { key: 'RAZORPAY_KEY_ID',                required: true,  description: 'Razorpay key ID (server-side)' },
+  { key: 'RAZORPAY_KEY_SECRET',            required: true,  description: 'Razorpay key secret' },
+  { key: 'RAZORPAY_WEBHOOK_SECRET',        required: true,  description: 'Razorpay webhook signature secret' },
+  { key: 'NEXT_PUBLIC_RAZORPAY_KEY_ID',    required: true,  description: 'Razorpay key ID (client-side checkout)' },
+  { key: 'RAZORPAY_PLAN_STARTER_MONTHLY',  required: true,  description: 'Razorpay plan ID for Starter monthly' },
+  { key: 'RAZORPAY_PLAN_GROWTH_MONTHLY',   required: true,  description: 'Razorpay plan ID for Growth monthly' },
+  { key: 'RAZORPAY_PLAN_PRO_MONTHLY',      required: true,  description: 'Razorpay plan ID for Pro monthly' },
 
   // ── Required for WhatsApp (Gupshup) ──────────────────────────────────────
   { key: 'GUPSHUP_APP_ID',             required: true,  description: 'Gupshup app ID for WhatsApp' },
