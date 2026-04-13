@@ -33,7 +33,6 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({
-    data,
     campaigns: data,
     pagination: {
       page,

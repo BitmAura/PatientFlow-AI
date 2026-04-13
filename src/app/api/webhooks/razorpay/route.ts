@@ -1,18 +1,18 @@
 /**
- * POST /api/webhooks/razorpay
- * Razorpay webhook handler for payment events
- * 
+ * POST /api/webhooks/razorpay  ← CANONICAL RAZORPAY WEBHOOK URL
+ * Configure this URL in Razorpay Dashboard → Webhooks.
+ * The legacy /api/webhook route is kept for backwards compatibility only.
+ *
  * Events handled:
- * - payment.authorized: Payment is authorized (may need capture)
- * - payment.failed: Payment failed
- * - payment.captured: Payment captured successfully
- * - subscription events: For recurring subscriptions
+ * - payment.authorized / payment.captured / payment.failed
+ * - subscription.* — delegated to handleSubscriptionWebhook (shared service)
  */
 
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { checkRateLimitAsync, getClientIp } from '@/lib/security/rate-limit'
+import { handleSubscriptionWebhook } from '@/lib/services/subscription'
 import { writeAuditLog } from '@/lib/audit/log'
 
 // Types for Razorpay webhook payload
@@ -130,62 +130,6 @@ async function handlePaymentFailed(payment: RazorpayPaymentEntity) {
   // For now, just log it - the appointment won't be confirmed until payment succeeds
 }
 
-/**
- * Handle subscription events (for recurring subscriptions)
- */
-async function handleSubscriptionEvent(event: string, payload: any) {
-  console.log('[Razorpay Webhook] Subscription event:', event)
-  const supabase = createClient()
-
-  const subId = payload.id
-  const status = payload.status
-
-  // Map Razorpay status to our internal status
-  let internalStatus: string = 'active'
-  if (status === 'authenticated' || status === 'active') internalStatus = 'active'
-  if (status === 'halted') internalStatus = 'past_due'
-  if (status === 'cancelled') internalStatus = 'cancelled'
-  if (status === 'expired') internalStatus = 'expired'
-
-  // Update subscription record
-  const { data: sub, error: subError } = await supabase
-    .from('subscriptions')
-    .update({ 
-      status: internalStatus,
-      current_period_end: payload.current_end ? new Date(payload.current_end * 1000).toISOString() : undefined,
-      updated_at: new Date().toISOString()
-    })
-    .eq('razorpay_subscription_id', subId)
-    .select('id, user_id')
-    .single()
-
-  if (subError) {
-    console.error('[Razorpay Webhook] Error updating subscription:', subError)
-    return
-  }
-
-  // If charged/captured, reset the usage counters for the new period
-  if (event === 'subscription.charged' || event === 'payment.captured') {
-    // Reset usage counters
-    const { error: usageError } = await supabase
-      .from('subscription_usage')
-      .update({
-        appointments_count: 0,
-        whatsapp_messages_sent: 0,
-        period_start: new Date().toISOString(),
-        period_end: payload.current_end ? new Date(payload.current_end * 1000).toISOString() : undefined,
-        updated_at: new Date().toISOString()
-      })
-      .eq('subscription_id', sub.id)
-
-    if (usageError) {
-        console.error('[Razorpay Webhook] Error resetting usage:', usageError)
-    }
-
-    // Notify owner on WhatsApp if payment was successful (optional but good practice)
-    // We can implement this later via the WhatsApp service
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -282,9 +226,8 @@ export async function POST(request: Request) {
       case 'subscription.resumed':
       case 'subscription.pending':
       case 'subscription.cancelled':
-        if (payload.payload?.subscription?.entity) {
-          await handleSubscriptionEvent(payload.event, payload.payload.subscription.entity as Record<string, unknown>)
-        }
+        // Delegate to the shared subscription service (same logic as /api/webhook)
+        await handleSubscriptionWebhook(payload)
         break
 
       default:

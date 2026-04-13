@@ -22,7 +22,7 @@ export async function processImportedPatients(
     try {
       // 1. Assign Basic Lifecycle Stage
       // Default to 'visited' if we have a last_visit, else 'new'
-      let stage: 'new' | 'visited' | 'recall_pending' = 'new';
+      let stage: 'new_patient' | 'visited' | 'recall_due' = 'new_patient';
       
       if (patient.last_visit_at) {
         stage = 'visited';
@@ -47,7 +47,7 @@ export async function processImportedPatients(
             patient.treatment_type || 'General Checkup',
             nextRecall.toISOString()
           );
-          stage = 'recall_pending';
+          stage = 'recall_due';
         }
       }
 

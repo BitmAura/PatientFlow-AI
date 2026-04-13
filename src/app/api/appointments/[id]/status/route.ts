@@ -60,6 +60,20 @@ export async function PATCH(
     return new NextResponse('Failed to update status', { status: 500 })
   }
 
+  // Update patient lifecycle stage based on new appointment status
+  const patientId = (currentAppt as any).patient_id
+  if (status === AppointmentStatus.COMPLETED) {
+    const admin = createAdminClient() as any
+    await admin.from('patients')
+      .update({ lifecycle_stage: 'treatment_completed' })
+      .eq('id', patientId)
+  } else if (status === AppointmentStatus.CHECKED_IN) {
+    const admin = createAdminClient() as any
+    await admin.from('patients')
+      .update({ lifecycle_stage: 'visited' })
+      .eq('id', patientId)
+  }
+
   await writeAuditLog({
     clinicId,
     userId: user?.id || null,

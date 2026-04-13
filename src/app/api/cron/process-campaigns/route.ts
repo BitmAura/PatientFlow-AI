@@ -20,11 +20,13 @@ async function handler(request: NextRequest) {
 
   const supabase = createAdminClient() as any
 
-  // Find active sending campaigns
+  // Find active sending campaigns — cap at 20 per cron run to prevent timeouts
   const { data: campaigns } = await supabase
     .from('campaigns')
     .select('id')
     .eq('status', 'sending')
+    .order('created_at', { ascending: true })
+    .limit(20)
 
   if (!campaigns || campaigns.length === 0) {
     return NextResponse.json({ processed_campaigns: 0, messages_sent: 0 })

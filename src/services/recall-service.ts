@@ -42,7 +42,7 @@ export class RecallService {
 
     // Update patient lifecycle
     await supabase.from('patients')
-      .update({ lifecycle_stage: 'recall_pending' } as any)
+      .update({ lifecycle_stage: 'recall_due' } as any)
       .eq('id', patientId)
   }
 
@@ -390,7 +390,7 @@ export class RecallService {
         newLifecycleStage = 'visited' 
         break
       case 'call_later':
-        newRecallStatus = 'contacted'
+        newRecallStatus = 'overdue' // reset to overdue so cron picks it up again
         break
       case 'wrong_number':
         newRecallStatus = 'cancelled'
@@ -409,9 +409,11 @@ export class RecallService {
       this.logActivity(recallId, activityType, `Staff Outcome: ${outcome}. ${notes || ''}`),
       supabase
         .from('patient_recalls')
-        .update({ 
+        .update({
           status: newRecallStatus,
-          notes: notes ? `[Staff: ${outcome}] ${notes}` : undefined
+          notes: notes ? `[Staff: ${outcome}] ${notes}` : undefined,
+          // Reset attempt count when staff schedules a callback so cron retries
+          ...(outcome === 'call_later' ? { attempt_count: 0 } : {}),
         } as any)
         .eq('id', recallId)
     ];

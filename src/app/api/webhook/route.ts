@@ -4,8 +4,9 @@ import { verifyWebhookSignature, parseWebhookEvent } from '@/lib/razorpay/subscr
 import { handleSubscriptionWebhook } from '@/lib/services/subscription'
 
 /**
- * POST /api/webhook
- * Generic Razorpay webhook receiver (server-only). Verifies HMAC and delegates to subscription service.
+ * POST /api/webhook  ← LEGACY — kept for backwards compatibility only.
+ * Canonical webhook URL is /api/webhooks/razorpay (has rate-limiting + audit logs).
+ * Do NOT configure new Razorpay webhooks to this endpoint.
  */
 export async function POST(request: NextRequest) {
   try {

@@ -109,7 +109,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
 
   const { data: appointments } = await admin
     .from('appointments')
-    .select('id, clinic_id, patient_id, start_time, status, reminder_48h_sent, reminder_24h_sent, reminder_2h_sent, noshow_followup_sent, patients(full_name, phone, email)')
+    .select('id, clinic_id, patient_id, start_time, status, reminder_sent_24h, reminder_sent_2h, patients(full_name, phone, email)')
     .in('status', ['pending', 'confirmed', 'completed', 'no_show'])
     .gte('start_time', new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString())
     .lte('start_time', new Date(Date.now() + 52 * 60 * 60 * 1000).toISOString())
@@ -149,7 +149,9 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
     }
 
     /* ── 48h reminder ─────────────────────────────────────────── */
-    if (!appointment.reminder_48h_sent && hours <= 50 && hours >= 44) {
+    // No DB column for 48h — use reminder_logs as idempotency guard
+    const already48h = await wasMessageSent(admin, appointment.id, 'appointment_reminder_48h')
+    if (!already48h && hours <= 50 && hours >= 44) {
       const { subject, html } = reminder24hTemplate({
         ...emailData,
         appointmentDate: `${appointmentDateStr} (in 2 days)`,
@@ -173,14 +175,14 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         stats.reminders24h++ // re-use counter
         if (result.channels.includes('email')) stats.emailsSent++
         if (result.channels.includes('sms')) stats.smsSent++
-        await admin.from('appointments').update({ reminder_48h_sent: true }).eq('id', appointment.id)
+        // No DB column for 48h — reminder_logs entry is the idempotency record
       } else {
         stats.failed++
       }
     }
 
     /* ── 24h reminder ─────────────────────────────────────────── */
-    if (!appointment.reminder_24h_sent && hours <= 26 && hours >= 20) {
+    if (!appointment.reminder_sent_24h && hours <= 26 && hours >= 20) {
       const { subject, html } = reminder24hTemplate(emailData)
       const result = await sendMultiChannel({
         admin,
@@ -213,14 +215,14 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         stats.reminders24h++
         if (result.channels.includes('email')) stats.emailsSent++
         if (result.channels.includes('sms')) stats.smsSent++
-        await admin.from('appointments').update({ reminder_24h_sent: true }).eq('id', appointment.id)
+        await admin.from('appointments').update({ reminder_sent_24h: true }).eq('id', appointment.id)
       } else {
         stats.failed++
       }
     }
 
     /* ── 3h reminder ──────────────────────────────────────────── */
-    if (!appointment.reminder_2h_sent && hours <= 4 && hours >= 1) {
+    if (!appointment.reminder_sent_2h && hours <= 4 && hours >= 1) {
       const { subject, html } = reminder3hTemplate(emailData)
       const result = await sendMultiChannel({
         admin,
@@ -241,14 +243,14 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
         stats.reminders3h++
         if (result.channels.includes('email')) stats.emailsSent++
         if (result.channels.includes('sms')) stats.smsSent++
-        await admin.from('appointments').update({ reminder_2h_sent: true }).eq('id', appointment.id)
+        await admin.from('appointments').update({ reminder_sent_2h: true }).eq('id', appointment.id)
       } else {
         stats.failed++
       }
     }
 
     /* ── No-show recovery (cron fallback — immediate send happens in status route) */
-    if (appointment.status === 'no_show' && !appointment.noshow_followup_sent) {
+    if (appointment.status === 'no_show') {
       const alreadySent = await wasMessageSent(admin, appointment.id, 'no_show_recovery')
       if (!alreadySent) {
         const { subject, html } = noShowRecoveryTemplate(emailData)
@@ -283,7 +285,7 @@ export async function processScheduledReminders(): Promise<ReminderStats> {
           stats.noShowRecovery++
           if (result.channels.includes('email')) stats.emailsSent++
           if (result.channels.includes('sms')) stats.smsSent++
-          await admin.from('appointments').update({ noshow_followup_sent: true }).eq('id', appointment.id)
+          // reminder_logs entry serves as idempotency guard — no separate DB column needed
         } else {
           stats.failed++
         }

@@ -36,7 +36,7 @@ export default function CampaignsPage() {
       <PageCard variant="default" padding>
         <h2 className="text-lg font-semibold mb-4">All Campaigns</h2>
         <CampaignTable 
-          data={campaigns?.data || []} 
+          data={campaigns?.campaigns || []}
           isLoading={campaignsLoading} 
         />
       </PageCard>
