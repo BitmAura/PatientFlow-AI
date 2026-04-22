@@ -163,7 +163,7 @@ export function WhatsAppConnectCard() {
                   variant="outline"
                   className="w-full"
                   size="sm"
-                  onClick={() => window.open('mailto:support@auradigitalservices.me', '_blank')}
+                  onClick={() => window.open('mailto:support@patientflow.ai', '_blank')}
                 >
                   <Phone className="w-4 h-4 mr-2" />
                   I need help with setup

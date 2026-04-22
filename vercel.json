@@ -3,9 +3,9 @@
     {
       "source": "/(.*)",
       "has": [
-        { "type": "host", "value": "app.auradigitalservices.me" }
+        { "type": "host", "value": "app.patientflow.ai" }
       ],
-      "destination": "https://auradigitalservices.me/$1",
+      "destination": "https://patientflow.ai/$1",
       "permanent": true
     }
   ],

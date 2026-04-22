@@ -12,7 +12,7 @@ export default function PortalLayout({
       <footer className="border-t bg-white py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>© 2024 PatientFlow AI. All rights reserved.</p>
-          <p className="mt-1">Need help? Contact support@auradigitalservices.me</p>
+          <p className="mt-1">Need help? Contact support@patientflow.ai</p>
         </div>
       </footer>
     </div>

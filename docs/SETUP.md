@@ -38,7 +38,7 @@ This will create all tables, enums, RLS policies, and triggers defined in `supab
 2. Enable **Email** provider.
 3. (Optional) Configure Google/GitHub auth if needed.
 4. Go to Authentication > URL Configuration:
-   - Set **Site URL** to your app root (e.g. `https://app.auradigitalservices.me` for prod, `http://localhost:3000` for dev).
+   - Set **Site URL** to your app root (e.g. `https://app.patientflow.ai` for prod, `http://localhost:3000` for dev).
    - Add **Redirect URLs**: `http://localhost:3000/api/auth/callback` and `https://your-domain.com/api/auth/callback` (use your real production domain). If these are missing, login can fail with "Failed to fetch".
 
 ## 2. WhatsApp Integration

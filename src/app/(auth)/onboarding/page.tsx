@@ -55,7 +55,7 @@ export default function OnboardingPage() {
       <div className="py-6 text-center text-xs text-muted-foreground">
         🔒 Your clinic and patient data is stored securely and never shared with third parties.
         <br className="sm:hidden" />{' '}
-        Questions? <a href="mailto:support@auradigitalservices.me" className="underline hover:text-foreground">Email support</a>
+        Questions? <a href="mailto:support@patientflow.ai" className="underline hover:text-foreground">Email support</a>
       </div>
     </div>
   )

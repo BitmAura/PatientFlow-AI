@@ -68,8 +68,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-zinc-600">
                 <Mail className="h-5 w-5 shrink-0 text-green-600" />
-                <a href="mailto:support@auradigitalservices.me" className="hover:text-green-700">
-                  support@auradigitalservices.me
+                <a href="mailto:support@patientflow.ai" className="hover:text-green-700">
+                  support@patientflow.ai
                 </a>
               </li>
             </ul>
@@ -78,7 +78,7 @@ export function Footer() {
         
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 md:flex-row">
           <p className="text-sm text-zinc-500">
-            &copy; {currentYear} Aura Digital Services. All rights reserved.
+            &copy; {currentYear} PatientFlow AI. All rights reserved.
           </p>
           <div className="flex space-x-6 text-sm text-zinc-500">
             <Link href="/privacy" className="hover:text-green-600 transition-colors">Privacy Policy</Link>

@@ -13,7 +13,7 @@
 *Effect: App is slow or data cannot be saved.*
 1. **Detection:** Sentry alerts or 500 errors on dashboard.
 2. **Action:** Enable "Maintenance Mode" toggle in Vercel to show a friendly "Clinic Upgrade in Progress" page.
-3. **Communication:** Email support@auradigitalservices.me to high-volume clinics.
+3. **Communication:** Email support@patientflow.ai to high-volume clinics.
 
 ## Scenario C: Data Breach / Unauthorized Access
 *Effect: Patient data exposure.*

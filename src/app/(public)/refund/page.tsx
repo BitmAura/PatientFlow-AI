@@ -47,7 +47,7 @@ export default function RefundPage() {
         <h2>Chargebacks & Disputes</h2>
         <p>
           Before initiating a chargeback through Razorpay or your card issuer, we request that you contact us first at 
-          support@auradigitalservices.me to resolve the issue amicably.
+          support@patientflow.ai to resolve the issue amicably.
         </p>
       </div>
 

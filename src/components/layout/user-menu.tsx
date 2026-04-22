@@ -89,7 +89,7 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <a href="mailto:support@auradigitalservices.me" className="cursor-pointer">
+            <a href="mailto:support@patientflow.ai" className="cursor-pointer">
               <HelpCircle className="mr-2 h-4 w-4" />
               Get Support
             </a>

@@ -100,8 +100,9 @@ function ClinicStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Clinic Name *</label>
+          <label htmlFor="clinic-name" className="block text-sm font-medium mb-2">Clinic Name *</label>
           <input
+            id="clinic-name"
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="e.g., Dr. Smith's Dental Clinic"
@@ -111,8 +112,9 @@ function ClinicStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Doctor Name *</label>
+          <label htmlFor="doctor-name" className="block text-sm font-medium mb-2">Doctor Name *</label>
           <input
+            id="doctor-name"
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Dr. John Smith"
@@ -122,8 +124,9 @@ function ClinicStep({ onNext, onBack }: { onNext: () => void; onBack: () => void
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Specialization *</label>
+          <label htmlFor="specialization" className="block text-sm font-medium mb-2">Specialization *</label>
           <select
+            id="specialization"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={specialization}
             onChange={(e) => setSpecialization(e.target.value)}
@@ -207,18 +210,22 @@ function HoursStep({ onNext, onBack }: { onNext: () => void; onBack: () => void 
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Start Time</label>
+            <label htmlFor="start-time" className="block text-sm font-medium mb-2">Start Time</label>
             <input
+              id="start-time"
               type="time"
+              title="Select clinic opening time"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">End Time</label>
+            <label htmlFor="end-time" className="block text-sm font-medium mb-2">End Time</label>
             <input
+              id="end-time"
               type="time"
+              title="Select clinic closing time"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
@@ -414,7 +421,7 @@ function CompleteStep({ onFinish }: { onFinish: () => void }) {
       </Button>
 
       <p className="text-xs text-gray-500">
-        Need help? Our support team is available 24/7 at support@auradigitalservices.me
+        Need help? Our support team is available 24/7 at support@patientflow.ai
       </p>
     </div>
   )

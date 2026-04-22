@@ -22,7 +22,7 @@ export interface SendEmailInput {
 export async function sendEmail(input: SendEmailInput): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const client = getClient()
-    const fromAddress = input.from ?? (process.env.EMAIL_FROM ?? 'PatientFlow AI <reminders@auradigitalservices.me>')
+    const fromAddress = input.from ?? (process.env.EMAIL_FROM ?? 'PatientFlow AI <reminders@patientflow.ai>')
 
     const { data, error } = await client.emails.send({
       from: fromAddress,

@@ -20,4 +20,4 @@ We use github to host code, to track issues and feature requests, and to accept 
 6. Issue that pull request!
 
 ## Any questions?
-Contact the Aura Digital Services team at dev@auradigitalservices.me
+Contact the PatientFlow AI team at dev@patientflow.ai

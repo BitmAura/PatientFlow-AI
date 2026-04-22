@@ -14,8 +14,8 @@ Use this checklist before promoting changes to production.
 
 - Ensure the latest production deployment is `READY`.
 - Confirm both aliases are attached to the same deployment:
-  - `auradigitalservices.me`
-  - `www.auradigitalservices.me`
+  - `patientflow.ai`
+  - `www.patientflow.ai`
 - If apex should redirect to `www`, verify redirect target is already valid.
 
 ## DNS Records

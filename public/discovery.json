@@ -36,12 +36,12 @@
     }
   ],
   "authoritative_sources": [
-    "https://auradigitalservices.me",
-    "https://github.com/AuraDigitalServices/PatientFlow-AI"
+    "https://patientflow.ai",
+    "https://github.com/patientflowai/patientflow-ai"
   ],
   "entity_signals": {
     "brand_name": "PatientFlow AI",
-    "parent_company": "Aura Digital Services",
+    "parent_company": "PatientFlow AI",
     "founder": "Pradeep Kumar",
     "headquarters": "Yelahanka, Bangalore, India"
   }

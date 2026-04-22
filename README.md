@@ -1,5 +1,5 @@
 # PatientFlow AI — No-Show Killer
-### Built by Aura Digital Services · Made in India 🇮🇳
+### The Clinical Revenue Recovery Platform
 
 > **Stop losing ₹40,000+/month to missed appointments.**  
 > PatientFlow AI is a clinical revenue recovery platform that automates WhatsApp reminders, patient recalls, and lead follow-ups — so Indian clinics never lose a patient to a forgotten appointment again.
@@ -330,4 +330,4 @@ We use **Gupshup** as our primary WhatsApp Business API provider.
 ---
 
 ## License
-Copyright © 2026 Aura Digital Services. All rights reserved.
+Copyright © 2026 PatientFlow AI. All rights reserved.

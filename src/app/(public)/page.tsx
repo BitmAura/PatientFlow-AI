@@ -41,7 +41,7 @@ const jsonLd = {
   name: 'PatientFlow AI',
   applicationCategory: 'HealthcareApplication',
   operatingSystem: 'Web',
-  url: 'https://auradigitalservices.me',
+  url: 'https://patientflow.ai',
   description:
     'WhatsApp-powered clinic management software for Indian healthcare. Reduces no-shows by 75% with automated reminders, recalls, and online booking.',
   offers: {
@@ -58,8 +58,8 @@ const jsonLd = {
   },
   provider: {
     '@type': 'Organization',
-    name: 'Aura Digital Services',
-    url: 'https://auradigitalservices.me',
+    name: 'PatientFlow AI',
+    url: 'https://patientflow.ai',
   },
 }
 

@@ -350,7 +350,7 @@ export function WhatsAppSetupWizard({ clinicPhoneNumber, initialMode = 'auto' }:
             <HelpCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>Need help?</strong> Our support team can set this up for you in 5 minutes. 
-              <Button variant="link" className="p-0 h-auto" onClick={() => window.open('mailto:support@auradigitalservices.me', '_blank')}>
+              <Button variant="link" className="p-0 h-auto" onClick={() => window.open('mailto:support@patientflow.ai', '_blank')}>
                 Contact Support
               </Button>
             </AlertDescription>
